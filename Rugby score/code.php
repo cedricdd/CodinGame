@@ -7,9 +7,9 @@
 fscanf(STDIN, "%d", $n);
 
 for($try = 0; $try <= floor($n/5); $try++) {
-    for($tr = 0; $tr <= min(floor($n/7), $try); $tr++) {
-        $score = $try * 5 + $tr * 2;
-        if($score <= $n && ($n - $score) % 3 == 0) echo $try . " " . $tr . " "  . (($n - $score) / 3) . "\n";
+    for($tr = 0; $tr <= $try; $tr++) {
+        $missing = $n - ($try * 5 + $tr * 2);
+        if($missing >= 0 && $missing % 3 == 0) echo $try . " " . $tr . " "  . ($missing / 3) . "\n";
     }
 }
 ?>
