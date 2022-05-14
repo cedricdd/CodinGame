@@ -1,3 +1,5 @@
+https://www.codingame.com/training/easy/rugby-score
+
 Given a rugby score, your program must compute the different scoring combinations that lead to that particular score.
 As a reminder:
 - a try is worth 5 points
