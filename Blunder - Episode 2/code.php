@@ -14,7 +14,7 @@ for ($i = 0; $i < $N; $i++){
 
 function compute(&$rooms, $room) {
     //Bender has exit the building
-    if((string)$room == "E")  return 0;
+    if($room === "E")  return 0;
 
     list($amount, $d1, $d2) = $rooms[$room];
 
