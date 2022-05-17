@@ -22,7 +22,7 @@ error_log(var_export($average, true));
 if($average < 0.05) echo "O(1)";
 elseif($average < 0.2) echo "O(log n)";
 elseif($average < 1.05) echo "O(n)";
-elseif($average < 1.3) echo "O(n log n)";
+elseif($average < 1.2) echo "O(n log n)";
 elseif($average < 2.1) echo "O(n^2)";
 elseif($average < 2.4) echo "O(n^2 log n)";
 elseif($average < 3.2) echo "O(n^3)";
