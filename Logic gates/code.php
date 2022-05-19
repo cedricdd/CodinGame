@@ -12,7 +12,7 @@ for ($i = 0; $i < $n; $i++) {
     fscanf(STDIN, "%s %s", $inputName, $inputSignal);
     $inputs[$inputName] = [bindec(strtr($inputSignal, "-_", 10)), strlen($inputSignal)];
 }
-error_log(var_export(PHP_FLOAT_MAX , true));
+error_log(var_export($inputs, true));
 
 for ($i = 0; $i < $m; $i++) {
     fscanf(STDIN, "%s %s %s %s", $outputName, $type, $inputName1, $inputName2);
