@@ -75,11 +75,11 @@ for ($i = 0; $i < $n; $i++) {
             break;
         default:
             if($pressedEntered) {
-                $number = $key;
+                $number = "";
                 $pressedEntered = 0;
                 $operation = [];
             }
-            else $number .= $key;
+            $number .= $key;
             echo $number . "\n";
     }
 }
