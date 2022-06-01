@@ -7,7 +7,7 @@
 fscanf(STDIN, "%d %d", $width, $height);
 for ($i = 0; $i < $height; $i++) {
     fscanf(STDIN, "%s", $line);
-    $map[] = str_split($line); //Keeping it as string will break the case ($x - 1) being negative by returning the last character of the string
+    $map[] = str_split($line);
 
     if(preg_match("/([<>^v])/", $line, $match)) {
         $sx = $px = strpos($line, $match[0]);
