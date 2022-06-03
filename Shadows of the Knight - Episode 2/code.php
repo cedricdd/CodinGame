@@ -1,4 +1,5 @@
 <?php
+
 // $W: width of the building.
 // $H: height of the building.
 fscanf(STDIN, "%d %d", $W, $H);
@@ -12,63 +13,56 @@ $possibleY = range(0, $H - 1);
 $current = [$X0, $Y0];
 $previous = $current;
 
-//Get the distance between two points
-function getDistance($source, $destination) {
-    return sqrt(pow($destination[0] - $source[0], 2) + pow($destination[1] - $source[1], 2));
-}
-
-//Get the closest point in an array compared to a given position
-function getClosest($position, $array) {
-    $best = $array[0];
-    $distance = getDistance($position, $best);
-    for($i = 1; $i < count($array); ++$i) {
-        $checkDistance = getDistance($position, $array[$i]);
-        if($distance > $checkDistance) {
-            $best = $array[$i];
-            $distance = $checkDistance;
-        }
-    }
-
-    return $best;
-}
-
 //Get the next position of Batman
 function getNextPosition($x, $y) {
-    global $possibleX, $possibleY;
+    global $possibleX, $possibleY, $outside, $W, $H;
 
     $firstX = array_key_first($possibleX);
     $lastX = array_key_last($possibleX);
-    $centerX = ($firstX + $lastX) / 2;
-
     $firstY = array_key_first($possibleY);
     $lastY = array_key_last($possibleY);
-    $centerY = ($firstY + $lastY) / 2;
 
     //We know where the bomb is
-    if(count($possibleX) == 1 && count($possibleY) == 1) {
-        return [$firstX, $firstY];
-    } //We want to reduce the number of possible X positions
-    elseif(count($possibleX) >= count($possibleY)) {
-        //We are outside the zone where the bomb is
-        if($x < $firstX || $x > $lastX) 
-            return getClosest([$x, $y], [[$firstX, $firstY], [$lastX, $firstY], [$firstX, $lastY], [$lastX, $lastY]]);
-        //We are on the center X position, move to the start
-        elseif($x == $centerX) $x = $firstX;
-        //Move to the postion on the opposite side of the X center
-        else $x += ($centerX - $x) * 2;
-    } //We want to reduce the number of possible Y positions
-    else {
-        //We are outside the zone where the bomb is
-        if($y < $firstY || $y > $lastY)
-            return getClosest([$x, $y], [[$firstX, $firstY], [$lastX, $firstY], [$firstX, $lastY], [$lastX, $lastY]]);
-        //We are on the center Y position, move to the start
-        elseif($y == $centerY) $y = $firstY;
-        //Move to the postion on the opposite side of the Y center
-        else $y += ($centerY - $y) * 2;
-    }
+    if(count($possibleX) == 1 && count($possibleY) == 1) return [$firstX, $firstY];
 
-    return [$x, $y];
+    //We are searching for the X position
+    if(count($possibleX) != 1) {
+        //We are at the edges of the map, jump to the center of remaining X positions
+        if ($x == 0 || $x == ($W - 1)) $newX = floor(($firstX + $lastX) / 2);
+       
+        else {
+            //Get the mirror X from the center of the remaining X positions
+            $newX = $firstX + $lastX - $x;
+
+            //Make sure we stay inside the map
+            $newX = max(0, min($newX, $W - 1));
+        }
+
+        //Make sure we don't get stuck on current position
+        if ($newX == $x) $newX++;
+
+        return [$newX, $y];
+
+    } //We are searching for the Y position
+    else {
+        //We are at the edges of the map, jump to the center of remaining Y positions
+        if ($y == 0 || $y == ($H - 1)) $newY = floor(($firstY + $lastY) / 2);
+       
+        else {
+            //Get the mirror Y from the center of the remaining Y positions
+            $newY = $firstY + $lastY - $y;
+
+            //Make sure we stay inside the map
+            $newY = max(0, min($newY, $H - 1));
+        }
+
+        //Make sure we don't get stuck on current position
+        if ($newY == $y) $newY++;
+
+        return [$x, $newY];
+    }
 }
+
 
 // game loop
 while (TRUE)
@@ -126,6 +120,9 @@ while (TRUE)
                 break;
         }
     } 
+
+    //error_log(var_export($possibleX, true));
+    //error_log(var_export($possibleY, true));
 
     $previous = $current;
     $current = getNextPosition($current[0], $current[1]);
