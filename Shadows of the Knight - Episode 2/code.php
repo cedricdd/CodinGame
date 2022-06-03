@@ -46,7 +46,7 @@ function getNextPosition($x, $y) {
 
     //We know where the bomb is
     if(count($possibleX) == 1 && count($possibleY) == 1) {
-        return [array_key_first($possibleX), array_key_first($possibleY)];
+        return [$firstX, $firstY];
     } //We want to reduce the number of possible X positions
     elseif(count($possibleX) >= count($possibleY)) {
         //We are outside the zone where the bomb is
