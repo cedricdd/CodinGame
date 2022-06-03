@@ -70,59 +70,53 @@ while (TRUE)
     // $bombDir: Current distance to the bomb compared to previous distance (COLDER, WARMER, SAME or UNKNOWN)
     fscanf(STDIN, "%s", $bombDir);
 
-    //We can only eliminate position if we only moved on 1 axis
-    if($current[0] == $previous[0] || $current[1] == $previous[1]) {
-        switch($bombDir) {    
-            case "WARMER":
-                //We moved on X axis
-                if($current[0] != $previous[0]) {
-                    foreach ($possibleX as $px) {
-                        //If previous was closer or same distance on X axis, bomb can't be there -- if it was same distance we would have gotten SAME
-                        if(abs($px - $current[0]) >= abs($px - $previous[0])) unset($possibleX[$px]);
-                    } 
-                } //We moved on Y axis 
-                else {
-                    foreach ($possibleY as $py) {
-                        //If previous was closer or same distance on Y axis, bomb can't be there 
-                        if(abs($py - $current[1]) >= abs($py - $previous[1])) unset($possibleY[$py]);
-                    } 
-                }
-                break;
-            case "COLDER":
-                //We moved on X axis
-                if($current[0] != $previous[0]) {
-                    foreach ($possibleX as $px) {
-                        //If current is closer or same distance on X axis, bomb can't be there 
-                        if(abs($px - $current[0]) <= abs($px - $previous[0])) unset($possibleX[$px]);
-                    } 
-                } //We moved on Y axis 
-                else {
-                    foreach ($possibleY as $py) {
-                        //If current is closer or same distance on Y axis, bomb can't be there 
-                        if(abs($py - $current[1]) <= abs($py - $previous[1])) unset($possibleY[$py]);
-                    } 
-                }
-                break;
-            case "SAME":
-                //We moved on X axis
-                if($current[0] != $previous[0]) {
-                    foreach ($possibleX as $px) {
-                        //The bomb is on the middle X position 
-                        if(($current[0] + $previous[0]) / 2 != $px) unset($possibleX[$px]);
-                    } 
-                } //We moved on Y axis 
-                else {
-                    foreach ($possibleY as $py) {
-                        //The bomb is on the middle Y position
-                        if(($current[1] + $previous[1]) / 2 != $py) unset($possibleY[$py]);
-                    } 
-                }
-                break;
-        }
-    } 
-
-    //error_log(var_export($possibleX, true));
-    //error_log(var_export($possibleY, true));
+    switch($bombDir) {    
+        case "WARMER":
+            //We moved on X axis
+            if($current[0] != $previous[0]) {
+                foreach ($possibleX as $px) {
+                    //If previous was closer or same distance on X axis, bomb can't be there -- if it was same distance we would have gotten SAME
+                    if(abs($px - $current[0]) >= abs($px - $previous[0])) unset($possibleX[$px]);
+                } 
+            } //We moved on Y axis 
+            else {
+                foreach ($possibleY as $py) {
+                    //If previous was closer or same distance on Y axis, bomb can't be there 
+                    if(abs($py - $current[1]) >= abs($py - $previous[1])) unset($possibleY[$py]);
+                } 
+            }
+            break;
+        case "COLDER":
+            //We moved on X axis
+            if($current[0] != $previous[0]) {
+                foreach ($possibleX as $px) {
+                    //If current is closer or same distance on X axis, bomb can't be there 
+                    if(abs($px - $current[0]) <= abs($px - $previous[0])) unset($possibleX[$px]);
+                } 
+            } //We moved on Y axis 
+            else {
+                foreach ($possibleY as $py) {
+                    //If current is closer or same distance on Y axis, bomb can't be there 
+                    if(abs($py - $current[1]) <= abs($py - $previous[1])) unset($possibleY[$py]);
+                } 
+            }
+            break;
+        case "SAME":
+            //We moved on X axis
+            if($current[0] != $previous[0]) {
+                foreach ($possibleX as $px) {
+                    //The bomb is on the middle X position 
+                    if(($current[0] + $previous[0]) / 2 != $px) unset($possibleX[$px]);
+                } 
+            } //We moved on Y axis 
+            else {
+                foreach ($possibleY as $py) {
+                    //The bomb is on the middle Y position
+                    if(($current[1] + $previous[1]) / 2 != $py) unset($possibleY[$py]);
+                } 
+            }
+            break;
+    }
 
     $previous = $current;
     $current = getNextPosition($current[0], $current[1]);
