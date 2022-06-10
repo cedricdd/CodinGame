@@ -32,7 +32,7 @@ for ($y = 0; $y < $height; $y++) {
         }
 
         //We can't beat the current best score even if all line at top are good
-        if(($y * $length) + $score < $bestScore) continue;
+        if(($y * $length) + $score <= $bestScore) continue;
 
         //Check the lines above
         for($y2 = $y - 1; $y2 >= 0; --$y2) {
