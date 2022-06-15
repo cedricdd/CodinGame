@@ -4,7 +4,7 @@
  * the standard input according to the problem statement.
  **/
 
-$numbers = explode(" ", stream_get_line(STDIN, 100 + 1, "\n"));
+$numbers = array_reverse(explode(" ", stream_get_line(STDIN, 100 + 1, "\n")));
 
 error_log(var_export($numbers, true));
 
@@ -12,7 +12,7 @@ error_log(var_export($numbers, true));
 foreach(range(max($numbers) + 1, 36) as $base) {
 
     $number = 0;
-    foreach ($numbers as $value) $number = bcadd(bcmul($number, $base), $value);
+    foreach ($numbers as $i => $value) $number = bcadd($number, bcmul($value, bcpow($base, $i)));
 
     //Test if it's a polydivisible number
     for($i = 1; $i <= strlen($number); ++$i) {
