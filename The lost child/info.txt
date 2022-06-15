@@ -1,0 +1,21 @@
+https://www.codingame.com/training/medium/the-lost-child-episode-1
+
+Goal
+The 12 year old child has lost his mother and now he wants to meet his mother.Somehow child navigated to his mother but he wanna know exact shortest distance and in order to help him you have to tell him exact shortest distance .each block =10km
+
+Input
+map 10*10 first ten lines input string row only consist of '.' means road where child can move,'#'-means wall where he can't move,'M'-position of mother,'C'-position of child.
+NOTE-child can't move diagonally.
+
+Output
+one line with the shortest ditance which child have to travel in order to reach his mother
+NOTE-Get ready for Episode 2.
+
+Constraints
+length of each row will be 10 and consist of only:-
+'.'-Road where child can move(empty space)
+'#'-wall child can't move
+'M'-position of his mother
+'C'-position of child
+
+There will always be a solution
