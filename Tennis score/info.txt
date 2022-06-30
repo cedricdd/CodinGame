@@ -1,0 +1,53 @@
+https://www.codingame.com/training/medium/tennis-score
+
+Goal
+https://en.wikipedia.org/wiki/Tennis_scoring_system
+
+Given a record of points scored in a tennis match, determine the current score, whether the match is complete, and who won.
+
+* "Normal" match :
+The maximum number of sets in a match is either 3 or 5. The player who wins a majority of the sets wins the match.
+
+* "Normal" set :
+To win a normal tennis set, you must win 6 games with a difference greater than or equal to 2.
+After the score reaches 6-5 the next score is either 7-5 (first player wins the set) or 6-6 ( (see below for tie-breaks)). 
+When one player wins the tie-break the set score is either 6-7 or 7-6.
+
+* "Normal" game :
+To win a normal tennis game (see below for tie-breaks), you must score at least 4 points, with at least 2 points more than your opponent. 
+The score being noted: 0, 15, 30, 40.
+If the score comes to 4-4, 5-5, 6-6... note: 40 40 (there is equality)
+If the score comes to 5-4, 6-5, 7-6... note: AV - (the first player has the advantage)
+If the score comes to 4-5, 5-6, 6-7... note: - AV (the second player has the advantage)
+
+* Tie-break rules:
+when we arrive at the score 6 6 in a set, then a "tie-break" is played. 
+It no longer takes 4 points but 7 points to win the game (always with a difference of at least two points, 
+the score in the tie-break is unlimited !) unless it is the last game (the 3rd for women, the 5th for men), 
+in this case there it takes at least 10 points to win the game.
+The winner of the game then wins the set on the score 7 6.
+Note: game points are counted normally and no longer with 0, 15, 30, 40 but 0, 1, 2, 3, 4, 5, ...
+
+
+Input
+Line 1: names of the two players separated by a space
+
+Line 2: maximum number n of sets to play.
+("Best of 3" for women and "Best of 5" for men)
+
+Line 3: each point in the match is represented by a sequence of binary digits: 0 if the first player won the point, 
+or 1 if the second player won the point, written in hexadecimal (possibly completed by 0 for the last byte), pairs of hex digits separated by spaces.
+
+Output
+Line 1: the current score of the first player:
+player name (completed with "." up to 15 characters), the games won, and if the match is not over, 
+the character "|" and the score of the current game, separated by spaces.
+
+Line 2: the current score of the second player:
+player name (completed with "." up to 15 characters), the games won, and if the match is not over, 
+the character "|" and the score of the current game, separated by spaces.
+
+Line 3: "Game in progress" or "[Player_name] wins"
+
+Constraints
+2 <= len(points) <= 111
