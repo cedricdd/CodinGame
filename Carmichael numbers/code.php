@@ -30,9 +30,12 @@ fscanf(STDIN, "%d",$n);
 
 $factors = primeFactors($n);
 
+//It's a prime number
+if(count($factors) == 1) exit("NO");
+
 foreach($factors as $factor => $weight) {
     if(($n - 1) % ($factor - 1) != 0) exit("NO");
 }
 
-echo primeCheck($n) ? "NO" : "YES";
+echo "YES";
 ?>
