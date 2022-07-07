@@ -1,0 +1,19 @@
+https://www.codingame.com/training/medium/train-passenger
+
+ Goal
+You are a train passenger and you want to know the shortest path you can take between two stations. 
+Unfortunately, there is no direct path between these two stations. So, you need to travel station to station to arrive at your destination. 
+You want to find the shortest path you can take. The shortest path is the path that travels through the smallest number of stations.
+There will always be a path from start to end.
+
+Input
+Line 1: A string start representing the start station.
+Line 2: A string end representing the end station.
+Line 3: An integer n representing the number of links between all stations.
+Next n lines: A string link formatted as: "station1 station2" saying that a direct path exists between station1 and station2. This path is bidirectional.
+
+Output
+Line 1: A string that represents the smallest path between the start and the end formatted as: "A > B > C > D" where A is start and D is end.
+
+Constraints
+0 < n < 30
