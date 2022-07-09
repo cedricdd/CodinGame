@@ -4,8 +4,6 @@ fscanf(STDIN, "%d", $n);
 
 $rows = array_fill(0, $n, [0, 0, ""]);
 $cols = array_fill(0, $n, [0, 0, ""]);
-$toFind = 0;
-
 for ($y = 0; $y < $n; ++$y) {
     $line = stream_get_line(STDIN, 40 + 1, "\n");
 
@@ -16,7 +14,7 @@ for ($y = 0; $y < $n; ++$y) {
         } elseif($c === "0") {
             $rows[$y][0]++;
             $cols[$x][0]++;
-        } else $toFind++;
+        }
 
         $rows[$y][2] .= $c;
         $cols[$x][2] .= $c;
@@ -26,21 +24,19 @@ for ($y = 0; $y < $n; ++$y) {
 }
 
 error_log(var_export($grid, true));
-//error_log(var_export($rows, true));
-//error_log(var_export($cols, true));
 
-function setValues(&$grid, &$rows, &$cols, &$toFind, $n) {
+function setValues(&$grid, &$rows, &$cols, $n) {
 
     do {
         $valueFound = false;
+        $complete = true;
 
         for ($y = 0; $y < $n; ++$y) {
             for ($x = 0; $x < $n; ++$x) {
                 if($grid[$y][$x] != ".") continue;
-        
-                //error_log(var_export($x ." " . $y, true));
-                
+
                 $value = -1;
+                $complete = false;
         
                 //We have already set all the 0 on the row or column, it's a 1
                 if($rows[$y][0] == ($n / 2) || $cols[$x][0] == ($n / 2)) {
@@ -78,15 +74,13 @@ function setValues(&$grid, &$rows, &$cols, &$toFind, $n) {
                     if($rows[$y][$value] > ($n / 2) || $cols[$x][$value] > ($n / 2)) return -1;
 
                     $valueFound = true;
-                    --$toFind;
                 }
             }
         }
 
     } while($valueFound);
 
-    if($toFind == 0) return 1;
-    else return 0;
+    return $complete ? 1 : 0;
 }
 
 //Get the position of the first missing number
@@ -142,7 +136,7 @@ $backups = [];
 while(true) {
     
     //Set all the values that are certain
-    $result = setValues($grid, $rows, $cols, $toFind, $n);
+    $result = setValues($grid, $rows, $cols, $n);
 
     //We have set all the missing values
     if($result == 1) {
@@ -156,7 +150,7 @@ while(true) {
     while(true) {
         //Invalid grid, reload last backup
         if($result == -1) {
-            list($grid, $cols, $rows, $toFind, $x, $y) = array_pop($backups);
+            list($grid, $cols, $rows, $x, $y) = array_pop($backups);
 
             //It can only be 0 or 1, since it can't be 0 it's 1
             $grid[$y][$x] = 1;
@@ -170,10 +164,8 @@ while(true) {
         //No possible guess, invalid grid
         if($x == -1 && $y == -1) $result == -1;
         else {
-            --$toFind;
-
             //We have a guess, backup info
-            $backups[] = [$grid, $cols, $rows, $toFind, $x, $y];
+            $backups[] = [$grid, $cols, $rows, $x, $y];
 
             //Set the guess
             $grid[$y][$x] = 0;
