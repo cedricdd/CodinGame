@@ -1,0 +1,19 @@
+https://www.codingame.com/training/medium/the-urinal-problem
+
+Goal
+Often times, when confronted with a large line of urinals, you must find the open urinal that is furthest away from all other occupied urinals in order 
+to minimize awkwardness. (See https://blog.xkcd.com/2009/09/02/urinal-protocol-vulnerability/ for inspiration)
+
+Write a program that accepts information about a line of urinals and provides the correct urinal index to use.
+
+Input
+Line 1: An integer N for the number of urinals in the bathroom.
+Line 2: A string B containing N characters of either a U for unoccupied or a ! for occupied.
+
+Output
+Line 1: The index of the unoccupied urinal that is furthest away from any occupied urinals. 
+(If two unoccupied urinals are equally isolated, print the index of the leftmost one)
+
+Constraints
+2 ≤ N ≤ 100
+B will contain at least one U and one !
