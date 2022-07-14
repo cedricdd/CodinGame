@@ -1,0 +1,57 @@
+https://www.codingame.com/training/hard/the-burglars-dilemna
+
+Goal
+You're a talented burglar attempting to crack a safe combination by listening to the clicks it makes at each of your attempts. 
+Suddenly, the alarm goes off, and you have only time for one last try. 
+Analysing the results of the previous attempts, you must give the correct combination if only one is possible. 
+Otherwise, lacking time to try them all, you must flee.
+
+Each previous attempt (which is always a failed one) is represented by a series of numbers between 0 and 9 (inclusive) and their associated sound : CLICK, CLACK or CLUCK.
+During a test, each sound has the same meaning and every meaning is different, but you never know which sound is associated with wich meaning.
+The possible meanings of a sound are the following :
+- The number is correct.
+- The number is adjacent to the correct number (note that 0 and 9 are adjacent).
+- The number is incorrect and not adjacent to the correct number.
+
+Given these information, if only one combination is possible, you must output it. If more than one combination is possible, you must output FLEE. There is always at least one possibility.
+
+### Example: ###
+Considering the following attemps :
+1 2 3 4
+1 2 4 5
+1 2 4 8
+CLICK CLICK CLACK CLUCK
+CLICK CLICK CLUCK CLICK
+CLICK CLICK CLUCK CLACK
+
+Let's make assumptions :
+Assumption 1 - CLICK is the sound for a correct number:
+This means that 1, 2, and the last 5 are correct. Since the 4 of the first line is associated with a CLUCK and 4 is next to 5, 
+we know that CLUCK has the adjacent meaning, and CLACK the failed meaning. From this, considering the 3rd number, we know that 3 is a bad number, 
+and 4 is adjacent, so the 3rd number is 5.
+This assumption leads to only one possibility : 1 2 5 5. But maybe the next assumptions will also have a different possibility... Let's check.
+
+
+Assumption 2 - CLACK is the sound for a correct number:
+This means that 3 is the correct third number, and looking at the second and third line, that CLUCK means adjacent, so CLICK must mean 'wrong number'. 
+But looking at the fourth number, we guess that 4 is adjacent to the correct number and 8 is the correct number, which is absurd. So this assumption is false.
+
+Assumption 3 - CLUCK is the sound for a correct number:
+This means that 4 is the correct 3rd and 4th number. Looking at the first line, 3 being next to 4, we guess that CLACK has the adjacent meaning. 
+But looking at the second line, me make the same reasoning with 5 and CLICK. Since two sounds can't have the same meaning, the assumption is false too.
+
+
+Since only one assumption makes sense and leads to only one possibility, the correct code is 1 2 5 5.
+
+Input
+Line 1: An integer N representing the number of attempts.
+Line 2: An integer C representing the length of the safe combination.
+Next N lines: A line NUMBERS containing the numbers of each attempt.
+Next N lines: A line CLICKS containing the corresponding clicks.
+
+Output
+The space separated safe combination if there is only one solution, or FLEE if more than one combination is possible.
+
+Constraints
+1 ≤ N ≤ 10
+1 ≤ C ≤ 10
