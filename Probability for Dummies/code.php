@@ -3,23 +3,23 @@
 fscanf(STDIN, "%d", $m);
 fscanf(STDIN, "%d", $n);
 
-/*
-Get exact value but times out
-function solve($p, $m, $n, $t) {
+$history = [];
+function solve($m, $n, $t) {
+    global $history; 
 
-    if($t + $n < $m) return 0;
-    if($t == $m) return $p;
+    if(($t + $n) < $m) return 0;
+    if($t == $m) return 1;
+    if(isset($history[$t][$n])) return $history[$t][$n];
 
-    $p2 = $p * (38 - $t) / 38; //We get a new number
-    $p3 = $p * 1 - $p2; //We get a number we already had
-    --$n;
+    $p = (38 - $t) / 38; //We get a new number
+    $p2 = 1 - $p; //We get a number we already had
 
-    return solve($p2, $m, $n, $t + 1) + solve($p3, $m, $n, $t);
+    return $history[$t][$n] = $p * solve($m, $n - 1, $t + 1) + $p2 * solve($m, $n - 1, $t);
 }
 
-echo round(solve(1, $m, $n - 1, 1) * 100) . "%\n";
-*/
+echo round(solve($m, $n, 0) * 100) . "%\n";
 
+/*
 $tries = 50000;
 $good = 0;
 
@@ -33,5 +33,5 @@ for($i = 0; $i <$tries; ++$i) {
     if(count($numbers) >= $m) ++$good;
 }
 
-echo round(($good / $tries) * 100) . "%";
+echo round(($good / $tries) * 100) . "%";*/
 ?>
