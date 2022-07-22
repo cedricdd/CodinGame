@@ -8,7 +8,7 @@ function printText(string $text): void {
 
     $text = trim($text);
 
-    if(strlen($text) == 0) return; //Don't print empty array
+    if(strlen($text) == 0) return; //Don't print empty string
 
     if($text[0] == ")") --$indent; //Increase indent value
 
