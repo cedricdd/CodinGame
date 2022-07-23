@@ -58,6 +58,9 @@ foreach($friends  as $needed => $list) {
 if(count($friends) == 0 || count($unliked) == 0) exit("$total");
 
 $tempTotal = $total;
+$additionalUnliked = [];
+$newUnliked = [];
+
 //Foreach group of good friends that are left find best combinaison of bad friends needed
 foreach($friends as $needed => $list) {
 
@@ -65,20 +68,42 @@ foreach($friends as $needed => $list) {
     $people += count($list);
     $missing = $needed - $people;
 
-    if($missing > count($unliked)) continue; //Not enough bad friends to add them
-
     //Get all the bad friends that can join with the current number of people
-    $additionalUnliked = [];
     foreach($unliked as $neededU => $listU) {
         if($neededU > $needed) break;
 
-        foreach($listU as $value) $additionalUnliked[] = $value;
+        foreach($listU as $value) $newUnliked[] = $value;
+        unset($unliked[$neededU]);
     }
 
-    //We use the $missing bad friends with the lowest penalty 
-    sort($additionalUnliked);
-    $check = $tempTotal - array_sum(array_slice($additionalUnliked, 0, $missing));
-    if($check > $total) $total = $check;
+    if($missing > count($additionalUnliked) + count($newUnliked)) continue; //Not enough bad friends to add them
+
+    //We got some new bad friends
+    if(count($newUnliked)) {
+
+        //$additionalUnliked is already sorted, we use merge sort
+        sort($newUnliked);
+
+        $i1 = 0;
+        $i2 = 0;
+        $merged = [];
+
+        while($i1 < count($additionalUnliked) && $i2 < count($newUnliked)) {
+            if($additionalUnliked[$i1] > $newUnliked[$i2]) $merged[] = $newUnliked[$i2++];
+            else $merged[] = $additionalUnliked[$i1++];
+        }
+
+        for($i = $i1; $i < count($additionalUnliked); ++$i) $merged[] = $additionalUnliked[$i];
+        for($i = $i2; $i < count($newUnliked); ++$i) $merged[] = $newUnliked[$i];
+
+        $additionalUnliked = $merged; //Merge sort is over
+        $newUnliked = [];
+    }
+
+    //We use the $missing bad friends with the lowest penalty
+    $adjustedTotal = $tempTotal;
+    for($i = 0; $i < $missing; ++$i) $adjustedTotal -= $additionalUnliked[$i];
+    if($adjustedTotal > $total) $total = $adjustedTotal;
 }
 
 echo $total;
