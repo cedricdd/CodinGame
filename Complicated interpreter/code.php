@@ -9,7 +9,7 @@ function getValue($value) {
 
     if(is_numeric($value)) return $value;
     else {
-        $name = substr($value, 1);
+        $name = ltrim($value, '$');
 
         //Invalid variable name
         if(!isset($variables[$name])) exit("ERROR");
