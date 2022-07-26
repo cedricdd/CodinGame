@@ -13,6 +13,9 @@ for ($y = 0; $y < 5; $y++) {
     }
 }
 
+//We want the first solution by alphabetical order, so we test pods in alphabetical order
+ksort($pods);
+
 $toCheck[] = [$pods, [], $gridID];
 $history = [];
 
@@ -35,7 +38,7 @@ while(true) {
             $grid[$pod[1]][$pod[0]] = $c;
         }
 
-        //Check the 4 cardinal directions for all the pods
+        //Check the 4 cardinal directions for all the pods in alphabetical order (D, L, R, U)
         foreach($pods as $c => $pod) {
             list($x, $y) = $pod;
 
@@ -44,19 +47,6 @@ while(true) {
                 echo implode(" ", $list) . "\n\n";
                 echo implode("\n", $grid);
                 exit();
-            }
-
-            //Pod could potentially move up
-            if($y > 1 && $grid[$y - 1][$x] == ".") {
-                for($y2 = $y - 2; $y2 >= 0; --$y2) {
-                    if($grid[$y2][$x] != ".") {
-                        $updatedPods = $pods;
-                        $updatedPods[$c][1] = $y2 + 1;
-
-                        $newCheck[] = [$updatedPods, array_merge($list, [$c . "U"]), $gridID ^ 1 << $x + $y * 5 | 1 << $x + ($y2 + 1) * 5];
-                        break;
-                    }
-                }
             }
 
             //Pod could potentially move down
@@ -85,7 +75,7 @@ while(true) {
                 }
             }
 
-               //Pod could potentially move right
+            //Pod could potentially move right
             if($x < 3 && $grid[$y][$x + 1] == ".") {
                 for($x2 = $x + 2; $x2 < 5; ++$x2) {
                     if($grid[$y][$x2] != ".") {
@@ -97,13 +87,21 @@ while(true) {
                     }
                 }
             }
+
+            //Pod could potentially move up
+            if($y > 1 && $grid[$y - 1][$x] == ".") {
+                for($y2 = $y - 2; $y2 >= 0; --$y2) {
+                    if($grid[$y2][$x] != ".") {
+                        $updatedPods = $pods;
+                        $updatedPods[$c][1] = $y2 + 1;
+
+                        $newCheck[] = [$updatedPods, array_merge($list, [$c . "U"]), $gridID ^ 1 << $x + $y * 5 | 1 << $x + ($y2 + 1) * 5];
+                        break;
+                    }
+                }
+            }
         }
     }
-
-    //We want the first solution by alphabetical order, make sure that if 2 solutions create the same grid ID it's the good one that's kept
-    usort($newCheck, function($a, $b) {
-        return implode("", $a[1]) <=> implode("", $b[1]);
-    });
 
     $toCheck = $newCheck;
 }
