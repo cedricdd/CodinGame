@@ -1,0 +1,21 @@
+https://www.codingame.com/training/medium/level-of-nested-parentheses
+
+Goal
+Output for each pair of matching parentheses their level of nesting in an ASCII art graphic style.
+
+The input is a string f of size n, with nested parentheses. Outermost parentheses have level-1, 
+and each time a new pair of parentheses is nested into a previous one, its level is incremented by one, up to level-L.
+
+The output is the same line, followed by an ASCII graphic: for each pair of parentheses, 
+under each parenthesis there must be an arrow pointing up (^ and then | on the following line).
+These arrows should be longer if they contain nested parentheses: in this case, additional | are added to the next line to make them longer.
+Under these two arrows, there must be written the level of nesting (from 1 to 9) and those two numbers are linked by a horizontal line made of repeated -.
+
+Output
+line 1 : f the unchanged input formula
+L+2 next lines: a formatted ASCII string showing the level of nesting of each pair of parentheses (L being the maximum level of nested parentheses). All output lines must have the same size n (n being the size of the input string f): complete with spaces when necessary.
+
+Constraints
+The opening and closing parentheses in the input formula f are consistent
+0 ≤ L ≤ 9
+1 ≤ n ≤ 100
