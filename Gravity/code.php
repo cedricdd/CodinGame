@@ -2,20 +2,15 @@
 
 fscanf(STDIN, "%d %d", $width, $height);
 
-$map = "";
-for ($i = 0; $i < $height; $i++) {
-    $map .= trim(fgets(STDIN));
-}
+$grid = array_fill(0, $height, str_repeat(".", $width)); //Initially the grid is empty
+$idx = array_fill(0, $width, $height - 1); //One index per column
 
-//Every # that can fall 1 line is moved down  until no # can no longer fall down
-while(preg_match_all("/(?=#.{" . ($width - 1) . "}\.)/", $map, $matches, PREG_OFFSET_CAPTURE)) {
-    
-    foreach($matches[0] as [, $i]) {
-        $map[$i] = ".";
-        $map[$i + $width] = "#";
+for ($i = 0; $i < $height; $i++) {
+    foreach(str_split(trim(fgets(STDIN))) as $x => $c) {
+        //There's a # in the column $x, add it in the grid
+        if($c == "#") $grid[$idx[$x]--][$x] = "#";
     }
 }
 
-//All the # are at the bottom of the map, print it
-echo implode("\n", str_split($map, $width));
+echo implode("\n", $grid);
 ?>
