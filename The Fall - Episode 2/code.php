@@ -149,7 +149,7 @@ function findPaths(int $x, int $y, string $d): array {
     return $paths;
 }
 
-function getNextPosition(&$grid, $x, $y, $dir) {
+function getNextPosition(array &$grid, int $x, int $y, string $dir): array {
     global $W, $H;
 
     //Going down
@@ -216,7 +216,7 @@ function getDestroyAction(&$grid, $x, $y, $dir) {
     return null;
 }
 
-function checkRocks($path, $positions, $startStep, $rockID): array {
+function checkRocks(array $path, array $positions, int $startStep, int $rockID): array {
     global $grid, $rocks;
 
     //We have checked all the rocks
@@ -319,7 +319,7 @@ while (TRUE)
         foreach($paths as $key => [$path, $positions]) {
 
             //Indy is not in the right position to use this path
-            if($positions[$step] != "$xi-$yi") continue;
+            if(($positions[$step] ?? "") != "$xi-$yi") continue;
 
             $updatedPath = checkRocks($path, $positions, $step, 0);
 
@@ -329,7 +329,15 @@ while (TRUE)
                 break;
             } 
         }
-    } else [$path, $positions] = $paths[0];
+    } else {
+        //Use the first valid path
+        foreach($paths as $key => [$path, $positions]) {
+            //Indy is not in the right position to use this path
+            if(($positions[$step] ?? "") != "$xi-$yi") continue;
+
+            break;
+        }   
+    }
 
     if($path[$step][0] !== "WAIT") {
         [$x, $y, $rotationDirection] = $path[$step];
