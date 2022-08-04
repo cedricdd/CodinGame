@@ -120,13 +120,15 @@ function findPaths(int $x, int $y, string $d): array {
         //Andy is out of the grid - invalid path
         if($x < 0 || $x >= $W || $y >= $H || $grid[$y][$x] == 0) continue;
 
+        //Save indy position
+        $positions[] = $x . "-" . $y;
+
         //Andy reached the exit
         if($x == $exit && $y == $H - 1) {
             $paths[] = formatPath($list, $positions);
             continue;
         }
 
-        $positions[] = $x . "-" . $y;
         $canRotate = $grid[$y][$x] > 0;
 
         foreach(MOVES[abs($grid[$y][$x])][$entryDirection] as [$xm, $ym, $newDirection, $rotationNeeded, $rotationDirection]) {
@@ -186,7 +188,7 @@ while (TRUE)
                 $gridRock = $grid;
                 $stepRock = 0;
 
-                while($stepRock < count($path)) {
+                while($stepRock < count($path) - 1) {
                     //Update the grid
                     if($path[$stepRock][0] != "WAIT") {
                         [$xa, $ya, $ra] = $path[$stepRock];
