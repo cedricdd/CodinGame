@@ -51,7 +51,7 @@ const MOVES = [
         "RIGHT" => [[0, 1, "TOP", 1, "LEFT"]],
     ],
     6 => [
-        "TOP" => [[0, 1, "TOP", 1, "LEFT"], [0, 1, "TOP", 1, "RIGHT"]],
+        "TOP" => [[0, 1, "TOP", 1, "RIGHT"], [0, 1, "TOP", 1, "LEFT"],],
         "LEFT" => [[1, 0, "LEFT", 0, ""], [0, 1, "TOP", 1, "LEFT"]],
         "RIGHT" => [[-1, 0, "RIGHT", 0, ""], [0, 1, "TOP", 1, "RIGHT"]],
     ],
@@ -61,7 +61,7 @@ const MOVES = [
         "RIGHT" => [[0, 1, "TOP", 0, ""], [-1, 0, "RIGHT", 1, "LEFT"]],
     ],
     8 => [
-        "TOP" => [[0, 1, "TOP", 1, "RIGHT"], [0, 1, "TOP", 1, "LEFT"]],
+        "TOP" => [[0, 1, "TOP", 1, "LEFT"], [0, 1, "TOP", 1, "RIGHT"]],
         "LEFT" => [[0, 1, "TOP", 0, ""], [1, 0, "LEFT", 2, "LEFT"]],
         "RIGHT" => [[0, 1, "TOP", 0, ""], [-1, 0, "RIGHT", 2, "LEFT"]],
     ],
@@ -149,116 +149,6 @@ function findPaths(int $x, int $y, string $d): array {
     return $paths;
 }
 
-$paths = [];
-$visited = [];
-
-// game loop
-while (TRUE)
-{
-    fscanf(STDIN, "%d %d %s", $xi, $yi, $di);
-
-    $start = microtime(true);
-    $rocks = [];
-    $paths = findPaths($xi, $yi, $di);
-
-    // $R: the number of rocks currently in the grid.
-    fscanf(STDIN, "%d", $R);
-
-    for ($i = 0; $i < $R; $i++) {
-        fscanf(STDIN, "%d %d %s", $xr, $yr, $dr);
-
-        //The rock is on a position indy was before, it can't catch up
-        if(isset($visited[$xr . "-" . $yr])) continue;
-    
-        $rocks[] = [$xr, $yr, $dr];
-    }
-
-    //There are at least one rock on the map
-    if(count($rocks) > 0) {
-
-        //Check all the possible paths
-        foreach($paths as $key => [$path, $positions]) {
-
-            $rocksToDestroy = [];
-
-            //Check whick rocks will kill indy
-            foreach($rocks as $key => [$x, $y, $dir]) {
-
-                $destroyActions = [];
-                $gridRock = $grid;
-                $stepRock = 0;
-
-                while($stepRock < count($path) - 1) {
-                    //Update the grid
-                    if($path[$stepRock][0] != "WAIT") {
-                        [$xa, $ya, $ra] = $path[$stepRock];
-
-                        $gridRock[$ya][$xa] = TRANSFORMATION[$gridRock[$ya][$xa]][$ra];
-                    }
-
-                    $stepRock++;
-
-                    list($x, $y, $dir) = getNextPosition($gridRock, $x, $y, $dir);
-
-                    //Rock is out of the grid, it gets destroyed
-                    if($x < 0 || $x >= $W || $y >= $H) continue 2;
-                    
-                    //This rock will kill indy, it needs to be destroyed
-                    if($positions[$stepRock] == $x . "-" . $y) {
-                        $rocksToDestroy[] = array_filter($destroyActions);
-    
-                        continue 2;
-                    }
-
-                    //Try to do a rotation to destroy the rock
-                    $destroyActions[$stepRock] = getDestroyAction($gridRock, $x, $y, $dir);
-                }
-            }
-
-            //We have some rocks to destroy
-            if(count($rocksToDestroy)) {
-
-                //Search for a WAIT a action to replace
-                for($i = 0; $i < count($path); ++$i) {
-                    if($path[$i][0] != "WAIT") continue;
-        
-                    foreach($rocksToDestroy as $key => $destroyActions) {
-                        foreach($destroyActions as $before => [$x, $y, $rotationDirection]) {
-                            //Too late for this
-                            if($i > $before) continue;
-
-                            $path[$i] = [$x, $y, $rotationDirection];
-                            unset($rocksToDestroy[$key]);
-    
-                            break 2;
-                        }
-                    }
-                }
-        
-                //We couldn't destroy all the rocks, move to the next path
-                if(count($rocksToDestroy) == 0) break; 
-            } //No rock are dangerous with current path, we use it
-            else break; 
-        }
-    } else [$path, $positions] = $paths[0];
-
-
-    if($path[0][0] !== "WAIT") {
-        [$x, $y, $rotationDirection] = $path[0];
-
-        //Dp the rotation
-        echo "$x $y $rotationDirection\n";
-
-        //Update the map
-        $grid[$y][$x] = TRANSFORMATION[$grid[$y][$x]][$rotationDirection];
-    }
-    else echo "WAIT\n";
-
-    $visited[$xi . "-" .$yi] = 1;
-
-    error_log(var_export("\n" . (microtime(true) - $start), true));
-}
-
 function getNextPosition(&$grid, $x, $y, $dir) {
     global $W, $H;
 
@@ -324,5 +214,137 @@ function getDestroyAction(&$grid, $x, $y, $dir) {
     }
 
     return null;
+}
+
+function checkRocks($path, $positions, $startStep, $rockID): array {
+    global $grid, $rocks;
+
+    //We have checked all the rocks
+    if($rockID == count($rocks)) return $path;
+
+    $stepRock = $startStep;
+    $gridRock = $grid;
+    $destroyActions = [];
+    [$x, $y, $dir] = $rocks[$rockID];
+
+    while($stepRock < count($path) - 1) {
+        //Update the grid
+        if($path[$stepRock][0] !== "WAIT") {
+            [$xa, $ya, $ra] = $path[$stepRock];
+
+            $gridRock[$ya][$xa] = TRANSFORMATION[$gridRock[$ya][$xa]][$ra];
+        }
+
+        $stepRock++;
+
+        list($x, $y, $dir) = getNextPosition($gridRock, $x, $y, $dir);
+
+        //Rock is out of the grid or it got destroyed
+        if($x == -1) {
+            return checkRocks($path, $positions, $startStep, $rockID + 1);
+        }
+        
+        //This rock will kill indy, it needs to be destroyed
+        if($positions[$stepRock] == $x . "-" . $y) {
+
+            //No solution to destroy this rock
+            if(count($destroyActions) == 0) return [];
+
+            //Search for a WAIT a action to replace
+            for($i = $startStep; $i < count($path); ++$i) {
+                if($path[$i][0] !== "WAIT") continue;
+
+                //Search for a solution to destroy this rock
+                foreach($destroyActions as $before => [$x, $y, $rotationDirection]) {
+                    //Too late for this
+                    if($i > $before) continue;
+
+                    //We found a solution to destroy the rock, check the rest of the rock with this new rotation
+                    $path[$i] = [$x, $y, $rotationDirection];
+
+                    $updatedPath = checkRocks($path, $positions, $startStep, $rockID + 1);
+
+                    if(count($updatedPath)) return $updatedPath;
+
+                    //The previous change didn't result in a valid path
+                    $path[$i] = ["WAIT"];
+                }
+            }
+
+            //All the solutions to destroy this rock can't be used
+            return [];
+        }
+
+        //Try to do a rotation to destroy the rock
+        $action = getDestroyAction($gridRock, $x, $y, $dir);
+
+        if($action != null) $destroyActions[$stepRock] = $action;
+    }
+
+    //This rock won't hit indy, check next one
+    return checkRocks($path, $positions, $startStep, $rockID + 1);
+}
+
+$step = 0;
+$paths = [];
+$visited = [];
+
+// game loop
+while (TRUE)
+{
+    fscanf(STDIN, "%d %d %s", $xi, $yi, $di);
+
+    $start = microtime(true);
+    $rocks = [];
+
+    if(count($paths) == 0) {
+        $paths = findPaths($xi, $yi, $di);
+    }
+
+    // $R: the number of rocks currently in the grid.
+    fscanf(STDIN, "%d", $R);
+
+    for ($i = 0; $i < $R; $i++) {
+        fscanf(STDIN, "%d %d %s", $xr, $yr, $dr);
+
+        //The rock is on a position indy was before, it can't catch up
+        if(isset($visited[$xr . "-" . $yr])) continue;
+    
+        $rocks[] = [$xr, $yr, $dr];
+    }
+
+    //There are at least one rock on the map
+    if(count($rocks) > 0) {
+
+        foreach($paths as $key => [$path, $positions]) {
+
+            //Indy is not in the right position to use this path
+            if($positions[$step] != "$xi-$yi") continue;
+
+            $updatedPath = checkRocks($path, $positions, $step, 0);
+
+            //We have a valid path (no rock is killing indy)
+            if(count($updatedPath)) {
+                $path = $updatedPath;
+                break;
+            } 
+        }
+    } else [$path, $positions] = $paths[0];
+
+    if($path[$step][0] !== "WAIT") {
+        [$x, $y, $rotationDirection] = $path[$step];
+
+        //Do the rotation
+        echo "$x $y $rotationDirection\n";
+
+        //Update the map
+        $grid[$y][$x] = TRANSFORMATION[$grid[$y][$x]][$rotationDirection];
+    }
+    else echo "WAIT\n";
+
+    ++$step;
+    $visited[$xi . "-" .$yi] = 1;
+
+    error_log(var_export("\n" . (microtime(true) - $start), true));
 }
 ?>
