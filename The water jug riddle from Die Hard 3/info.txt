@@ -1,0 +1,45 @@
+https://www.codingame.com/training/expert/the-water-jug-riddle-from-die-hard-3
+
+Goal
+You've got to defuse a bomb by placing exactly 4 liters of water on a sensor. And you have to be quick!
+
+The problem is, you only have a 5L jug and a 3L jug on hand!
+
+See the video clip here: https://youtu.be/BVtQNK_ZUJg
+
+You have an unlimited water source, and if needed you can also empty the water in the jugs to get rid of it.
+
+How could 4 liters be measured?
+
+One method:
+- Start by filling the 5L bottle. This state could be represented as (0, 5).
+- Next, pour from the 5L bottle into the 3L bottle until the 3L bottle is full, to get the state (3, 2).
+- Empty the 3L bottle, changing the state to (0, 2).
+- Pour the 2 liters of water from the 5L bottle into the 3L bottle, to get the state (2, 0).
+- Fill the 5L bottle again; the state is now (2, 5).
+- Pour from the 5L bottle into the 3L bottle until it is full, resulting in the state (3, 4).
+
+6 moves were used.
+
+You will need to solve this problem in the general case of N containers and find the length of the shortest sequence of moves.
+
+You always start with all containers empty.
+
+Possible moves:
+- "Fill" a container to reach its capacity
+- "Empty" water from a container to empty it completely
+- "Pour" water from a container to another. No water is spilled with this move.
+
+Input
+Line 1: The amount of water W to be measured (4 in the example)
+Line 2: The number of containers N to be measured (2 in the example)
+Following N lines: An integer representing the capacity of the containers (3 and 5 in the example)
+
+Output
+Line 1: The minimal number of moves M needed to solve the problem (6 in the example)
+
+Constraints
+0 < W < 100
+1 < N < 5
+Each container has a unique capacity Ci and:
+0 < C0 < C1 ... < CN < 100
