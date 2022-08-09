@@ -15,6 +15,7 @@ fscanf(STDIN, "%d %d", $L, $R);
  * = 2* (9^n - 8^n)
  * 
  * We now just have to decompose the number in block of power of 10
+ * $N = $x1 * 10^n + $x2 * 10^n-1 + ... + $xp * 10^0
  */
 function solve(string $n): int {
 
@@ -29,8 +30,8 @@ function solve(string $n): int {
 
     //We check all digits from the number from left to right
     for($i = 0; $i < strlen($n); ++$i) {
-        //For [0, $d[ the last digit is done during next step or we would count the same lucky numbers twice
-        //This is resulting in the fact we are only checking the range [0, $n[
+        //We only count block that are "complete", for $x * 10^n we only count lycky numbres in for $i = [0, $x1 - 1] with 10^n
+        //block $x1 will be taken care when we check $x2 => the very last number is excluded we only check the range [0, $n[
         for($d = 0; $d < $n[$i]; ++$d) {
             //A 6 or a 8 when we already had a 6 or 8 previously, add nothing
             if(($has6 || $d == 6) && ($has8 || $d == 8)) continue;
