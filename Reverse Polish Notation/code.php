@@ -3,16 +3,18 @@
 fscanf(STDIN, "%d", $N);
 $stack = [];
 
-foreach(explode(" ", fgets(STDIN)) as $instruction) {
+foreach(explode(" ", trim(fgets(STDIN))) as $instruction) {
     //Adding number to stack
     if(is_numeric($instruction)) {
-        $stack[] = $instruction;
+        $stack[] = intval($instruction);
     } else {
+        error_log(var_export($stack, true));
+
         $right = array_pop($stack);
         $left = array_pop($stack);
 
         //Not enough operands 
-        if($left == null || $right == null) {
+        if($left === null || $right === null) {
             $stack[] = "ERROR";
             break;
         }
@@ -50,8 +52,9 @@ foreach(explode(" ", fgets(STDIN)) as $instruction) {
                 array_push($stack, $right, $left); break;
             case "ROL":
                 $index = count($stack) - $right;
-                array_push($stack, $stack[count($stack) - $right]); 
+                array_push($stack, $stack[$index]); 
                 unset($stack[$index]);
+                $stack = array_values($stack); //Reset indexes
                 break;
         }
     }
