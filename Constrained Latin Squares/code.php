@@ -33,8 +33,8 @@ for ($y = 0; $y < $n; ++$y) {
     }
 }
 
-//Foreach positions where we don't have a set digit we get all the possible digits we can use there 
-//and the other positions that should get updated when we set a digit to this position. 
+//Foreach positions where we don't have a set digit we get all the digits that can be used there 
+//and the other positions that should be updated when we set a digit to this position. 
 foreach($unknowns as $index => [$x, $y]) {
     $possibleDigits[$index] = array_intersect($cols[$x][0], $rows[$y][0]);
 
@@ -48,7 +48,7 @@ foreach($unknowns as $index => [$x, $y]) {
 function solve(array $possibleDigits, array $counts, array $neighbors):void {
     global $solutions;
 
-    //We want to work on the position that has the less possible digits that can be placed
+    //We want to work on the position that has the less possible digits left
     asort($counts);
 
     foreach($counts as $position => &$value) {
@@ -77,7 +77,6 @@ function solve(array $possibleDigits, array $counts, array $neighbors):void {
         } else {
             //Several digits can be used at this position
             foreach($possibleNumbers as $number) {
-                //error_log(var_export("one possibily for $position is $number", true));
                 $possibleDigitsUpdated = $possibleDigits;
                 $countsUpdated = $counts;
                 $neighborsUpdated = $neighbors;
@@ -99,7 +98,7 @@ function solve(array $possibleDigits, array $counts, array $neighbors):void {
         }
     }
 
-    ++$solutions; //We have successfully place a digit in every positions
+    ++$solutions; //We have successfully placed a digit in every positions
 }
 
 solve($possibleDigits, $counts, $neighbors);
