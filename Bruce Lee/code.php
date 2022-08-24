@@ -4,7 +4,7 @@ $ENCRYPT = stream_get_line(STDIN, 4095 + 1, "\n");
 $binary = "";
 
 //Input is not valid
-if(strlen(preg_replace("/0{1,2}\s0+(?:$|\s)/", "", $ENCRYPT)) != 0) die("INVALID");
+if(preg_replace("/0{1,2}\s0+(?:$|\s)/", "", $ENCRYPT) != "") die("INVALID");
 
 //Get all the unary
 preg_match_all("/0+ 0+/", $ENCRYPT, $matches);
