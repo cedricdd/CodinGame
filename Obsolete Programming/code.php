@@ -46,10 +46,7 @@ function parseInstructions(array $instructions): void {
         //Remove the top number
         elseif($instruction == "POP") array_pop($stack);
         //Duplicate the top number
-        elseif($instruction == "DUP") {
-            $stack = array_values($stack); //Reset indexes
-            $stack[] = $stack[count($stack) - 1];
-        }
+        elseif($instruction == "DUP") $stack[] = end($stack);
         //Bring to the top the third number of the stack
         elseif($instruction == "ROT") array_push($stack, array_splice($stack, -3, 1)[0]);
         //Copy the second top number of the stack on the top
