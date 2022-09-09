@@ -42,7 +42,7 @@ while(true) {
             case "_": $direction = (array_pop($stack) == 0) ? ">" : "<"; break;
             case "|": $direction = (array_pop($stack) == 0) ? "v" : "^"; break;
             case "C": echo chr(array_pop($stack)); break;
-            case "D": $stack[] = array_slice($stack, -1, 1)[0]; break;
+            case "D": $stack[] = end($stack); break;
             case "E": break 2;
             case "I": echo array_pop($stack); break;
             case "P": array_pop($stack); break;
