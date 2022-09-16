@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/31431dffae601260cd5cce2ed5ba6c9f2c045
+https://www.codingame.com/training/medium/merlins-magic-square
 
 Goal
 Background and Symbols:
