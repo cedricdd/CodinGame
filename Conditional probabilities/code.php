@@ -86,8 +86,6 @@ do {
                 elseif($P["A AND B"] != null && $P["B GIVEN A"] != null) $P[$name] = divFractions($P["A AND B"], $P["B GIVEN A"]);
                 //A = A AND B + A AND NOT B
                 elseif($P["A AND B"] != null && $P["A AND NOT B"] != null) $P[$name] = addFractions($P["A AND B"], $P["A AND NOT B"]);
-                //A = A AND NOT B / NOT B GIVEN A
-                elseif($P["A AND NOT B"] != null && $P["NOT B GIVEN A"] != null) $P[$name] = divFractions($P["A AND NOT B"], $P["NOT B GIVEN A"]);
                 break;
             case "A AND B":
                 //A AND B = A - A AND NOT B
@@ -144,7 +142,7 @@ do {
                 if($P["A"] != null) $P[$name] = subFractions([1, 1], $P["A"]);
                 //NOT A = NOT A AND NOT B + NOT A AND B
                 elseif($P["NOT A AND NOT B"] != null && $P["NOT A AND B"] != null) $P[$name] = addFractions($P["NOT A AND NOT B"], $P["NOT A AND B"]);
-                //NOT = NOT A AND B / B GIVEN NOT A
+                //NOT A = NOT A AND B / B GIVEN NOT A
                 elseif($P["NOT A AND B"] != null && $P["B GIVEN NOT A"] != null) $P[$name] = divFractions($P["NOT A AND B"], $P["B GIVEN NOT A"]);
                 break;
             case "NOT A AND B":
