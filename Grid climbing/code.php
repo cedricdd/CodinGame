@@ -1,5 +1,7 @@
 <?php
 
+$start = microtime(1);
+
 fscanf(STDIN, "%d", $n);
 
 $lastPosition = $n * $n - 1;
@@ -26,7 +28,7 @@ for($ya = 0; $ya < $n; ++$ya) {
     }
 }
 
-$best = array_fill(0, $n * $n, INF); //We start with a value of INF for each positions
+$best = array_fill(0, $n * $n, $map[0][0] + $jumps[0][$lastPosition]); //We start with the value of direct jump from start to end
 $toCheck = [[0, $map[0][0]]]; //We start exploring at 0;0
 
 while(count($toCheck)) {
@@ -47,4 +49,6 @@ while(count($toCheck)) {
 }
 
 echo $best[$lastPosition] . PHP_EOL;
+
+error_log(var_export(microtime(1) - $start, true));
 ?>
