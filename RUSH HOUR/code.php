@@ -1,117 +1,117 @@
 <?php
 
-// $n: Number of vehicles
 fscanf(STDIN, "%d", $n);
 
-$moves = [];
+$s = microtime(true);
+$listMoves = [];
 
 // game loop
-while (TRUE)
-{
+while (TRUE) {
     $cars = [];
     $state = 0;
 
     for ($i = 0; $i < $n; $i++) {
         fscanf(STDIN, "%d %d %d %d %s", $id, $x, $y, $length, $axis);
 
-        $position = $x + $y * 6;
+        //We only care about the inputs on first turn
+        if(count($listMoves) == 0) {
+            $carPosition = $x + $y * 6;
+            $cars[$id] = $carPosition;
+    
+            //Update the state with all the positions occupied by this car
+            for($l = 0; $l < $length; ++$l) {
+                $state |= 1 << ($carPosition + ($l * (($axis == "H") ? 1 : 6)));
+            }
 
-        //Save car info
-        if($axis == "H") $carsH[$id] = [$position, $length, $y * 6, $y * 6 + (6 - $length)];
-        else $carsV[$id] = [$position, $length, $x, (6 - $length) * 6 + $x];
+            //Car is moving horizontally 
+            if($axis == "H") {
+                for($x2 = 0; $x2 <= 6 - $length; ++$x2) {
+                    $startPosition = $y * 6 + $x2;
 
-        //Update the state with all the positions occupied by this car
-        for($c = 0; $c < $length; ++$c) {
-            $state |= 1 << ($position + ($c * (($axis == "H") ? 1 : 6)));
+                    if($x2 > 0) $carMoves[$id][$startPosition][] = [
+                        1 << ($startPosition - 1), //The position that needs to be free to make the move
+                        1 << ($startPosition + $length - 1), //The position that's freed by doing the move
+                        $startPosition - 1, //The new position of the car after the move
+                        "LEFT" //The move direction
+                    ];
+                    if($x2 < 6 - $length) $carMoves[$id][$startPosition][] = [
+                        1 << ($startPosition + $length), 
+                        1 << $startPosition, 
+                        $startPosition + 1, 
+                        "RIGHT"
+                    ];
+                }
+            } //Car is moving vertically
+            else {
+                for($y2 = 0; $y2 <= 6 - $length; ++$y2) {
+                    $startPosition = $y2 * 6 + $x;
+
+                    if($y2 > 0) $carMoves[$id][$startPosition][] = [
+                        1 << ($startPosition - 6), 
+                        1 << ($startPosition + (($length - 1) * 6)), 
+                        $startPosition - 6, 
+                        "UP"
+                    ];
+                    if($y2 < 6 - $length) $carMoves[$id][$startPosition][] = [
+                        1 << ($startPosition + ($length * 6)), 
+                        1 << $startPosition, 
+                        $startPosition + 6, 
+                        "DOWN"
+                    ];
+                }
+            }
         }
     }
 
-    if(count($moves) == 0) {
-        $toCheck[] = [$state, $carsH, $carsV, []];
+    //Generate the list of moves on the first turn
+    if(count($listMoves) == 0) {
+        $toCheck[] = [$cars, $state, []];
+        $history = [];
+        $turn = 0;
 
         //Do a BFS search for the solution
         while(count($toCheck)) {
 
             $newCheck = [];
 
-            foreach($toCheck as [$state, $H, $V, $list]) {
+            foreach($toCheck as $i => [$cars, $state, $list]) {
 
-                //Car reached the exit spot, we are over
-                if($H[0][0] == 16) {
-                    $moves = array_reverse($list);
+                //Our car reached the exit spot, direction the beach
+                if($cars[0] == 16) {
+                    $listMoves = $list;
+                    error_log(("Finised in " . (microtime(true) - $s) . "s"));
                     break 2;
                 }
         
-                if(isset($history[$state])) continue;
-                else $history[$state] = 1;
+                //Check all the cars
+                foreach($cars as $index => $position) {
+                    //Check the potential moves that the car can do based on it's current position
+                    foreach($carMoves[$index][$cars[$index]] as [$needToBeFree, $needToFreed, $newPosition, $direction]) {
+                        //If no other car is blocking the move
+                        if(($state & $needToBeFree) == 0) {
 
-                //Cars that move horizontally
-                foreach($H as $id => [$p, $l, $min, $max]) {
-                    //Check moving left
-                    if($p > $min && !($state & (1 << ($p - 1)))) {
-                        $stateC = $state;
-                        $stateC ^= (1 << ($p - 1)) + (1 << ($p + $l - 1));
+                            $updatedState = ($state | $needToBeFree) ^ $needToFreed; //The new state after the car moves
 
-                        $H[$id][0] = $p - 1;
-                        $list[] = "$id LEFT";
+                            //We have already reached the state by using less moves, skipping
+                            if(!isset($history[$updatedState])) {
+                                $history[$updatedState] = 1;
+                                $cars[$index] = $newPosition;
+                                $list[$turn] = $index . " " . $direction;
+                                
+                                $newCheck[] = [$cars, $updatedState, $list];
 
-                        $newCheck[] = [$stateC, $H, $V, $list];
-
-                        array_pop($list);
+                                $cars[$index] = $position; //Reset car position
+                            }
+                        }
                     }
-
-                    //Check moving right
-                    if($p < $max && !($state & (1 << ($p + $l)))) {
-                        $stateC = $state;
-                        $stateC ^= (1 << $p) + (1 << ($p + $l));
-
-                        $H[$id][0] = $p + 1;
-                        $list[] = "$id RIGHT";
-
-                        $newCheck[] = [$stateC, $H, $V, $list];
-
-                        array_pop($list);
-                    }
-
-                    $H[$id][0] = $p; //Reset for next cars
                 }
-
-                //Cars that move vertically
-                foreach($V as $id => [$p, $l, $min, $max]) {
-                    //Check moving up
-                    if($p > $min && !($state & (1 << ($p - 6)))) {
-                        $stateC = $state;
-                        $stateC ^= (1 << ($p + ($l - 1) * 6)) + (1 << ($p - 6));
-            
-                        $V[$id][0] = $p - 6;
-                        $list[] = "$id UP";
-
-                        $newCheck[] = [$stateC, $H, $V, $list];
-
-                        array_pop($list);
-                    }
-
-                    //Check moving down
-                    if($p < $max && !($state & (1 << ($p + $l * 6)))) {
-                        $stateC = $state;
-                        $stateC ^= (1 << $p) + (1 << ($p + $l * 6));
-
-                        $V[$id][0] = $p + 6;
-                        $list[] = "$id DOWN";
-
-                        $newCheck[] = [$stateC, $H, $V, $list];
-
-                        array_pop($list);
-                    }
-                
-                    $V[$id][0] = $p; //Reset for next cars
-                }
-
-                $toCheck = $newCheck;
             }
+
+            ++$turn;
+            $toCheck = $newCheck;
         }
     }
 
-    echo array_pop($moves) . "\n";
+    echo array_shift($listMoves) . "\n";
 }
 ?>
