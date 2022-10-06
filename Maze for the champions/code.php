@@ -1,5 +1,8 @@
 <?php
 
+const CARDINALS = [[1, 0, ">"], [-1, 0, "<"], [0, 1, "v"], [0, -1, "^"]];
+const DIAGONALS = [[-1, -1, "o"], [1, -1, "o"], [-1, 1, "o"], [1, 1, "o"]];
+
 function solveWarrior(array $start, array $end): array {
 
     global $W, $H, $map;
@@ -28,7 +31,7 @@ function solveWarrior(array $start, array $end): array {
             if(isset($visited[$y][$x])) continue;
             else $visited[$y][$x] = $step;
 
-            foreach([[1, 0, ">"], [-1, 0, "<"], [0, 1, "v"], [0, -1, "^"]] as [$xm, $ym, $direction]) {
+            foreach(CARDINALS as [$xm, $ym, $direction]) {
                 $xu = $x + $xm;
                 $yu = $y + $ym;
 
@@ -74,7 +77,7 @@ function solveElf(array $start, array $end): array {
             if(isset($visited[$y][$x])) continue;
             else $visited[$y][$x] = $step;
 
-            foreach([[-1, -1, "o"], [1, -1, "o"], [-1, 1, "o"], [1, 1, "o"], [1, 0, ">"], [-1, 0, "<"], [0, 1, "v"], [0, -1, "^"]] as [$xm, $ym, $direction]) {
+            foreach(array_merge(CARDINALS, (($step > 0) ? DIAGONALS : [])) as [$xm, $ym, $direction]) {
                 $xu = $x + $xm;
                 $yu = $y + $ym;
 
@@ -124,7 +127,7 @@ function solveDwarf(array $start, array $end): array {
             else $visited[$y][$x] = $step;
 
             
-            foreach([[1, 0, ">"], [-1, 0, "<"], [0, 1, "v"], [0, -1, "^"]] as [$xm, $ym, $direction]) {
+            foreach(CARDINALS as [$xm, $ym, $direction]) {
                 $x1 = $x + $xm;
                 $y1 = $y + $ym;
                 $x2 = $x1 + $xm;
@@ -167,7 +170,7 @@ function solveMage(array $start, array $end): array {
 
             $step = count($list);
 
-            if(isset($visited[$y][$x])) continue;
+            if(isset($visited[$y][$x]) && $visited[$y][$x] < $step) continue;
             else $visited[$y][$x] = $step;
 
            // error_log("we are at " . implode("-", $position) . " -- score $score"); 
@@ -178,7 +181,6 @@ function solveMage(array $start, array $end): array {
 
                 do {
                     if($xu == $W - 1 || $map[$y + 1][$xu] != "#" || $map[$y - 1][$xu] != "#") {
-                      //  error_log("right $xu $y"); 
                         $list[$step] = [$x, $y, ">"];
                         $newCheck[] = [[$xu, $y], $score + 5, $list];
                     }
@@ -192,8 +194,7 @@ function solveMage(array $start, array $end): array {
                 $xu = $x - 1;
 
                 do {
-                    if($xu == 0 || $map[$y + 1][$xu] != "#" || $map[$y - 1][$xu] != "#") {
-                      //  error_log("left $xu $y"); 
+                    if($xu == 0 || $map[$y + 1][$xu] != "#" || $map[$y - 1][$xu] != "#") { 
                         $list[$step] = [$x, $y, "<"];
                         $newCheck[] = [[$xu, $y], $score + 5, $list];
                     }
@@ -208,7 +209,6 @@ function solveMage(array $start, array $end): array {
 
                 do {
                     if($yu == $H - 1 || $map[$yu][$x + 1] != "#" || $map[$yu][$x - 1] != "#") {
-                       // error_log("bottom $x $yu"); 
                         $list[$step] = [$x, $y, "v"];
                         $newCheck[] = [[$x, $yu], $score + 5, $list];
                     }
@@ -223,7 +223,6 @@ function solveMage(array $start, array $end): array {
 
                 do {
                     if($yu == 0 || $map[$yu][$x + 1] != "#" || $map[$yu][$x - 1] != "#") {
-                      //  error_log("top $x $yu"); 
                         $list[$step] = [$x, $y, "^"];
                         $newCheck[] = [[$x, $yu], $score + 5, $list];
                     }
