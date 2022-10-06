@@ -3,10 +3,18 @@ https://www.codingame.com/contribute/view/21993ee1e30cfa634b8c05d7798662f1f9230
 Goal
 Your objective is to send the fastest champion to solve the maze.
 The champions have different capabilities and speed.
-- The WARRIOR has no special capability but he is the faster and he can cross a cell in 2 seconds !
+- The WARRIOR has no special capability but he is the fastest and he can cross a cell in 2 seconds !
 - The DWARF can break wall if the wall thickness is only 1 cell. He needs 3 seconds to cross a cell.
 - The ELF can do diagonal moves. Because he can make a lot of different moves he must think of it twice and it will cost 4 seconds to decide which cell to go first.
-- The MAGE can fly straightforward until the next direction change. Because of the long wizard robe, he moves very slowly and each cell marked will cost 5 seconds.
+- The MAGE can fly straight forward as many cells as he wants without being able to cross a wall. Because of the long wizard robe, he moves very slowly and each cell marked will cost 5 seconds.
+
+Rules:
+- entry is given by an arrow (<, >, v, ^) that is going inside the maze.
+- exit is given by an arrow (<, >, v, ^) that is going outside the maze.
+- empty cell is shown with .
+- wall is shown with #
+- the borders of the maze can't be broken by the dwarf.
+- First step and last step are mandatory and can't be changed. Even for the mage who needs to land on the end point.
 
 Some examples:
 
@@ -51,21 +59,16 @@ score: 20 (4 x 5 seconds)
 
 Input
 Line 1: An integer W for the width of the maze
-Line 1: An integer H for the height of the maze
+Line 2: An integer H for the height of the maze
 Next H lines: Details for the maze
 
 Output
-You must print in uppercase, the champion with his score
-You must print the complete maze with the path done by the champion. 
-The path is written with the following arrows (<, >, v, ^) except for diagonal moves with the elf where you must print o before the diagonal move.
+Line 1: The champion and his score, separated with a space
+Next H lines: The complete maze with the path done by the champion. The path is represented using the arrows denoting the directions (<, >, v, ^) except for the elf's diagonal move which is denoted with o.
 
 Constraints
-- All champions can complete all the mazes.
-- There is always only one best choice (no draw between two champions)
-- width < 25
-- height < 25
-- entry is given by an arrow (<, >, v, ^) that is going inside the maze.
-- exit is given by an arrow (<, >, v, ^) that is going outside the maze.
-- empty cell is showing with .
-- wall is showing with #
-- the borders of the maze can't be broken by the dwarf.
+All champions can complete all the mazes.
+There is always only one champion (no draw between two champions)
+0 < W < 25
+0 < H < 25
+
