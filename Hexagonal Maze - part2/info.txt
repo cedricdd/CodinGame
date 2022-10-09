@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/31365d8104c3c0d6153260fd2479c0e644872
+https://www.codingame.com/training/medium/hexagonal-maze---part2
 
 Goal
 
