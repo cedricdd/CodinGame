@@ -32,10 +32,7 @@ while(count($toCheck)) {
 
     foreach($toCheck as [$position, $path, $keys]) {
         //Reached the target point
-        if($map[$position] == "E") {
-            echo implode(" ", $path) . PHP_EOL;
-            break 2;
-        }
+        if($map[$position] == "E") break 2;
 
         //We are slidding
         if($map[$position] == "_") {
@@ -44,14 +41,12 @@ while(count($toCheck)) {
                 $move = $moves[intdiv($position, $width) % 2][$path[$step -1]];
                 $position += $move;
 
-                //Reach a free space
+                //Reached a free space
                 if($map[$position] == ".") {
                     break;
                 } //Reached the end
-                elseif($map[$position] == "E") {
-                    echo implode(" ", $path) . PHP_EOL;
-                    break 3;
-                } //Reached a wall
+                elseif($map[$position] == "E") break 3;
+                //Reached a wall
                 elseif($map[$position] == "#") {
                     $position -= $move;;
                     break;
@@ -79,7 +74,7 @@ while(count($toCheck)) {
             elseif(!($keys & (1 << $alphabet[$map[$position]]))) continue;
         }
         
-        //Check the 6 directions we can move
+        //Check the 6 directions 
         foreach($moves[intdiv($position, $width) % 2] as $d => $move) {
             if($map[$position + $move] != "#") $newCheck[] = [$position + $move, $path + [$step => $d], $keys];
         }
@@ -90,4 +85,5 @@ while(count($toCheck)) {
 }
 
 error_log(var_export(microtime(1) - $start, true));
+echo implode(" ", $path);
 ?>
