@@ -53,9 +53,7 @@ while(count($toCheck)) {
                 } //Reached a key or door
                 elseif(ctype_alpha($map[$position])) {
                     //It's a door we can't open
-                    if($map[$position] == ucfirst($map[$position]) && !($keys & (1 << $alphabet[$map[$position]]))) {
-                        $position -= $move;
-                    }
+                    if($map[$position] == ucfirst($map[$position]) && !($keys & (1 << $alphabet[$map[$position]]))) $position -= $move;
                     break;
                 }
             }
