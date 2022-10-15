@@ -1,0 +1,20 @@
+https://www.codingame.com/training/medium/were-going-in-circles
+
+Goal
+There is a w by h grid of arrows represented by: "^", ">", "v", "<". Empty cells are represented by periods: ".".
+
+A loop of arrows is a set of arrows that loop back on themselves when moving from one arrow to the closest arrow in the direction that it points. 
+If an arrow points outside the grid, it is not part of a loop.
+
+The goal is to count the number_of_loops in the grid.
+
+Input
+line 1: w and h separated by a space (width and height, respectively).
+The next h lines: The grid of arrows and empty cells.
+
+Output
+The number_of_loops in the grid.
+
+Constraints
+0 < w, h <= 20
+The grid only contains the characters: ^>v<.
