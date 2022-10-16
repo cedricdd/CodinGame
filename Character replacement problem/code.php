@@ -7,7 +7,7 @@ foreach(explode(" ", trim(fgets(STDIN))) as $rule) {
 
     if($oldCharacter == $newCharacter) continue;
     if(isset($rules[$newCharacter])) {
-        if($rules[$newCharacter] = $oldCharacter) die("ERROR"); //Loop
+        if($rules[$newCharacter] == $oldCharacter) die("ERROR"); //Loop
         else $newCharacter = $rules[$newCharacter];
     }
     
