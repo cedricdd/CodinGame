@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/3235531ad5b2b9889601bea375c1e0fc564ca
+https://www.codingame.com/training/easy/character-replacement-problem
 
 Goal
 This program problem is to replace the characters in a multi-line string m of n lines of length n.
