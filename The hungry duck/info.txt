@@ -1,0 +1,21 @@
+https://www.codingame.com/training/hard/the-hungry-duck---part-1
+https://www.codingame.com/training/hard/the-hungry-duck---part-2
+
+Goal
+You are a duck sitting in the top left field of a W×H-sized lake.
+In every field of the lake is a different amount of food.
+Your duck is only allowed to move to the right or down.
+What is the maximum amount of food you can eat before reaching the bottom right field?
+
+In part 1 you only swim in small lakes where you don't have to care about timeouts.
+
+Input
+Line 1: Two space separated integers W and H for the width and height of the room
+Next H lines: W integers for the amount of food
+
+Output
+Line 1: The maximum amount of food you are able to eat.
+
+Constraints
+0 < W,H <= 10
+0 < Amount of food < 256
