@@ -1,8 +1,4 @@
 <?php
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
 
 $alphabet = [
     "A" => ".-", "B" => "-...", "C" => "-.-.", "D" => "-..", "E" => ".", "F" => "..-.", "G" => "--.", "H" => "....", "I" => "..", 
@@ -36,14 +32,14 @@ for ($i = 0; $i < $N; $i++) {
     //We don't want to decode, just count the possibilities, we can merge them if we keep the # of words using this representation.
     $words[$morse] = ($words[$morse] ?? 0) + 1;
 
-    //We save the sizes of the morse representations for optimization
+    //We save to sizes of the morse representations for optimization
     $sizes[strlen($morse)] = 1;
 }
 
 //We sort the sizes to be able to optimize the search by breaking
 ksort($sizes);
 
-$memorization[0] = 1; //If we reach the very end of the code we have a solution
+$memorization[""] = 1; //If we end up with an empty code it means found a solution
 
 function solve($code) {
     global $words, $memorization, $sizes;
@@ -51,7 +47,7 @@ function solve($code) {
     $length = strlen($code);
 
     //We know the value, return it
-    if(isset($memorization[$length])) return $memorization[$length];
+    if(isset($memorization[$code])) return $memorization[$code];
 
     $result = 0;
 
@@ -64,13 +60,12 @@ function solve($code) {
         $subCode = substr($code, 0, $size);
 
         if(isset($words[$subCode])) {
+            //Multiple words can have the same code, we need to count all the possibilities
             $result += solve(substr($code, $size)) * $words[$subCode];
         }      
     }
 
-    $memorization[$length] = $result;
-    return $result;
+    return $memorization[$code] = $result;
 }
 
-echo solve($L);
-?>
+echo solve($L) . PHP_EOL;
