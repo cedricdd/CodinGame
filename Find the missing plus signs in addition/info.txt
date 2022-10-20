@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/3106825da27e8f16c91008b0ce5e45f8a7017
+https://www.codingame.com/training/medium/find-the-missing-plus-signs-in-addition
 
 Goal
 
