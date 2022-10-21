@@ -2,7 +2,7 @@
 
 //Get the directional vector
 function getVector(int $x1, int $y1, int $x2, int $y2): array {
-    return [$x2 - $x1, $y2 - $y1, pow(abs($x1 - $x2), 2) + pow(abs($y1 - $y2), 2)];
+    return [$x2 - $x1, $y2 - $y1, sqrt(pow(abs($x1 - $x2), 2) + pow(abs($y1 - $y2), 2))];
 }
 
 //Get the angle beetween 2 vectors
