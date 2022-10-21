@@ -2,6 +2,8 @@
 
 function setDigits(array &$result, array &$cells, array $zones): bool {
 
+    global $neighbors, $w, $h;
+
     do {
         $digitFound = false;
 
@@ -10,19 +12,16 @@ function setDigits(array &$result, array &$cells, array $zones): bool {
             elseif(count($digits) == 1) {
                 $digit = array_key_first($digits);
                 unset($cells[$index]);
-                [$xp, $yp] = explode(" ", $index);
-                $result[$yp][$xp] = $digit;
+                [$x, $y] = explode(" ", $index);
+                $result[$y][$x] = $digit;
                 $digitFound = true;
 
-                for($y = $yp - 1; $y < $yp + 2; ++$y) {
-                    for($x = $xp - 1; $x < $xp + 2; ++$x) {
-                        unset($cells[$x . " " . $y][0][$digit]);
-                    }
-                }
+                foreach($neighbors[$index] as $indexCell) unset($cells[$indexCell][0][$digit]);
 
                 foreach($zones[$zoneID] as $indexCell) unset($cells[$indexCell][0][$digit]);
             }
         }
+
 
     } while($digitFound);
 
@@ -46,6 +45,16 @@ $zoneIndex = 0;
 //Find all the zones
 for($y = 0; $y < $h; ++$y) {
     for($x = 0; $x < $w; ++$x) {
+
+        $index = $x . " " . $y;
+
+        for($y2 = max(0, $y - 1); $y2 < min($h, $y + 2); ++$y2) {
+            for($x2 = max(0, $x - 1); $x2 < min($w, $x + 2); ++$x2) {
+                if($x == $x2 && $y == $y2) continue;
+                $neighbors[$index][] = $x2 . " " . $y2;
+            }
+        }
+
         if(isset($cells[$x . " " . $y])) continue;
 
         $zone = [];
@@ -85,37 +94,30 @@ error_log(var_export(microtime(1) - $start, true));
 
 $backup = [];
 
-while(true) {
+function solve(array $result, array $cells, array $zones): void {
 
-    while(true) {
-        $valid = setDigits($result, $cells, $zones);
+    global $zones, $start;
 
-        if($valid == true) {
-            if(count($cells) == 0) break 2;
-            else break;
-        } else [$result, $cells] = array_pop($backup);
+    //error_log(var_export(count($cells) . " left to find", true));
+
+    $valid = setDigits($result, $cells, $zones);
+
+    if($valid == true && count($cells) == 0) {
+        echo implode("\n", $result) . PHP_EOL;
+        error_log(var_export(microtime(1) - $start, true));
+        exit();
+    } elseif($valid == false) return;
+
+    $index = array_key_first($cells);
+    $digits = $cells[$index][0];
+
+    foreach(array_reverse($digits, true) as $digit => $filler) {
+        $cells[$index][0] = [$digit => 1];
+
+        //error_log(var_export("guess $digit for $index", true));
+
+        solve($result, $cells, $zones);
     }
-
-    while(true) {
-        $index = array_key_first($cells);
-        $digits = $cells[$index][0];
-    
-        if(count($digits) == 0) [$result, $cells] = array_pop($backup);
-        else {
-            $guess = array_key_first($digits);
-
-            unset($cells[$index][0][$guess]);
-
-            $backup[] = [$result, $cells];
-
-            $cells[$index][0] = [$guess => 1];
-
-            break;
-        }
-    }
-
 }
 
-echo implode("\n", $result) . PHP_EOL;
-
-error_log(var_export(microtime(1) - $start, true));
+solve($result, $cells, $zones);
