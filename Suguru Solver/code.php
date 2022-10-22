@@ -1,5 +1,8 @@
 <?php
 
+//The possible digits based on zone's size
+const DIGITS = [1 => 2, 2 => 6, 3 => 14, 4 => 30, 5 => 62, 6 => 126];
+
 function setDigits(array &$result, array &$cells, array $zones): bool {
 
     global $neighbors, $w, $h;
@@ -7,18 +10,36 @@ function setDigits(array &$result, array &$cells, array $zones): bool {
     do {
         $digitFound = false;
 
+        //Search for position with only one possible didit
         foreach($cells as $index => [&$digits, $zoneID]) {
-            if(count($digits) == 0) return false;
-            elseif(count($digits) == 1) {
-                $digit = array_key_first($digits);
-                unset($cells[$index]);
-                [$x, $y] = explode(" ", $index);
-                $result[$y][$x] = $digit;
-                $digitFound = true;
+            switch($digits) {
+                case 2:  $digit = 1; break;
+                case 4:  $digit = 2; break;
+                case 8:  $digit = 3; break;
+                case 16: $digit = 4; break;
+                case 32: $digit = 5; break;
+                case 64: $digit = 6; break;
+                default: continue 2; //More than one possible digit for this position
+            }
 
-                foreach($neighbors[$index] as $indexCell) unset($cells[$indexCell][0][$digit]);
+            unset($cells[$index]);
+            [$x, $y] = explode(" ", $index);
+            $result[$y][$x] = $digit;
+            $digitFound = true;
+            $mask = 1 << $digit;
 
-                foreach($zones[$zoneID] as $indexCell) unset($cells[$indexCell][0][$digit]);
+            //Neighbors can't use this digit anymore
+            foreach($neighbors[$index] as $indexCell) {
+                if(!isset($cells[$indexCell])) continue;
+                //If we are removing the last possible digit it's an invalid solution
+                if(($cells[$indexCell][0] &= ~$mask) == 0) return false;
+            }
+
+            //Cells in the same zone can't use this digit anymore
+            foreach($zones[$zoneID] as $indexCell) {
+                if(!isset($cells[$indexCell])) continue;
+                //If we are removing the last possible digit it's an invalid solution
+                if(($cells[$indexCell][0] &= ~$mask) == 0) return false;
             }
         }
 
@@ -48,6 +69,7 @@ for($y = 0; $y < $h; ++$y) {
 
         $index = $x . " " . $y;
 
+        //Get all the neighbors of this position
         for($y2 = max(0, $y - 1); $y2 < min($h, $y + 2); ++$y2) {
             for($x2 = max(0, $x - 1); $x2 < min($w, $x + 2); ++$x2) {
                 if($x == $x2 && $y == $y2) continue;
@@ -60,6 +82,7 @@ for($y = 0; $y < $h; ++$y) {
         $zone = [];
         $toCheck = [[$x, $y, $grid[$y][$x][0]]];
 
+        //Find all the cells sharing the same zone
         while(count($toCheck)) {
             [$cellX, $cellY, $zoneLetter] = array_pop($toCheck);
             [$letter, $digit] = str_split($grid[$cellY][$cellX]);
@@ -68,9 +91,7 @@ for($y = 0; $y < $h; ++$y) {
             if(isset($cells[$cellX . " " . $cellY])) continue;
             
             $zone[] = $cellX . " " . $cellY;
-
-            if($digit != 0) $cells[$cellX . " " . $cellY] = [[$digit => 1], $zoneIndex];
-            else $cells[$cellX . " " . $cellY] = [[], $zoneIndex];
+            $cells[$cellX . " " . $cellY] = [(($digit != 0) ? (1 << $digit) : 0), $zoneIndex];
 
             foreach([[0, 1], [0, -1], [1, 0], [-1, 0]] as [$xm, $ym]) {
                 $xu = $cellX + $xm;
@@ -80,44 +101,43 @@ for($y = 0; $y < $h; ++$y) {
             }
         }
 
-        $digits = array_flip(range(1, count($zone)));
+        $digits = DIGITS[count($zone)];
 
+        //If the digit is not given, set all the possible digits for each positions
         foreach($zone as $index) {
-            if(count($cells[$index][0]) == 0) $cells[$index][0] = $digits;
+            if($cells[$index][0] == 0) $cells[$index][0] = $digits;
         }
 
         $zones[$zoneIndex++] = $zone;
     }
 }
 
-error_log(var_export(microtime(1) - $start, true));
-
-$backup = [];
-
-function solve(array $result, array $cells, array $zones): void {
+function solve(array $result, array $cells): void {
 
     global $zones, $start;
 
-    //error_log(var_export(count($cells) . " left to find", true));
-
     $valid = setDigits($result, $cells, $zones);
 
-    if($valid == true && count($cells) == 0) {
+    if($valid == false) return;
+    //The grid is valid and we have a digit for each cells
+    elseif(count($cells) == 0) {
         echo implode("\n", $result) . PHP_EOL;
         error_log(var_export(microtime(1) - $start, true));
-        exit();
-    } elseif($valid == false) return;
+        exit(); //There is only one solution
+    }
 
+    //We have to guess a digit, we use the first cell with multiple possibilities
     $index = array_key_first($cells);
-    $digits = $cells[$index][0];
+    [$digits, $zoneID] = $cells[$index];
 
-    foreach(array_reverse($digits, true) as $digit => $filler) {
-        $cells[$index][0] = [$digit => 1];
+    for($i = 6; $i > 0; --$i) {
+        //If this digit is possible for the cell, we try it
+        if($digits & 1 << $i) {
+            $cells[$index][0] = 1 << $i;
 
-        //error_log(var_export("guess $digit for $index", true));
-
-        solve($result, $cells, $zones);
+            solve($result, $cells);
+        }
     }
 }
 
-solve($result, $cells, $zones);
+solve($result, $cells);
