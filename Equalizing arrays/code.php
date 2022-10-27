@@ -21,28 +21,26 @@ while($position < $N) {
     } //Value B < A, we need to shift to the left
     else {
         $missing = $B[$position] - $A[$position]; //The initial amount that is missing
-        $moving = [[$position + 1, $missing]];
+        $leftMoves = [($position + 2) . " -1 " . $missing];
 
-        for($j = $position + 1; $j < $N; ++$j) {
+        for($i = $position + 1; $i < $N; ++$i) {
             //The amount at the current position is enough to not go negative
-            if($A[$j] >= $missing) {
-                $A[$j] -= $missing; //This is the only value we need to udpate
+            if($A[$i] >= $missing) {
+                $A[$i] -= $missing; //This is the only value we need to udpate
                 break;
             }
             //Not enough, we continue and update the value of $missing
             else {
-                $missing += $B[$j] - $A[$j];
-                $moving[] = [$j + 1, $missing];
+                $missing += $B[$i] - $A[$i];
+                array_unshift($leftMoves, ($i + 2) . " -1 " . $missing);
             }
         }
 
-        //Add the moves from highest index to lowest
-        foreach(array_reverse($moving) as [$index, $value]) {
-            $moves[] = ($index + 1) . " -1 " . $value;
-        }
+        //Add the left moves
+        $moves = array_merge($moves, $leftMoves);
 
-        //We can jump to $j position
-        $position = $j;
+        //We can jump to $i position
+        $position = $i;
     }
 }
 
