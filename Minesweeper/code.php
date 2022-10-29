@@ -17,14 +17,13 @@ while (TRUE) {
     }
 
     $toFlag = [];
-    $guess = "";
-    $guessChance = 1.0;
+    $guesses = [];
     $loop = 0;
 
     do {
         $grid = $turnGrid;
         $neighbors = [];
-        $safeCells = [];
+        $safePositions = [];
         $restartLoop = false;
 
         //Set all the bombs we already know
@@ -34,6 +33,7 @@ while (TRUE) {
             }
         }
 
+        //Foreach position with a digit we get the number of neighbors that are "?" and the number of bombs that are still unknown
         for($y = 0; $y < 16; ++$y) {
             for($x = 0; $x < 30; ++$x) {
                 if(!ctype_digit($grid[$y][$x])) continue;
@@ -44,31 +44,37 @@ while (TRUE) {
                 for($y2 = max(0, $y - 1); $y2 < min(16, $y + 2); ++$y2) {
                     for($x2 = max(0, $x -1); $x2 < min(30, $x + 2); ++$x2) {
                         if($grid[$y2][$x2] === "B") --$bombsToFind;
-                        elseif($grid[$y2][$x2] === "?") $neighbors[$x . " " . $y][] = [$x2, $y2];
+                        elseif($grid[$y2][$x2] === "?") $neighbors[$x . " " . $y][$x2 . " " . $y2] = [$x2, $y2];
                     }
                 }
 
+                //We know where all the bombs are
                 if($bombsToFind == 0) {
+                    //If there are some other neighbors we are sure there's no bomb there
                     if(count($neighbors[$x . " " . $y]) > 0) {
                         foreach($neighbors[$x . " " . $y] as [$xs, $ys]) {
-                            $safeCells["$xs $ys"] = 1;
+                            $safePositions["$xs $ys"] = 1;
                         }
                     }
                 }
+                //We don't already know where all the bombs are located
                 else {
+                    //The # of "?" in neighbors is the same as the # of bombs still to find, it's all bombs 
                     if($bombsToFind == count($neighbors[$x . " " . $y])) {
                         foreach($neighbors[$x . " " . $y] as [$x2, $y2]) {
                             $bombs[$y2][$x2] = 1;
                             $toFlag["$x2 $y2"] = 1;
-                            $restartLoop = false;
+                            $restartLoop = true;
                         }
         
                         $bombsToFind = 0;
-                    } elseif(($bombsToFind / count($neighbors[$x . " " . $y])) < $guessChance) {
-                        //error_log("using $x $y as guess");
-                        $guessChance = $bombsToFind / count($neighbors[$x . " " . $y]);
-                        [$x2, $y2] = reset($neighbors[$x . " " . $y]);
-                        $guess = "$x2 $y2";
+                    } //We don't know where the bombs are
+                    else {
+                        $chance = $bombsToFind / count($neighbors[$x . " " . $y]);
+
+                        foreach($neighbors[$x . " " . $y] as [$x2, $y2]) {
+                            $guesses["$x2 $y2"] = min(($guesses["$x2 $y2"] ?? 1), $chance);
+                        }
                     }
                 }
                 
@@ -77,11 +83,9 @@ while (TRUE) {
         }
 
         for($y = 0; $y < 16; ++$y) {
-            //1-2-1 pattern in horizontal
+            //1-2-1 pattern in horizontal -- bombs are above or below the 1s
             if(preg_match("/121/", implode("", $grid[$y]), $match, PREG_OFFSET_CAPTURE)) {
-                error_log("$y -- 1-2-1");
-                error_log(var_export($match, true));
-    
+
                 $x = $match[0][1];
                 $top1 = ($y > 0 && $grid[$y - 1][$x] === "?");
                 $top2 = ($y > 0 && $grid[$y - 1][$x + 2] === "?");
@@ -90,8 +94,6 @@ while (TRUE) {
     
                 //We know where the bombs are
                 if($top1 + $top2 + $bottom1 + $bottom2 == 2) {
-                    error_log("bombs found at $top1 $top2 $bottom1 $bottom2");
-
                     if($top1 == true) {
                         $bombs[$y - 1][$x] = 1;
                         $toFlag[$x . " " . ($y - 1)] = 1;
@@ -113,11 +115,9 @@ while (TRUE) {
                 }
             }
 
-            //1-2-2-1 pattern in horizontal
+            //1-2-2-1 pattern in horizontal -- bombs are above or below the 2s
             if(preg_match("/1221/", implode("", $grid[$y]), $match, PREG_OFFSET_CAPTURE)) {
-                error_log("$y -- 1-2-2-1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                error_log(var_export($match, true));
-    
+
                 $x = $match[0][1];
                 $top1 = ($y > 0 && $grid[$y - 1][$x + 1] === "?");
                 $top2 = ($y > 0 && $grid[$y - 1][$x + 2] === "?");
@@ -126,8 +126,6 @@ while (TRUE) {
     
                 //We know where the bombs are
                 if($top1 + $top2 + $bottom1 + $bottom2 == 2) {
-                    error_log("bombs found at $top1 $top2 $bottom1 $bottom2");
-
                     if($top1 == true) {
                         $bombs[$y - 1][$x + 1] = 1;
                         $toFlag[($x + 1) . " " . ($y - 1)] = 1;
@@ -151,11 +149,9 @@ while (TRUE) {
         }
 
         for($x = 0; $x < 30; ++$x) {
-            //1-2-1 pattern in vertical
+            //1-2-1 pattern in vertical -- bombs are above or below the 1s
             if(preg_match("/121/", implode("", array_column($grid, $x)), $match, PREG_OFFSET_CAPTURE)) {
-                error_log("$x -- 1-2-1");
-                error_log(var_export($match, true));
-    
+
                 $y = $match[0][1];
                 $left1 = ($x > 0 && $grid[$y][$x - 1] === "?");
                 $left2 = ($x > 0 && $grid[$y + 2][$x - 1] === "?");
@@ -164,8 +160,6 @@ while (TRUE) {
     
                 //We know where the bombs are
                 if($left1 + $left2 + $right1 + $right2 == 2) {
-                    error_log("bombs found at $left1 $left2 $right1 $right2");
-
                     if($left1 == true) {
                         $bombs[$y][$x - 1] = 1;
                         $toFlag[($x - 1) . " " . $y] = 1;
@@ -187,11 +181,8 @@ while (TRUE) {
                 }
             }
 
-            //1-2-1 pattern in vertical
+            //1-2-2-1 pattern in vertical -- bombs are above or below the 2s
             if(preg_match("/1221/", implode("", array_column($grid, $x)), $match, PREG_OFFSET_CAPTURE)) {
-                error_log("$x -- 1-2-2-1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                error_log(var_export($match, true));
-    
                 $y = $match[0][1];
                 $left1 = ($x > 0 && $grid[$y + 1][$x - 1] === "?");
                 $left2 = ($x > 0 && $grid[$y + 2][$x - 1] === "?");
@@ -200,8 +191,6 @@ while (TRUE) {
     
                 //We know where the bombs are
                 if($left1 + $left2 + $right1 + $right2 == 2) {
-                    error_log("bombs found at $left1 $left2 $right1 $right2");
-
                     if($left1 == true) {
                         $bombs[$y + 1][$x - 1] = 1;
                         $toFlag[($x - 1) . " " . ($y + 1)] = 1;
@@ -227,24 +216,65 @@ while (TRUE) {
         foreach($neighbors as $position => $list) {
             [$x, $y] = explode(" ", $position);
             if(($grid[$y][$x] == 1 && count($list) == 2) || ($grid[$y][$x] == 2 && count($list) == 3)) {
-                //error_log("we need to check $x $y!!!!!!!!!!!!");
+
+                //We check the neighbors of the current position
+                for($y2 = max(0, $y - 2); $y2 < min(16, $y + 3); ++$y2) {
+                    for($x2 = max(0, $x - 2); $x2 < min(30, $x + 3); ++$x2) {
+                        //It needs to have at least one unfound bombs and have more neighbors unknow
+                        if($grid[$y2][$x2] > 0 && count($neighbors[$x2 . " " . $y2]) > count($list)) {
+                            $neighborsDifference = $neighbors[$x2 . " " . $y2];
+
+                            //All the neighbors of the first position needs to also be neighbors of the second postion
+                            foreach($list as [$nx, $ny]) {
+                                if(isset($neighborsDifference[$nx . " " . $ny])) unset($neighborsDifference[$nx . " " . $ny]);
+                                else continue 2;
+                            }
+
+                            $updatedCount = $grid[$y2][$x2] - $grid[$y][$x];
+
+                            //The neighbors that are left are all safe positions
+                            if($updatedCount == 0) {
+                                foreach($neighborsDifference as [$xs, $ys]) {
+                                    $safePositions["$xs $ys"] = 1;
+                                }
+
+                            } //The neighbors that are left are all bombs
+                            elseif($updatedCount == count($neighborsDifference)) {
+                                foreach($neighborsDifference as [$xs, $ys]) {
+                                    $bombs[$ys][$xs] = 1;
+                                    $toFlag["$xs $ys"] = 1;
+                                }
+
+                                $restartLoop = true;
+                            }
+                        }
+                    }
+                }
+
             }
         }
     } while($restartLoop);
 
+    /*
     error_log(var_export(implode("\n", array_map(function($line) {
         return implode("", $line);
     }, $grid)), true)); 
+    */
 
-    if(count($safeCells) > 0) {
-        error_log("we have " . count($safeCells) . " safe cells");
-        //error_log(var_export($safeCells, true));
+    error_log("We have found " . array_sum(array_map("count", $bombs)) . " bombs.");
 
-        echo array_key_first($safeCells) . " " . implode(" ", array_keys($toFlag)) . PHP_EOL;
-    } elseif(!empty($guess)) {
-        error_log("guess is $guess $guessChance");
+    //We have some safe positions
+    if(count($safePositions) > 0) {
+        error_log("We have " . count($safePositions) . " safe positions.");
 
-        echo $guess . " " . implode(" ", array_keys($toFlag)) . PHP_EOL;
+        echo array_key_first($safePositions) . " " . implode(" ", array_keys($toFlag)) . PHP_EOL;
+    } //We use the safest guess 
+    elseif(!empty($guesses)) {
+        asort($guesses);
+
+        error_log("Chance of guess is " . number_format(((1 - reset($guesses)) * 100), 1) . "%");
+
+        echo array_key_first($guesses) . " " . implode(" ", array_keys($toFlag)) . PHP_EOL;
     } //We just select the first "?" 
     else {
         for($y = 0; $y < 16; ++$y) {
