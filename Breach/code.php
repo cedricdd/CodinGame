@@ -18,7 +18,7 @@ const PERIODIC_TABLE = [
 const COLORS = [
     "W" => "GRAY", "w" => "WHITE", "R" => "RED", "r" => "LIGHT_RED", "G" => "GREEN", "g" => "LIGHT_GREEN",
     "B" => "BLUE", "b" => "LIGHT_BLUE", "y" => "YELLOW", "o" => "ORANGE", "P" => "PINK", "p" => "LIGHT_PINK",
-    "V" => "VIOLET", "v" => "LIGHT_VIOLET"
+    "V" => "VIOLET", "v" => "LIGHT_VIOLET", "?" => "CORRUPT"
 ];
 
 // game loop
