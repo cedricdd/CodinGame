@@ -1,6 +1,6 @@
 <?php
 
-const periodicTable = [
+const PERIODIC_TABLE = [
     1 => "H", 2 => "He", 3 => "Li", 4 => "Be", 5 => "B", 6 => "C", 7 => "N", 8 => "O", 9 => "F", 10 => "Fe",
     11 => "Na", 12 => "Mg", 13 => "Al", 14 => "Si", 15 => "P", 16 => "S", 17 => "Cl", 18 => "Ar", 19 => "K", 20 => "Ca",
     21 => "Sc", 22 => "Ti", 23 => "V", 	24 => "Cr", 25 => "Mn", 26 => "Fe", 27 => "Co", 28 => "Ni", 29 => "Cu", 30 => "Zn",
@@ -13,6 +13,12 @@ const periodicTable = [
     91 => "Pa", 92 => "U" ,	93 => "Np", 94 => "Pu", 95 => "Am", 96 => "Cm", 97 => "Bk", 98 => "Cf", 99 => "Es", 100 => "Fm", 
     101 => "Md", 102 => "No", 103 => "Lr", 104 => "Rf", 105 => "Db", 106 => "Sg", 107 => "Bh", 108 => "Hs", 109 => "Mt", 110 => "Ds", 
     111 => "Rg", 112 => "Cn", 113 => "Nh", 114 => "Fl", 115 => "Mc", 116 => "Lv", 117 => "Ts", 118 => "Og"
+];
+
+const COLORS = [
+    "W" => "GRAY", "w" => "WHITE", "R" => "RED", "r" => "LIGHT_RED", "G" => "GREEN", "g" => "LIGHT_GREEN",
+    "B" => "BLUE", "b" => "LIGHT_BLUE", "y" => "YELLOW", "o" => "ORANGE", "P" => "PINK", "p" => "LIGHT_PINK",
+    "V" => "VIOLET", "v" => "LIGHT_VIOLET"
 ];
 
 // game loop
@@ -30,8 +36,6 @@ while (TRUE)
         $lines[] = stream_get_line(STDIN, 999 + 1, "\n");
     }
 
-    error_log(var_export($lines, true)); 
-
     //Xn = Xn-1 + Xn-2
     if($type == "ss_n") {
         preg_match("/\[(.*)\]\[([0-9]+)\]/", $lines[0], $matches);
@@ -41,8 +45,6 @@ while (TRUE)
         for($i = 5; $i <= $matches[2]; ++$i) {
             $list[$i] = $list[$i - 1] + $list[$i - 2];
         }
-
-        error_log(var_export($list, true)); 
 
         echo array_pop($list) . PHP_EOL;
     }
@@ -55,8 +57,6 @@ while (TRUE)
         for($i = 5; $i <= $matches[2]; ++$i) {
             $list[$i] = $list[$i - 1] + $list[1] - $list[0];
         }
-
-        error_log(var_export($list, true)); 
 
         echo array_pop($list) . PHP_EOL;
     }
@@ -72,11 +72,11 @@ while (TRUE)
     elseif($type == "gs_m") {
         [, $value] = explode(": ", $lines[0]);
 
-        echo periodicTable[$value] . PHP_EOL;
+        echo PERIODIC_TABLE[$value] . PHP_EOL;
     }
     //Atomic number of a chemical element
     elseif($type == "ss_m") {
-        $table = array_flip(periodicTable);
+        $table = array_flip(PERIODIC_TABLE);
 
         echo $table[$lines[0]] . PHP_EOL;
     }
@@ -128,19 +128,17 @@ while (TRUE)
         //We found all the colors, validate, no idea why you output 0 for that
         echo 0 . PHP_EOL;
     }
+    //Output the full name of the only colors that has a "+" next to it
     elseif($type == "ss_colv") {
-        $inputs = array_map(function($position) {
-            return preg_split("//u", $position, -1, PREG_SPLIT_NO_EMPTY);
-        }, explode("-", $lines[0]));
+        preg_match("/[a-zA-Z](?=\+)/", $lines[0], $match);
 
-        error_log(var_export($inputs, true));
+        echo COLORS[$match[0]] . PHP_EOL;
+    }
+    //Just print the full name of the colors
+    elseif($type == "rs_colv") {
+        preg_match("/[a-zA-Z]/", $lines[0], $match);
 
-        foreach($inputs as $list) {
-            if(count($list) > 2) {
-                echo $list[1] . PHP_EOL;
-                break;
-            }
-        }
+        echo COLORS[$match[0]] . PHP_EOL;
     }
 }
 ?>
