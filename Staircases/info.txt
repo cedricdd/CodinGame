@@ -1,0 +1,23 @@
+https://www.codingame.com/training/hard/staircases/solution
+
+The program:
+Given N bricks, your program needs to find the number of different staircases that can be built using all of these bricks.
+
+A staircase consists of steps of different sizes in a strictly increasing order. Two steps can not have the same height. 
+Every staircase has a minimum of 2 steps and each step has at least 1 brick.
+
+Example:
+
+For N = 5, there are two different valid staircases that can be built
+
+1 then 4 bricks
+2 then 3 bricks
+
+INPUT:
+Line 1: An integer N representing the number of bricks.
+
+OUTPUT:
+Line 1: an integer representing the number of ways to build staircases using N bricks
+
+CONSTRAINTS:
+1 ≤ N ≤ 500
