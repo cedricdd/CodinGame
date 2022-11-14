@@ -1,0 +1,43 @@
+https://www.codingame.com/training/easy/the-dart-101
+
+Goal
+Everybody knows the dart game 101. But this times the rules have changed.
+
+Every player shoot 3 darts a round, unless you reach or exceed 101 points, in which case your round immediately ends.
+
+When a dart hits the target you tentatively collect points. There are multiplier rings that increase the points of some darts.
+For example :
+When you touch the 19, your total is increased by 19.
+When you touch the double 19 (2*19) , your total is increased by 2*19=38.
+When you touch the triple 19 (3*19), your total is increased by 3*19=57.
+
+Each time you miss the target, your total is decreased by 20 points.
+If you miss twice consecutively in the same round, your total is decreased by another 10 points.
+If you miss three times in the same round, your whole total is reset at 0.
+In other words X.X means -40 but XX. and .XX means -50 in the same round.
+
+To win, you must score exactly 101 points.
+
+If you exceed the score of 101 after a shoot, you revert to your total before your current round and your round ends here. 
+Your round may therefore end before your third shoot.
+
+The player who has reached 101 in the fewest rounds wins the game.
+You have to print the winner's name.
+
+Example of calculation :
+10 5 3*18 20 X 2*14 17 4
+In the round 1, the player scores 10 + 5 + 3*18 = 10 + 5 + 54 = 69 points
+In the round 2, the player scores 20 - 20 + 28 = 28 points. The total is 69 + 28 = 97 points
+In the round 3, the player cannot score 17. The total stays at 97 points.
+In the round 4, the player scores 4 points and reaches exactly 101.
+This player finishes in 4 rounds.
+
+Input
+Line1 : A number N of player
+Next N lines : name of player
+Next N lines : shoots of a player separated with space (X when a player missed the target).
+
+Output
+Line 1 : The name of the winne
+Constraints
+1 ≤ N ≤ 8
