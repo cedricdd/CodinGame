@@ -132,7 +132,7 @@ function solve(array $result, array $cells): void {
 
     for($i = 6; $i > 0; --$i) {
         //If this digit is possible for the cell, we try it
-        if($digits & 1 << $i) {
+        if($digits & (1 << $i)) {
             $cells[$index][0] = 1 << $i;
 
             solve($result, $cells);
