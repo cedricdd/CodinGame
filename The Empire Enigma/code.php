@@ -21,7 +21,8 @@ for($i = 1; $i <= 100; ++$i) {
 */
 
 function decodeCharacter(int $encoded, int $random): string {
-    return chr(bindec(substr(sprintf("%08b", $encoded ^ $random), -8)));
+    //XOR & truncated to the lowest 8 bits
+    return chr($encoded ^ $random & 255);
 }
 
 fscanf(STDIN, "%d", $offset);
