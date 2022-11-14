@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/267455f7148fcc689ba45367f760f3d71a584
+https://www.codingame.com/training/medium/suguru-solver
 
 Goal
 Suguru (also known as Tectonics) is a puzzle game similar to Sudoku. The puzzle is made up of different zones, called cages. 
