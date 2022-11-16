@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/32389ea0a9b5549e37a791011e7847b87a5ed
+https://www.codingame.com/training/easy/card-counting-when-easily-distracted
 
 Goal
 In this simplified version of "Card Counting", you are playing Blackjack at a casino table, that uses only one standard deck (52) of cards.
