@@ -1,0 +1,33 @@
+https://www.codingame.com/training/medium/wine-from-kalbodia---episode-1
+
+Goal
+«Story Background»
+It is the year 2636, and the United Colonies of Kalbodia are the premiere producers of wine in the Solar System. 
+Who'd have thought that the asteroid belt could be so fruitful with just a touch of terraforming? 
+History aside, Kordak is a new employee of the Kalbodiwine Company, which handles wine trade between high-class residential asteroids and wine-producing asteroids. 
+There are many languages in use throughout the United Colonies of Kalbodia, and it is up to Kordak to determine which shipment of wine goes where.
+
+«Prompt»
+Kordak receives N requests of wine from the residential asteroids. For legibility, these requests are formatted as single strings containing the letters A-Z, 
+where each letter represents a unique kind of wine within each request. At the same time, Kordak also gets N crates of wine from the wine-producing asteroids. 
+The wine bottles in a crate are put in the same order as written in its corresponding wine request, using a-z for legibility. 
+However, the wine comes from buyers and sellers of different languages, so the letters on different requests or on different crates are not correlated. 
+Furthermore, the wine-producers all use the same type of bottle to store the wine (for stupid bureaucratic reasons, of course). 
+Since Kordak does not know the language on the labels, and he cannot open the wine bottles lest he be fired for tampering with goods, 
+Kordak must figure out which crate of wine corresponds to which wine request based on how the bottles are arranged.
+
+Both wine requests and crates are indexed from 1 to N in the order given. Report the indices of the crates that correspond with the wine requests.
+
+Input
+Line 1: An integer N representing the number of requests / crates
+Next N lines: A string representing the i-th wine request with letters A-Z
+Next N lines: A string representing what is inside the j-th crate with letters a-z
+
+Output
+N lines of integers in the same order as the wine requests given
+
+Constraints
+2 ≤ N ≤ 100
+2 ≤ types of wine per request/crate ≤ 26
+1 ≤ bottles of wine in a request/crate ≤ 100
+There is one unique answer
