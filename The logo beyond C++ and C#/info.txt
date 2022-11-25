@@ -1,0 +1,41 @@
+https://www.codingame.com/contribute/view/40408fbe39755835404edcffb882493003bc0
+
+Goal
+Legend has it that the origin of the name "C#" was really just two "++" stacked on top of each other, like this
+++
+++
+...and that formed a "sharp" (musical note symbol). Cool, right?
+
+C-Enterprises is considering releasing yet another programming language and their Marketing Department is in need of a logo for it that 
+will play off that history, so it too will consist solely of plus-signs. They have asked you to do some rough drafts for them.
+
+Here is what they know they want:
+~ They want just the outline of plus-signs
+~ The outline itself will be done in plus-signs characters (+)
+~ When 2 plus-signs touch each other, the outlines separating the touching parts should disappear, so that it all "flows together"
+
+They have not decided the following so these will be inputs in the various cases:
+~ The size of the plus-signs
+~ The thickness of the two-lines that form each plus-sign
+~ The number and arrangement of the plus-signs
+
+(You explain you are a programmer -- not a graphic artist -- but alas they insist. So you just do your best, 
+knowing the console application output will make the proportions appear a bit elongated.)
+
+Input
+Line 1: An integer size (both the height and width) of a single plus-sign outline
+Line 2: An integer thickness of the two lines of the plus-sign
+Line 3: An integer N for the number of rows in the proposed logo
+Next N lines: a string that constitutes a row of that logo
+
+Output
+Draw the logo
+(Trim off any white space to the right on each line)
+
+Constraints
+If size is even, thickness will be even
+If size is odd, thickness will be odd
+
+size ≥ 5
+thickness ≥ 3
+thickness < size
