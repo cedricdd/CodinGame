@@ -1,0 +1,36 @@
+https://www.codingame.com/training/medium/simple-fraction-to-mixed-number
+
+Goal
+Given a string representing a simple fraction X/Y, you must output a string representing the corresponding mixed fraction in the following format:
+
+[sign]A B/C
+
+where A is integer part and B/C is irreducible proper fraction. There must be exactly one space between A and B/C.
+
+Some rules must be followed:
+
+1. If X/Y equals the integer part, return integer part only (and ignore Rule 2).
+2. If integer part is zero, return the irreducible proper fraction only.
+3. In cases where rules (1) or (2) apply, the result must not contain any spaces.
+4. In case of division by zero, output DIVISION BY ZERO.
+5. The sign of the resulting number applies to this number as a whole and if the sign is negative, it is placed before the number without a space after the sign. Zero does not have a sign.
+
+Examples:
+
+Input: 42/9, expected result: 4 2/3.
+Input: 6/3, expected result: 2.
+Input: 4/6, expected result: 2/3.
+Input: 0/18891, expected result: 0.
+Input: -10/7, expected result: -1 3/7.
+Inputs 0/0 or 3/0 must output DIVISION BY ZERO.
+
+Input
+Number of tests N.
+Next N lines: Two integers separated by a slash: X/Y.
+
+Output
+The resulting mixed number, one per line.
+
+Constraints
+-10000000 < X < 10000000
+-10000000 < Y < 10000000
