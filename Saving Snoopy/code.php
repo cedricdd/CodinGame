@@ -7,6 +7,7 @@ for ($i = 0; $i < $n; $i++) {
 }
 fscanf(STDIN, "%d", $length);
 
+//Remove the last $count characters from the array
 function removeCharacters(array $characters, int $count): array {
     return array_slice($characters, 0, $count * -1);
 }
@@ -19,7 +20,7 @@ function shuffleCharacters(array $characters): array {
     $characters = array_values($characters); //Make sure indexes are set properly
 
     array_walk($characters, function($v, $k) use (&$shuffled) { 
-        $shuffled[($k % 2)][] = $v; 
+        $shuffled[($k % 2)][] = $v; //Sort by odd & even
     });
 
     return array_merge($shuffled[0], $shuffled[1]);
