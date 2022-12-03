@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/40408fbe39755835404edcffb882493003bc0
+https://www.codingame.com/training/easy/the-logo-beyond-c-and-c
 
 Goal
 Legend has it that the origin of the name "C#" was really just two "++" stacked on top of each other, like this
@@ -6,8 +6,8 @@ Legend has it that the origin of the name "C#" was really just two "++" stacked 
 ++
 ...and that formed a "sharp" (musical note symbol). Cool, right?
 
-C-Enterprises is considering releasing yet another programming language and their Marketing Department is in need of a logo for it that 
-will play off that history, so it too will consist solely of plus-signs. They have asked you to do some rough drafts for them.
+C-Enterprises is considering releasing yet another programming language and their Marketing Department is in need of a logo for it that will play off that history, 
+so it too will consist solely of plus-signs. They have asked you to do some rough drafts for them.
 
 Here is what they know they want:
 ~ They want just the outline of plus-signs
@@ -19,8 +19,8 @@ They have not decided the following so these will be inputs in the various cases
 ~ The thickness of the two-lines that form each plus-sign
 ~ The number and arrangement of the plus-signs
 
-(You explain you are a programmer -- not a graphic artist -- but alas they insist. So you just do your best, 
-knowing the console application output will make the proportions appear a bit elongated.)
+You explain you are a programmer -- not a graphic artist -- but alas they insist. 
+So you just do your best, knowing the console application output will make the proportions appear a bit elongated.
 
 Input
 Line 1: An integer size (both the height and width) of a single plus-sign outline
@@ -33,8 +33,8 @@ Draw the logo
 (Trim off any white space to the right on each line)
 
 Constraints
-If size is even, thickness will be even
-If size is odd, thickness will be odd
+If size is even, thickness is even
+If size is odd, thickness is odd
 
 size ≥ 5
 thickness ≥ 3
