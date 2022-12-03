@@ -11,21 +11,23 @@ for ($i = 0; $i < $height; $i++) {
 $width = max(array_map('count', $logo));
 $spaceSize = ($size - $thickness) >> 1;
 
-error_log("width $width");
-
 $grid = array_fill(0, $size * $height, str_repeat(" ", $width * $size));
 
 foreach($logo as $y => $line) {
     foreach($line as $x => $character) {
         if($character == "+") {
             for($i = 0; $i < $thickness; ++$i) {
+                //Top border if there's nothing directly above
                 if(($logo[$y - 1][$x] ?? " ") != "+") $grid[$y * $size][$x * $size + $spaceSize + $i] = "+";
+                //Bottom border if there's nothing directly below
                 if(($logo[$y + 1][$x] ?? " ") != "+") $grid[($y + 1) * $size - 1][$x * $size + $spaceSize + $i] = "+";
-
+                //Left border if there's nothing directly left
                 if(($logo[$y][$x - 1] ?? " ") != "+") $grid[$y * $size + $spaceSize + $i][$x * $size] = "+";
+                //Right border if there's nothing directly right
                 if(($logo[$y][$x + 1] ?? " ") != "+") $grid[$y * $size + $spaceSize + $i][($x + 1) * $size - 1] = "+";
             }
             
+            //The parts between the borders to from the + shape
             for($i = 0; $i <= $spaceSize; ++$i) {
                 $grid[$y * $size + $i][$x * $size + $spaceSize] = "+";
                 $grid[$y * $size + $i][$x * $size + $spaceSize + $thickness - 1] = "+";
@@ -42,6 +44,5 @@ foreach($logo as $y => $line) {
         }
     }
 }
-
 
 echo implode("\n", array_map("rtrim", $grid)) . PHP_EOL;
