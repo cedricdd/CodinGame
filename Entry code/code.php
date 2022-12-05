@@ -1,43 +1,56 @@
 <?php
+
 fscanf(STDIN, "%d", $x);
 fscanf(STDIN, "%d", $n);
 
-$codes = range(0, $x - 1);
+//Generate all the codes of size $size with the digits $digits
+function generateCodes(array $digits, int $size): array {
 
-//Generate all the possible codes
-for($i = 0; $i < $n - 1; ++$i) {
-    foreach($codes as $index => $code) {
-        for($j = 0; $j < $x; ++$j) {
-            $codes[] = $code . $j;
+    $codes = $digits;
+
+    for($i = 1; $i < $size; ++$i) {
+        $updatedCodes = [];
+
+        foreach($codes as $code) {
+            foreach($digits as $digit) {
+                $updatedCodes[] = $code . $digit;
+            }
         }
-        unset($codes[$index]);
+
+        $codes = $updatedCodes;
     }
+
+    return $codes;
 }
 
-//Generate the de Bruijn graph 
-//https://en.wikipedia.org/wiki/De_Bruijn_graph
+$codes = generateCodes(range(0, $x - 1), $n);
+
+//Generate the de Bruijn graph (https://en.wikipedia.org/wiki/De_Bruijn_graph)
 foreach($codes as $code) {
-    $links[substr($code, 0, -1)][] = substr($code, 1);
+    $links[strval(substr($code, 0, -1))][] = strval(substr($code, 1));
 }
 
-function solve($position, $stack, $links) {
+function solve(string $position, array $stack): string {
 
-    //We can still reach some nodes from this position, move to the smallest one
+    global $links;
+
+    //We can still reach some nodes from this position, move to the first one
     if(count($links[$position])) {
-        return solve(array_shift($links[$position]), array_merge($stack, [$position]), $links);
-    } //We can't move anywhere from this position, add the last digit of the position is part of the sequence and backtrack
+        $stack[] = $position;
+        return solve(array_shift($links[$position]), $stack);
+    } //We can't move anywhere from this position
     else {
+        //The last digit of the position is part of the Eulerian path
         $d = $position[-1];
 
-        //No more backtracking
+        //If we have nowhere to backtrack, we are done
         if(empty($stack)) return $d;
 
-        return solve(array_pop($stack), $stack, $links) . $d;
+        return solve(array_pop($stack), $stack) . $d;
     }
 }
 
 //The shortest sequence is the Eulerian path in the de Bruijn graph
 //https://en.wikipedia.org/wiki/Eulerian_path
 //We use the smallest index as starting point
-echo str_repeat('0', max(1, $n - 2)) . solve(array_key_first($links), [], $links);
-?>
+echo str_repeat("0", $n - 2) . solve(array_key_first($links), []) . PHP_EOL;
