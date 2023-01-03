@@ -32,26 +32,16 @@ function checkKnightMoves(int $x, int $y, string $king): bool {
 
 for ($y = 0; $y < 8; ++$y) {
     foreach(explode(" ", trim(fgets(STDIN))) as $x => $c) {
-        if($c != "_") $pieces[$c] = $x . ";" . $y;
+        if($c == "K") $king = $x . ";" . $y;
+        elseif($c != "_") [$type, $px, $py] = [$c, $x, $y];
     }
 }
 
-if(isset($pieces["R"])) {
-    [$x, $y] = explode(";", $pieces["R"]);
-
-    if(checkRookMoves($x, $y, $pieces["K"])) exit("Check");
-} elseif(isset($pieces["B"])) {
-    [$x, $y] = explode(";", $pieces["B"]);
-
-    if(checkBishopMoves($x, $y, $pieces["K"])) exit("Check");
-} elseif(isset($pieces["Q"])) {
-    [$x, $y] = explode(";", $pieces["Q"]);
-
-    if(checkRookMoves($x, $y, $pieces["K"]) || checkBishopMoves($x, $y, $pieces["K"])) exit("Check");
-} elseif(isset($pieces["N"])) {
-    [$x, $y] = explode(";", $pieces["N"]);
-
-    if(checkKnightMoves($x, $y, $pieces["K"])) exit("Check");
+switch($type) {
+    case "R": if(checkRookMoves($px, $py, $king)) exit("Check"); break;
+    case "B": if(checkBishopMoves($px, $py, $king)) exit("Check"); break;
+    case "Q": if(checkRookMoves($px, $py, $king) || checkBishopMoves($px, $py, $king)) exit("Check"); break;
+    case "N": if(checkKnightMoves($px, $py, $king)) exit("Check"); break;
 }
 
 echo "No Check" . PHP_EOL;
