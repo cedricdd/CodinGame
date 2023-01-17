@@ -1,5 +1,33 @@
 <?php
 
+//Find all the ways to reach $sum by using $count numbers
+function findSumPermutations(int $sum, int $count, array $numbers, array $list, array &$results): void {
+
+    //We reached the sum we want
+    if($sum == 0) {
+        //We mark all the numbers we used
+        foreach($list as $number) $results[$number] = 1;
+
+        return;
+    }
+
+    //We still have numbers that can be used and we haven't reached the max amount of numbers yet.
+    if($count > 0 && count($numbers) > 0) {
+
+        $number = array_pop($numbers); //The next number to test
+
+        //We don't use it
+        findSumPermutations($sum, $count, $numbers, $list, $results);
+
+        //We use this number
+        if($sum >= $number) {
+            $list[] = $number;
+            findSumPermutations($sum - $number, $count - 1, $numbers, $list, $results);
+        }
+    } 
+}
+
+//Get the all the position in the grid that are affected when we set a number
 function generateAffectedPositions(): array {
     $affected = [];
 
@@ -8,9 +36,9 @@ function generateAffectedPositions(): array {
             $index = $y * 9 + $x;
 
             for($i = 0; $i < 9; ++$i) {
-                //The rows that are affected
+                //The position on the same row
                 $affected[$index][] = $i * 9 + $x;
-                //The cols that are affected
+                //The position on the same col
                 $affected[$index][] = $y * 9 + $i;
             }
         
@@ -84,12 +112,12 @@ function solve(string $grid, array $possibleNumbers, array $cages): void {
 
     } while($numberFound); //Restart the loop as long as some number have been found
 
-    //There are some positions with multiple possibilites
+    //There are some positions with multiple possibilities
     if(count($possibleNumbers) > 0) {
-        foreach($possibleNumbers as $index => $list) {
-            foreach($list as $value => $filler) {
+        foreach($possibleNumbers as $a => $b) {
+            foreach($b as $c => $filler) {
                 //Test each values for this position
-                $possibleNumbers[$index] = [$value => 1];
+                $possibleNumbers[$a] = [$c => 1];
 
                 solve($grid, $possibleNumbers, $cages);
             }
@@ -128,9 +156,7 @@ for ($y = 0; $y < 9; ++$y) {
         //We need to create this cage
         if(!isset($cages[$name])) $cages[$name] = [0, []];
         
-        if($value != 0) $cages[$name][0] -= $value; //Update the value left to find in this cage
-        else $cages[$name][1][$index] = 1; //Update the # of numbers left to find in this cage
-        
+        $cages[$name][1][$index] = $value; //Update the # of numbers left to find in this cage
         $cagesMatch[$index] = $name; //keep track of which cage is associated with each positions
     }
 }
@@ -138,7 +164,33 @@ for ($y = 0; $y < 9; ++$y) {
 foreach(explode(" ", trim(fgets(STDIN))) as $values) {
     [$name, $value] = explode("=", $values);
 
-    $cages[$name][0] += $value;
+    $cages[$name][0] = $value;
+}
+
+foreach($cages as $name => [$sum, $listPositions]) {
+
+    $listNumbers = $numbers; //All the numbers that can be used for the sum
+    
+    foreach($listPositions as $index => $number) {
+        //We have a number that's already set
+        if($number != 0) {
+            $sum -= $number;
+            unset($listPositions[$index]);
+            unset($listNumbers[$number]);
+        }
+    }
+
+    //Update info of the cage
+    $cages[$name] = [$sum, $listPositions];
+
+    $sumNumbers = [];
+
+    findSumPermutations($sum, count($listPositions), array_flip($listNumbers), [], $sumNumbers);
+
+    //Update the possible numbers for all the positions inside the cage
+    foreach($listPositions as $index => $number) {
+        $possibleNumbers[$index] = array_intersect_key($possibleNumbers[$index], $sumNumbers);
+    }
 }
 
 solve($grid, $possibleNumbers, $cages);
