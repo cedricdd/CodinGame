@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/41067b01258b3f953b8b53b8a1073c957d719
+https://www.codingame.com/training/medium/goldbachs-conjecture
 
 Goal
 Goldbach's conjecture is one of the oldest and best-known unsolved problems in number theory and all of mathematics. 
