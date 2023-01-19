@@ -180,7 +180,6 @@ for ($y = 0; $y < 9; ++$y) {
 
         if($value != 0) {
             $grid[$index] = $value;
-            //unset($possibleNumbers[$index]); //This position has been set
 
             foreach($affectedPositions[$index] as $position) $possibleNumbers[$position] &= ~NUMBERS_BIN[$value];
         } else $positionsToFind[$index] = 1;
