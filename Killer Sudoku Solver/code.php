@@ -189,7 +189,7 @@ for ($y = 0; $y < 9; ++$y) {
         //We need to create this cage
         if(!isset($cages[$name])) $cages[$name] = [0, []];
         
-        $cages[$name][1][$index] = $value; //Update the # of numbers left to find in this cage
+        $cages[$name][1][$index] = $value; //Save all the positions in this cage
         $cagesMatch[$index] = $name; //keep track of which cage is associated with each positions
     }
 }
