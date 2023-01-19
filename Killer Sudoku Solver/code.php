@@ -1,12 +1,29 @@
 <?php
 
+const NUMBERS = 511;
+const NUMBERS_BIN = [1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64, 8 => 128, 9 => 256];
+
+
 //Find all the ways to reach $sum by using $count numbers
-function findSumPermutations(int $sum, int $count, array $numbers, array $list, array &$results): void {
+function findSumPermutations(int $sum, int $count, array $numbers, array $list, array &$cage): void {
 
     //We reached the sum we want
-    if($sum == 0) {
-        //We mark all the numbers we used
-        foreach($list as $number) $results[$number] = 1;
+    if($sum == 0 && $count == count($list)) {
+        //We mark all the numbers we can use
+        foreach($list as $number) $cage[2] |= NUMBERS_BIN[$number];
+
+        /*
+         * Save all the numbers associations for this cage.
+         * If we use the number X in any positions of the cage, we know that the other positions in the cage have to be a number 
+         * that is associated with X in one of the solutions that reaches the sum.
+         */
+        for($i = 0; $i < $count; ++$i) {
+            for($j = 0; $j < $count; ++$j) {
+                if($i == $j) continue;
+
+                $cage[3][$list[$i]] |= NUMBERS_BIN[$list[$j]];
+            }
+        } 
 
         return;
     }
@@ -17,12 +34,12 @@ function findSumPermutations(int $sum, int $count, array $numbers, array $list, 
         $number = array_pop($numbers); //The next number to test
 
         //We don't use it
-        findSumPermutations($sum, $count, $numbers, $list, $results);
+        findSumPermutations($sum, $count, $numbers, $list, $cage);
 
         //We use this number
         if($sum >= $number) {
             $list[] = $number;
-            findSumPermutations($sum - $number, $count - 1, $numbers, $list, $results);
+            findSumPermutations($sum - $number, $count, $numbers, $list, $cage);
         }
     } 
 }
@@ -56,39 +73,52 @@ function generateAffectedPositions(): array {
     return $affected;
 }
 
-function solve(string $grid, array $possibleNumbers, array $cages): void {
+function solve(string $grid, array $possibleNumbers, array $cages, array $positionsToFind): void {
     global $cagesMatch, $affectedPositions;
 
     do {
         $numberFound = false;
 
-        foreach($possibleNumbers as $index => $list) {
+        foreach($positionsToFind as $index => $filler) {
             //There are no number left for this position, invalid grid
-            if(count($list) == 0) return;
+            if($possibleNumbers[$index] == 0) return;
 
             //There is only only possible number for this position
-            elseif(count($list) == 1) {
-                $value = array_key_first($list);
-                
-                $cageName = $cagesMatch[$index];
-
-                //This was the last number to find in the region
-                if(count($cages[$cageName][1]) == 1) {
-                    if($value != $cages[$cageName][0]) return; //Sum of the cage doesn't match, invalid grid
-                    else unset($cages[$cageName]);
-                }
-                else {
-                    if(($cages[$cageName][0] -= $value) <= 0) return; //Update the value of the sum & check if the sum is already too big
-                    unset($cages[$cageName][1][$index]); //Update the positions left to find in this cage
-                }
-
-                $grid[$index] = $value;
-
-                unset($possibleNumbers[$index]);
-                foreach($affectedPositions[$index] as $position) unset($possibleNumbers[$position][$value]);
-
-                $numberFound = true;
+            switch($possibleNumbers[$index]) {
+                case 1:   $value = 1; break;
+                case 2:   $value = 2; break;
+                case 4:   $value = 3; break;
+                case 8:   $value = 4; break;
+                case 16:  $value = 5; break;
+                case 32:  $value = 6; break;
+                case 64:  $value = 7; break;
+                case 128: $value = 8; break;
+                case 256: $value = 9; break;
+                default: $value = 0;
             }
+
+            if($value == 0) continue; //Several numbers are still possible for this position
+
+            $cageName = $cagesMatch[$index];
+    
+            //This was the last number to find in the region
+            if(count($cages[$cageName][1]) == 1) {
+                if($value != $cages[$cageName][0]) return; //Sum of the cage doesn't match, invalid grid
+                else unset($cages[$cageName]);
+            }
+            else {
+                if(($cages[$cageName][0] -= $value) <= 0) return; //Update the value of the sum & check if the sum is already too big
+                unset($cages[$cageName][1][$index]); //Update the positions left to find in this cage
+
+                foreach($cages[$cageName][1] as $position => $filler) $possibleNumbers[$position] &= $cages[$cageName][3][$value];
+            }
+
+            $grid[$index] = $value;
+
+            unset($positionsToFind[$index]);
+            foreach($affectedPositions[$index] as $position) $possibleNumbers[$position] &= ~NUMBERS_BIN[$value];
+
+            $numberFound = true;
         }
 
         foreach($cages as $name => [$value, $list]) {
@@ -97,14 +127,14 @@ function solve(string $grid, array $possibleNumbers, array $cages): void {
                 $index = array_key_first($list);
 
                 //The value missing to reach the sum of the cage is not a valid value for this position => invalid grid
-                if(!isset($possibleNumbers[$index][$value])) return;
+                if(!isset(NUMBERS_BIN[$value]) || ($possibleNumbers[$index] & NUMBERS_BIN[$value]) == 0) return;
 
                 unset($cages[$name]); ///We are done with this cage
 
                 $grid[$index] = $value;
 
-                unset($possibleNumbers[$index]);
-                foreach($affectedPositions[$index] as $position) unset($possibleNumbers[$position][$value]);
+                unset($positionsToFind[$index]);
+                foreach($affectedPositions[$index] as $position) $possibleNumbers[$position] &= ~NUMBERS_BIN[$value];
 
                 $numberFound = true;
             }
@@ -113,17 +143,21 @@ function solve(string $grid, array $possibleNumbers, array $cages): void {
     } while($numberFound); //Restart the loop as long as some number have been found
 
     //There are some positions with multiple possibilities
-    if(count($possibleNumbers) > 0) {
-        foreach($possibleNumbers as $a => $b) {
-            foreach($b as $c => $filler) {
-                //Test each values for this position
-                $possibleNumbers[$a] = [$c => 1];
+    if(count($positionsToFind) > 0) {
 
-                solve($grid, $possibleNumbers, $cages);
-            }
+        $position = array_key_first($positionsToFind);
+        $numbers = $possibleNumbers[$position];
 
-            return;
+        //Test each values for this position
+        foreach(NUMBERS_BIN as $value => $check) {
+            if(($numbers & $check) != 0) {
+                $possibleNumbers[$position] = $check;
+
+                solve($grid, $possibleNumbers, $cages, $positionsToFind);
+            } 
         }
+
+        return;
     } 
 
     //We have found the solution
@@ -132,10 +166,10 @@ function solve(string $grid, array $possibleNumbers, array $cages): void {
 
 $start = microtime(1);
 
-$numbers = array_flip(range(1, 9)); //We use the index and not the value to be able to directly unset
-$possibleNumbers = array_fill(0, 81, $numbers);
+$possibleNumbers = array_fill(0, 81, NUMBERS);
 $grid = str_repeat("0", 81);
 $affectedPositions = generateAffectedPositions();
+$positionsToFind = [];
 
 for ($y = 0; $y < 9; ++$y) {
     fscanf(STDIN, "%s %s", $gridLine, $gridCages);
@@ -146,10 +180,10 @@ for ($y = 0; $y < 9; ++$y) {
 
         if($value != 0) {
             $grid[$index] = $value;
-            unset($possibleNumbers[$index]); //This position has been set
+            //unset($possibleNumbers[$index]); //This position has been set
 
-            foreach($affectedPositions[$index] as $position) unset($possibleNumbers[$position][$value]);
-        }
+            foreach($affectedPositions[$index] as $position) $possibleNumbers[$position] &= ~NUMBERS_BIN[$value];
+        } else $positionsToFind[$index] = 1;
 
         $name = $gridCages[$x];
         
@@ -169,30 +203,28 @@ foreach(explode(" ", trim(fgets(STDIN))) as $values) {
 
 foreach($cages as $name => [$sum, $listPositions]) {
 
-    $listNumbers = $numbers; //All the numbers that can be used for the sum
-    
+    $listNumbers = range(1, 9); //All the numbers that can be used for the sum
+
     foreach($listPositions as $index => $number) {
         //We have a number that's already set
         if($number != 0) {
             $sum -= $number;
             unset($listPositions[$index]);
-            unset($listNumbers[$number]);
-        }
+            unset($listNumbers[$number - 1]);
+        } 
     }
 
     //Update info of the cage
-    $cages[$name] = [$sum, $listPositions];
+    $cages[$name] = [$sum, $listPositions, 0, range(0, 9)];
 
-    $sumNumbers = [];
-
-    findSumPermutations($sum, count($listPositions), array_flip($listNumbers), [], $sumNumbers);
+    findSumPermutations($sum, count($listPositions), $listNumbers, [], $cages[$name]);
 
     //Update the possible numbers for all the positions inside the cage
     foreach($listPositions as $index => $number) {
-        $possibleNumbers[$index] = array_intersect_key($possibleNumbers[$index], $sumNumbers);
+        $possibleNumbers[$index] &= $cages[$name][2];
     }
 }
 
-solve($grid, $possibleNumbers, $cages);
+solve($grid, $possibleNumbers, $cages, $positionsToFind);
 
 error_log(microtime(1) - $start);
