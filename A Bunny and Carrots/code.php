@@ -1,3 +1,5 @@
+<?php
+
 function getPerimeter(array $field): int {
     global $width, $height;
 
