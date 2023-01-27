@@ -8,7 +8,7 @@ $c = $bits[2] + $bits[3] + $bits[6] + $bits[7] + $bits[10] + $bits[11] + $bits[1
 $e = $bits[4] + $bits[5] + $bits[6] + $bits[7] + $bits[12] + $bits[13] + $bits[14] + $bits[15]; //efghmnop 
 $i = $bits[8] + $bits[9] + $bits[10] + $bits[11] + $bits[12] + $bits[13] + $bits[14] + $bits[15]; //ijklmnop 
 
-//a is even and another one is too => two errors
+//a is even and another one is odd => two errors
 if(!($a & 1) && ($b & 1 || $c & 1 || $e & 1 || $i & 1)) echo "TWO ERRORS" . PHP_EOL;
 else {
     if($b & 1 && $c & 1 && $e & 1 && $i & 1) $bits[15] ^= 1;
