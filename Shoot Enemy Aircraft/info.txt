@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/431466782bff9fdee6719ca89371faa4f36db
+https://www.codingame.com/training/easy/shoot-enemy-aircraft
 
 Goal
 There are enemy aircraft (> or <) in the sky (made of .). Each turn they move one cell forward. 
