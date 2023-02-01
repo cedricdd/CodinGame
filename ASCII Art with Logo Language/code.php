@@ -13,21 +13,17 @@ $grid = [];
 fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
     foreach(explode(";", trim(fgets(STDIN))) as $cmd) {
-
-        if(strcasecmp($cmd, "PU") == 0) $drawing = 0; //PENUP
-        elseif(strcasecmp($cmd, "PD") == 0) $drawing = 1; //PENDOWN
+        if(strcasecmp($cmd, "PU") == 0) $drawing = 0;
+        elseif(strcasecmp($cmd, "PD") == 0) $drawing = 1;
         else {
             [$cmd, $info] = explode(" ", $cmd);
 
-            //Turning Right
             if(strcasecmp($cmd, "RT") == 0) $direction = ($direction + intdiv($info, 90)) % 4;
-            //Turning Left
             elseif(strcasecmp($cmd, "LT") == 0) $direction = ($direction - intdiv($info, 90) + 4) % 4;
-            //Change writting symbol
             elseif(strcasecmp($cmd, "SETPC") == 0) $symbol = $info;
-            //Change default symbol
-            elseif(strcasecmp($cmd, "CS") == 0) $default = $info;
-            //Turtle is moving
+            elseif(strcasecmp($cmd, "CS") == 0) {
+                $default = $info;
+            }
             elseif(strcasecmp($cmd, "FD") == 0) {
                 for($t = 0; $t < $info; ++$t) {
                     if($drawing == 1) $grid[$y][$x] = $symbol;
@@ -39,23 +35,22 @@ for ($i = 0; $i < $n; $i++) {
     }
 }
 
-$min = INF;
-$max = -INF;
+$minY = min(array_keys($grid));
+$maxY = max(array_keys($grid));
+$minX = INF;
+$maxX = -INF;
 
-//We need to know the width of the output
 foreach($grid as $y => $line) {
     $keys = array_keys($line);
 
-    $min = min(min($keys), $min);
-    $max = max(max($keys), $max);
+    $minX = min(min($keys), $minX);
+    $maxX = max(max($keys), $maxX);
 }
 
-ksort($grid);
+for($y = $minY; $y <= $maxY; ++$y) {
+    $answer = str_repeat($default, $maxX - $minX);
 
-foreach($grid as $y => $line) {
-    $answer = str_repeat($default, $max - $min);
-
-    foreach($line as $x => $c) $answer[$x - $min] = $c;
+    foreach($grid[$y] ?? [] as $x => $c) $answer[$x - $minX] = $c;
 
     echo rtrim($answer) . PHP_EOL;
 }
