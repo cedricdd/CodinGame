@@ -13,6 +13,7 @@ $grid = [];
 fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
     foreach(explode(";", trim(fgets(STDIN))) as $cmd) {
+        
         if(strcasecmp($cmd, "PU") == 0) $drawing = 0;
         elseif(strcasecmp($cmd, "PD") == 0) $drawing = 1;
         else {
@@ -21,9 +22,7 @@ for ($i = 0; $i < $n; $i++) {
             if(strcasecmp($cmd, "RT") == 0) $direction = ($direction + intdiv($info, 90)) % 4;
             elseif(strcasecmp($cmd, "LT") == 0) $direction = ($direction - intdiv($info, 90) + 4) % 4;
             elseif(strcasecmp($cmd, "SETPC") == 0) $symbol = $info;
-            elseif(strcasecmp($cmd, "CS") == 0) {
-                $default = $info;
-            }
+            elseif(strcasecmp($cmd, "CS") == 0) $default = $info;
             elseif(strcasecmp($cmd, "FD") == 0) {
                 for($t = 0; $t < $info; ++$t) {
                     if($drawing == 1) $grid[$y][$x] = $symbol;
