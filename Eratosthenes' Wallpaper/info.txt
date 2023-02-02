@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/418266118e1e56452a62c5bb493b9efe35673
+https://www.codingame.com/training/medium/eratosthenes-wallpaper
 
 Goal
 Eratosthenes wants a wallpaper containing the prime factors of numbers. You are tasked to supply a nice wallpaper.
