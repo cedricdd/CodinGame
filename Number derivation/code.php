@@ -1,6 +1,6 @@
 <?php
 
-//Get the prime factores of $n and their weight
+//Get the prime factors of $n and their weight
 function primeFactors(int $n): array {
     $factors = [];
     $divisor = 2;
