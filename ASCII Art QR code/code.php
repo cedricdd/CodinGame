@@ -67,7 +67,7 @@ $clear = $BOM[0];
 $key = $clear ? 0 : bindec(substr($BOM, 1));
 
 foreach(str_split($message, 7) as $binary) {
-    //Incomplete binaru
+    //Incomplete binary
     if(strlen($binary) != 7) break;
 
     $characterCode = bindec($binary) ^ $key;
