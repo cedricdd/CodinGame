@@ -59,9 +59,6 @@ for($x = $W - 1; $x >= 0; --$x) {
     $direction ^= 1;
 }
 
-error_log(var_export($code, true));
-error_log(var_export($data, true));
-
 $BOM = substr($data, 0, 8); //Begin of message - 8 bits
 $message = substr($data, 8, strlen($data)); 
 $answer = "";
