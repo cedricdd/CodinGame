@@ -59,22 +59,20 @@ for($x = $W - 1; $x >= 0; --$x) {
     $direction ^= 1;
 }
 
+error_log(var_export($code, true));
+error_log(var_export($data, true));
+
 $BOM = substr($data, 0, 8); //Begin of message - 8 bits
-$message = substr($data, 8, strlen($data) - 15); 
-$EOM = substr($data, -7); //End of message - 7 bits
+$message = substr($data, 8, strlen($data)); 
 $answer = "";
 $clear = $BOM[0];
 $key = $clear ? 0 : bindec(substr($BOM, 1));
 
 foreach(str_split($message, 7) as $binary) {
-    //Incomplete binary
-    if(strlen($binary) != 7) break;
+    //End of message
+    if(($characterCode = bindec($binary) ^ $key) == "0000000") break;
 
-    $characterCode = bindec($binary) ^ $key;
-
-    //Message is over, invalid character
-    if($characterCode < 32 || $characterCode > 126) break;
-    else $answer .= chr($characterCode);
+    $answer .= chr($characterCode);
 }
 
 echo $answer . PHP_EOL;
