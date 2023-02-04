@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/448622d46725b4192d09931aaa2a615084c7d
+https://www.codingame.com/training/medium/ascii-art-with-logo-language
 
 Goal
 Your job is to implement a simple Logo interpreter that draws ASCII Art with a Turtle.
