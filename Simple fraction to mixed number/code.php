@@ -1,6 +1,6 @@
 <?php
 
-function GCD (int $a, int $b): int {
+function GCD(int $a, int $b): int {
     return $b ? GCD($b, $a % $b) : $a;
 }
 
