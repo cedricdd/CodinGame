@@ -1,66 +1,60 @@
 <?php
 
-function GCD(int $a, int $b): int {
-    while ($a != $b) {
-        if ($a > $b) {
-            $a -= $b;
-        } else {
-            $b -= $a;
-        }
-    }
-
-    return $a;
+function LCM(string $a, string $b): string {
+    return bcdiv(bcmul($a, $b), GCD($a, $b));
 }
 
-function LCM(int $a, int $b): int {
-    return $a * $b / GCD($a, $b);
+function GCD(string $a, string $b): string {
+    return $b ? GCD($b, bcmod($a, $b)) : $a;
 }
 
-function simplifyFractions(int $a, int $b): array {
+function simplifyFractions(string $a, string $b): array {
 
     $modifier = 1;
 
-    //Negative value
-    if(($a < 0 && $b > 0) || ($a > 0 && $b < 0)) $modifier = -1;
-
-    $a = abs($a);
-    $b = abs($b);
+    if(bccomp($a, 0) == -1) {
+        $a = bcmul($a, "-1");
+        $modifier *= -1;
+    }
+    if(bccomp($b, 0) == -1) {
+        $b = bcmul($b, "-1");
+        $modifier *= -1;
+    }
 
     $gcd = GCD($a, $b);
 
-    return [($a / $gcd) * $modifier, $b / $gcd];
+    return [bcmul(bcdiv($a, $gcd), $modifier), bcdiv($b, $gcd)];
 }
 
 function subFractions(array $a, array $b): array {
 
     $divisor = LCM($a[1], $b[1]);
-    $dividend = ($a[0] * ($divisor / $a[1])) - ($b[0] * ($divisor / $b[1]));
+    $dividend = bcsub(bcmul($a[0], bcdiv($divisor, $a[1])), bcmul($b[0], bcdiv($divisor, $b[1])));
 
     return simplifyFractions($dividend, $divisor);
 }
 
 function addFractions(array $a, array $b): array {
     $divisor = LCM($a[1], $b[1]);
-    $dividend = ($a[0] * ($divisor / $a[1])) + ($b[0] * ($divisor / $b[1]));
+    $dividend = bcadd(bcmul($a[0], bcdiv($divisor, $a[1])), bcmul($b[0], bcdiv($divisor, $b[1])));
 
     return simplifyFractions($dividend, $divisor);
 }
 
 function divFractions(array $a, array $b): array {
-    return simplifyFractions($a[0] * $b[1], $a[1] * $b[0]);
+    return simplifyFractions(bcmul($a[0], $b[1]), bcmul($a[1], $b[0]));
 }
 
 function mulFractions(array $a, array $b): array {
-    return simplifyFractions($a[0] * $b[0], $a[1] * $b[1]);
+    return simplifyFractions(bcmul($a[0], $b[0]), bcmul($a[1], $b[1]));
 }
 
+//Return the list of variable => expression in the string
 function parse(string $input): array {
-
-    error_log("parsing $input");
 
     $name = "";
     $value = "";
-    $readingName = 0;
+    $readingName = 1;
     $readingValue = 0;
     $count = 0;
     $info = [];
@@ -68,17 +62,23 @@ function parse(string $input): array {
     foreach(str_split($input . ";") as $c) {
 
         switch($c) {
+            //Expression can have nested parantheses, we want the full expression for the variable
             case "(": ++$count; break;
             case ")": --$count; break;
-            case "'":
-                if(empty($name)) $readingName = 1;
-                elseif($readingName == 1) $readingName = 0;
-                break;
+            case "=":
+                //We finished reading a variable name
+                if($readingName == 1) {
+                    $readingName = 0;
+                    $readingValue = 1;
+                    continue 2;
+                }
             case ";":
+                //We finished reading an expression
                 if($count == 0) {
                     $readingValue = 0;
+                    $readingName = 1;
 
-                    $info[trim($name, "'")] = trim($value, "='");
+                    $info[trim($name, "'")] = trim($value, "'");
                     [$name, $value] = ["", ""];
         
                     continue 2;
@@ -95,43 +95,35 @@ function parse(string $input): array {
 function getValue($value): array {
     global $variables;
 
-    error_log("get value of $value");
-
-    if(is_numeric($value)) {
-        $result = [intval($value), 1];
-    }
-
+    //Value is a constant
+    if(is_numeric($value)) $result = [intval($value), 1];
+    //Value is a varirable
     elseif(preg_match("/^[a-zA-Z0-9]*$/", $value)) {
         $result = getValue($variables[$value]);
-    } else {
-
+    } //Value is an operation or a fraction
+    else {
         $expression = parse(trim($value, ")("));
 
-        error_log(var_export($expression, true));
-
+        //Operation +-*/
         if(count($expression) == 3) {
 
-            $a = getValue($expression["num1"]);
-            //error_log("a - " . $expression["num1"] . " => " . $a[0] . "/" . $a[1]);
-            $b = getValue($expression["num2"]);
-            //error_log("b - " . $expression["num2"] . " => " . $b[0] . "/" . $b[1]);
+            $num1 = getValue($expression["num1"]);
+            $num2 = getValue($expression["num2"]);
             
             switch($expression["operator"]) {
-                case "+": $result = addFractions($a, $b); break;
-                case "-": $result = subFractions($a, $b); break;
-                case "/": $result = divFractions($a, $b); break;
-                case "*": $result = mulFractions($a, $b); break;
+                case "+": $result = addFractions($num1, $num2); break;
+                case "-": $result = subFractions($num1, $num2); break;
+                case "/": $result = divFractions($num1, $num2); break;
+                case "*": $result = mulFractions($num1, $num2); break;
             }
-        } else {
+        } //Fraction
+        else {
             $result = divFractions(getValue($expression["numerator"]), getValue($expression["denominator"]));
         }
     }
 
-    error_log("$value => " . $result[0] . "/" . $result[1]);
     return $result;
 }
-
-$start = microtime(1);
 
 $CGX = "";
 
@@ -140,20 +132,12 @@ for ($i = 0; $i < $n; $i++){
     $CGX .= trim(fgets(STDIN));
 }
 
-error_log(var_export($CGX, true));
-
 //Get the value 'result' & 'vars' if it exist
 preg_match("/^\('result'=([^;]+)(?:;'vars'=\((.*)\))?\)$/", $CGX, $matches);
 
-//error_log(var_export($matches, true));
-
 $variables = parse($matches[2] ?? "");
-
-error_log("varirables:");
-error_log(var_export($variables, true));
 
 $result = getValue(trim($matches[1], "'"));
 
+//Print as integer when possible othewise as fraction
 echo ($result[1] == 1 ? $result[0] : ($result[0] . "/" . $result[1])) . PHP_EOL;
-
-error_log(microtime(1) - $start);
