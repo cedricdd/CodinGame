@@ -1,7 +1,7 @@
 <?php
 
-function gcd ($a, $b) {
-    return $b ? gcd($b, $a % $b) : $a;
+function GCD(int $a, int $b): int {
+    return $b ? GCD($b, $a % $b) : $a;
 }
 
 $conversion = explode(" in ", stream_get_line(STDIN, 40 + 1, "\n"));
