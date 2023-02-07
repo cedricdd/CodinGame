@@ -1,12 +1,7 @@
 <?php
 
-function GCD(int $a, int $b): int {
-    while ($a != $b) {
-        if ($a > $b)  $a -= $b;
-        else $b -= $a;
-    }
-
-    return $a;
+function GCD (int $a, int $b): int {
+    return $b ? gcd($b, $a % $b) : $a;
 }
 
 fscanf(STDIN, "%d", $N);
