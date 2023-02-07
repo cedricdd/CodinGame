@@ -1,7 +1,7 @@
 <?php
 
 function GCD (int $a, int $b): int {
-    return $b ? gcd($b, $a % $b) : $a;
+    return $b ? GCD($b, $a % $b) : $a;
 }
 
 fscanf(STDIN, "%d", $N);
