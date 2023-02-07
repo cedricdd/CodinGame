@@ -20,15 +20,7 @@ $P = [
 ];
 
 function GCD(int $a, int $b): int {
-    while ($a != $b) {
-        if ($a > $b) {
-            $a -= $b;
-        } else {
-            $b -= $a;
-        }
-    }
-
-    return $a;
+    return $b ? GCD($b, $a % $b) : $a;
 }
 
 function LCM(int $a, int $b): int {
