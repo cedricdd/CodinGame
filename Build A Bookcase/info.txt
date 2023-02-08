@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/428216c70c1a3be68db317c36b3510fcc9a0d
+https://www.codingame.com/training/easy/build-a-bookcase
 
 Goal
 You are building a bookcase of a certain height and width, with a certain numberOfShelves:
