@@ -1,0 +1,37 @@
+https://www.codingame.com/contribute/view/4426874a1276dafe6bd53346f0e87bbf3e672
+
+Goal
+Sort a list of integer values in alphabetical order of their standard-form Roman numeral representations.
+I=1, V=5, X=10, L=50, C=100, D=500, M=1000
+IV=4, IX=9, XL=40, XC=90, CD=400, CM=900
+
+Note that:
+49 = XLIX, not IL
+999 = CMXCIX, not IM
+
+EXAMPLE
+3
+44
+63
+97
+
+44 = XLIV, alphabetically 3rd
+63 = LXIII, alphabetically 1st
+97 = XCVII, alphabetically 2nd
+
+Output:
+63 97 44
+
+For more on standard-form Roman numerals, see
+https://en.wikipedia.org/wiki/Roman_numerals#Standard_form
+
+Input
+Line 1: An integer n, the number of integers to be sort
+Next n lines: a positive integer x
+
+Output
+The n integers from the input, space-separated and arranged in alphabetical order of the Roman-numeral representation of each x
+
+Constraints
+1 <= n <= 20
+1 <= x <= 3999
