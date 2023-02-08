@@ -1,0 +1,42 @@
+https://www.codingame.com/contribute/view/4522582665e3fc50be46171452399f63d6049
+
+Goal
+Your job is to extend the Logo language developed in ASCII Art with Logo Language with the ability for our Turtle to move diagonally and some new commands
+(so to check how resilient is your first implementation to the never ending dance of changing requirements).
+SETPC pen: uses cyclically the characters in pen as Turtle pen, changing every Turtle's step (of length 1) with pen down. ; can't be used in pen.
+RT angle: RIGHT. Turns Turtle right for number of degrees specified (only positive multiples of 45).
+LT angle: LEFT. Turns Turtle left for number of degrees specified (only positive multiples of 45).
+RP loop [commands]: REPEAT. This instruction repeats the commands that are inside the square brackets the number of times indicated by the loop parameter.
+
+For example:
+RP 2 [FD 2]
+
+is equivalent to
+FD 2;FD 2
+
+REPEAT command can be nested. For example:
+RP 2 [RP 2 [RT 90;FD 2]]
+
+is equivalent to
+RT 90;FD 2;RT 90;FD 2;RT 90;FD 2;RT 90;FD 2
+
+setpc 12345;rt 90;fd 5
+
+produces
+12345
+
+Reference: Part1:
+https://www.codingame.com/contribute/view/448622d46725b4192d09931aaa2a615084c7d
+
+Input
+Line 1: An integer N, indicating the program's number of lines.
+Next N lines: lines of text with Logo instructions.
+
+Output
+The ASCII Art generated.
+
+Constraints
+1 ≤ N ≤ 2000
+angle: a positive integer multiple of 45.
+loop: a positive integer from 1 to 100.
+pen: an ASCII string excluding spaces and semicolon.
