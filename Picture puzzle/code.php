@@ -119,7 +119,7 @@ $border = str_repeat("#", $pieceSize);
 
 for ($i = 0; $i < $nPieces; $i++) {
 
-    $piece = array_fill(0, 4, [array_fill(0, $pieceSize, str_repeat(" ", $pieceSize)), []]);
+    $piece = array_fill(0, 4, array_fill(0, $pieceSize, str_repeat(" ", $pieceSize)));
 
     $top = "";
     $bottom = "";
