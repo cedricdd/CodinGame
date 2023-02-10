@@ -1,7 +1,5 @@
 <?php
 
-$start = microtime(1);
-
 //Add a piece at a given position
 function addPiece(int $index, array $sides, array $positions): array {
     global $width, $height;
@@ -45,7 +43,7 @@ function checkBorders(array $sides, int $index): bool {
 //We found the solution, draw it
 function drawSolution(array $usedPieces) {
     global $pieces, $pieceSize, $width, $height, $start;
-    
+
     $pictureWidth = 1 + ($pieceSize - 1) * $width;
     $pictureHeight = 1 + ($pieceSize - 1) * $height;
 
@@ -58,12 +56,15 @@ function drawSolution(array $usedPieces) {
         $startX = $x * $pieceSize - $x; //The X start position of this piece in the solution
         $startY = $y * $pieceSize - $y; //The Y start position of this piece in the solution
 
-        $piece = $pieces[$indexPiece][$rotation]["piece"];
-
         //Insert the piece in the solution
         for($y = 0; $y < $pieceSize; ++$y) {
             for($x = 0; $x < $pieceSize; ++$x) {
-                $answer[$startY + $y][$startX + $x] = $piece[$y][$x];
+                switch($rotation) {
+                    case 0: $answer[$startY + $y][$startX + $x] = $pieces[$indexPiece][$y][$x]; break; //0°
+                    case 1: $answer[$startY + $x][$startX + $pieceSize - 1 - $y] = $pieces[$indexPiece][$y][$x]; break; //90°
+                    case 2: $answer[$startY + $pieceSize - 1 - $y][$startX + $pieceSize - 1 - $x] = $pieces[$indexPiece][$y][$x]; break; //180°
+                    case 3: $answer[$startY + $pieceSize - 1 - $x][$startX + $y] = $pieces[$indexPiece][$y][$x]; break; //270°
+                }
             }
         }
     }
@@ -73,7 +74,7 @@ function drawSolution(array $usedPieces) {
 }
 
 function solve(array $usedPieces, array $positions) {
-    global $pieces, $start;
+    global $sides, $start;
 
     if(count($positions) == 0) {
         drawSolution($usedPieces);
@@ -85,23 +86,23 @@ function solve(array $usedPieces, array $positions) {
         if(count($infoPosition) == 0) continue;
 
         //We try each of the pieces
-        foreach($pieces as $indexPiece => $infoPiece) {
+        foreach($sides as $indexPiece => $infoSides) {
 
             //We are already using this piece in another position
             if(isset($usedPieces[$indexPiece])) continue;
 
             //Checks the 4 rotations of the piece
-            foreach($infoPiece as $indexRotation => ["piece" => $piece, "sides" => $sides]) {
+            foreach($infoSides as $indexRotation => $sidesRotation) {
 
-                if(checkBorders($sides, $indexPosition) == false) continue;
+                if(checkBorders($sidesRotation, $indexPosition) == false) continue;
     
                 foreach($infoPosition as $direction => $pattern) {
                     //The borders doesn't match, it's not the right piece
-                    if($pattern != $sides[$direction]) continue 2;
+                    if($pattern != $sidesRotation[$direction]) continue 2;
                 }
     
                 //This rotation can be added at the current position
-                $updatedPositions = addPiece($indexPosition, $sides, $positions);
+                $updatedPositions = addPiece($indexPosition, $sidesRotation, $positions);
     
                 solve($usedPieces + [$indexPiece => [$indexPosition, $indexRotation]], $updatedPositions);
             }
@@ -111,6 +112,8 @@ function solve(array $usedPieces, array $positions) {
     }
 }
 
+$start = microtime(1);
+
 fscanf(STDIN, "%d %d", $pieceSize, $nPieces);
 fscanf(STDIN, "%d %d", $width, $height);
 fscanf(STDIN, "%d %d", $pictureWidth, $pictureHeight);
@@ -119,45 +122,34 @@ $border = str_repeat("#", $pieceSize);
 
 for ($i = 0; $i < $nPieces; $i++) {
 
-    $piece = array_fill(0, 4, array_fill(0, $pieceSize, str_repeat(" ", $pieceSize)));
-
-    $top = "";
-    $bottom = "";
-    $left = "";
-    $right = "";
+    $piece = [];
 
     for ($y = 0; $y < $pieceSize; ++$y) {
-        foreach(str_split(stream_get_line(STDIN, $pieceSize + 1, "\n")) as $x => $c) {
-            
-            //Get the border of the piece with no rotation
-            if($y == 0) $top .= $c;
-            if($y == $pieceSize - 1) $bottom .= $c;
-            if($x == 0) $left .= $c;
-            if($x == $pieceSize - 1) $right .= $c;
-    
-            $piece[0][$y][$x] = $c; //0°
-            $piece[1][$x][$pieceSize - 1 - $y] = $c; //90°
-            $piece[2][$pieceSize - 1 - $y][$pieceSize - 1 - $x] = $c; //180°
-            $piece[3][$pieceSize - 1 - $x][$y] = $c; //270°
-        }
+        $piece[] = stream_get_line(STDIN, $pieceSize + 1, "\n");
     }
+    
+    $top = $piece[0];
+    $bottom = $piece[$pieceSize - 1];
+    $left = implode("", array_map(function($line) { return $line[0]; }, $piece));
+    $right = implode("", array_map(function($line) use ($pieceSize) { return $line[$pieceSize - 1]; }, $piece));
 
-    //Save the piece with it's rotations and the associated borders
-    $pieces[$i] = [
-        ["piece" => $piece[0], "sides" => ["top" => $top, "right" => $right, "bottom" => $bottom, "left" => $left]],
-        ["piece" => $piece[1], "sides" => ["top" => strrev($left), "right" => $top, "bottom" => strrev($right), "left" => $bottom]],
-        ["piece" => $piece[2], "sides" => ["top" => strrev($bottom), "right" => strrev($left), "bottom" => strrev($top), "left" => strrev($right)]],
-        ["piece" => $piece[3], "sides" => ["top" => $right, "right" => strrev($bottom), "bottom" => $left, "left" => strrev($top)]],
+    //Save the piece with the borders for each rotations
+    $pieces[] = $piece;
+    $sides[] = [
+        ["top" => $top, "right" => $right, "bottom" => $bottom, "left" => $left], //0°
+        ["top" => strrev($left), "right" => $top, "bottom" => strrev($right), "left" => $bottom], //90°
+        ["top" => strrev($bottom), "right" => strrev($left), "bottom" => strrev($top), "left" => strrev($right)], //180°
+        ["top" => $right, "right" => strrev($bottom), "bottom" => $left, "left" => strrev($top)], //270°
     ];
 }
 
 //We know the first piece is not rotated so we start by adding that one
 for($index = 0; $index < $nPieces; ++$index) {
 
-    if(checkBorders($pieces[0][0]["sides"], $index) == false) continue;
+    if(checkBorders($sides[0][0], $index) == false) continue;
 
     //The first piece can be placed at $index position, try to solve with that
-    $positions = addPiece($index, $pieces[0][0]["sides"], array_fill(0, $nPieces, []));
+    $positions = addPiece($index, $sides[0][0], array_fill(0, $nPieces, []));
 
     solve([0 => [$index, 0]], $positions);
 }
