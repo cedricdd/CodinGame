@@ -42,6 +42,19 @@ For example, in the same puzzle, you will never have two pieces like :
 
 because they could be swapped and the puzzle would have multiple solutions.
 
+Test descriptions:
+
+Name    |Pieces|Piece size|Ambiguity|Rotation|Comment
+--------|------|----------|---------|--------|-------------------------------------
+ Test 1 | 2x2  | 4x4      | No      | No     | Who needs an algo to solve that?
+ Test 2 | 15x15| 2x2      | No      | No     | So much diversity
+ Test 3 | 11x3 | 6x6      | A bit   | No     | The birth of programming languages
+ Test 4 | 8x4  | 6x6      | More    | No     | Your deepest wish
+ Test 5 | 2x2  | 4x4      | No      | Yes    | Who needs an algo to solve that?
+ Test 6 | 15x15| 2x2      | No      | Yes    | So much diversity
+ Test 7 | 11x3 | 6x6      | A bit   | Yes    | The birth of programming languages
+ Test 8 | 8x4  | 6x6      | More    | Yes    | Your deepest wish
+
 Input
 Line 1: two space-separated integers: pieceSize the size of a square-shaped piece (number of characters on every border of the piece) and nPieces the total number of pieces given in the input.
 Line 2: two space-separated integers: nColumns the number of pieces in a row, nRows the number of pieces in a column in the final picture
