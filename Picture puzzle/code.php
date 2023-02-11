@@ -47,7 +47,6 @@ function drawSolution(array $usedPieces) {
 
     echo implode("\n", $answer) . PHP_EOL;
     error_log(microtime(1) - $start);
-    error_log(memory_get_usage());
 }
 
 //We use integer to represent the borders, comparing int is faster than string
@@ -78,8 +77,6 @@ function solve(int $indexPosition, array $usedPieces, array $positions) {
 
         //Checks the 4 rotations of the piece
         foreach($infoSides as $indexRotation => $sidesRotation) {
-
-            //if(checkBorders($sidesRotation, $indexPosition) == false) continue;
 
             foreach($positions[$indexPosition] as $direction => $pattern) {
                 //The borders doesn't match, it's not the right piece
