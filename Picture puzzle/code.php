@@ -134,7 +134,7 @@ for ($index = 0; $index < $nPieces; $index++) {
     $leftID = getBorderID($left);
     $leftInvID = getBorderID(strrev($left));
 
-    $right = implode("", array_map(function($line) use ($pieceSize) { return $line[$pieceSize - 1]; }, $piece));
+    $right = implode("", array_map(function($line) { return $line[-1]; }, $piece));
     $rightID = getBorderID($right);
     $rightInvID = getBorderID(strrev($right));
 
@@ -152,7 +152,5 @@ for ($index = 0; $index < $nPieces; $index++) {
         ];
     }
 }
-
-error_log(microtime(1) - $start);
 
 solve(0, [], $positions);
