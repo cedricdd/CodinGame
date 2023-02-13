@@ -1,21 +1,5 @@
 <?php
 
-//Add a piece at a given position
-function addPiece(int $index, array $sides, array $positions): array {
-    global $width, $height;
-
-    $x = $index % $width;
-    $y = intdiv($index, $width);
-
-    //Update the positions that are still to found with the borders of the piece we are adding
-    if($x > 0) $positions[$index - 1]["right"] = $sides["left"];
-    if($x < $width - 1) $positions[$index + 1]["left"] = $sides["right"];
-    if($y > 0) $positions[$index - $width]["bottom"] = $sides["top"];
-    if($y < $height - 1) $positions[$index + $width]["top"] = $sides["bottom"];
-
-    return $positions;
-}
-
 //We found the solution, draw it
 function drawSolution(array $usedPieces) {
     global $pieces, $pieceSize, $width, $height, $start;
@@ -49,48 +33,36 @@ function drawSolution(array $usedPieces) {
     error_log(microtime(1) - $start);
 }
 
-//We use integer to represent the borders, comparing int is faster than string
-function getBorderID(string $name): int {
-    static $ID = 0;
-    static $borders = [];
-
-    if(isset($borders[$name])) return $borders[$name];
-    else {
-        $borders[$name] = $ID;
-        return $ID++;
-    }
-}
-
 function solve(int $indexPosition, array $usedPieces, array $positions) {
-    global $sides, $nPieces, $start;
+    global $width, $height, $borders, $picBorder;
 
-    if($indexPosition == $nPieces) {
+    if($indexPosition == $width * $height) {
         drawSolution($usedPieces);
         exit(); //There's only one solution, it's over
     }
 
-    //We try each of the pieces
-    foreach($sides as $indexPiece => $infoSides) {
+    $x = $indexPosition % $width;
+    $y = intdiv($indexPosition, $width);
+
+    $top = $positions[$indexPosition - $width]["bottom"] ?? $picBorder; //The bottom border of the piece on top
+    $left = $positions[$indexPosition - 1]["right"] ?? $picBorder; //The right border of the piece on left
+
+    //We try each of the possible pieces based on the borders of the piece on top & left
+    foreach($borders[$top . $left] ?? [] as [$indexPiece, $indexRotation, $sides]) {
 
         //We are already using this piece in another position
         if(isset($usedPieces[$indexPiece])) continue;
 
-        //Checks the 4 rotations of the piece
-        foreach($infoSides as $indexRotation => $sidesRotation) {
+        if($x < $width - 1 && $sides["right"] == $picBorder) continue; //Picture border can't be on the left
+        if($y < $height - 1 && $sides["bottom"] == $picBorder) continue; //Picture border can't be on the bottom
+ 
+        //This rotation can be added at the current position
+        $positions[$indexPosition] = $sides;
 
-            foreach($positions[$indexPosition] as $direction => $pattern) {
-                //The borders doesn't match, it's not the right piece
-                if($pattern != $sidesRotation[$direction]) continue 2;
-            }
-
-            //This rotation can be added at the current position
-            $updatedPositions = addPiece($indexPosition, $sidesRotation, $positions);
-
-            solve($indexPosition + 1, $usedPieces + [$indexPiece => [$indexPosition, $indexRotation]], $updatedPositions);
-        }
+        solve($indexPosition + 1, $usedPieces + [$indexPiece => [$indexPosition, $indexRotation]], $positions);
     }
 
-    return; //If none of the previous recursive find a solution one of the piece already added is wrong.
+    return; //If none of the previous recursive call have found the solution then one of the piece already added is wrong.
 }
 
 $start = microtime(1);
@@ -100,19 +72,7 @@ fscanf(STDIN, "%d %d", $width, $height);
 fscanf(STDIN, "%d %d", $pictureWidth, $pictureHeight);
 
 $positions = array_fill(0, $nPieces, []);
-getBorderID(str_repeat("#", $pieceSize)); //Set the picture border as ID 0
-
-//Set the borders of the piece that are at the border of the picture
-for($y = 0; $y < $height; ++$y) {
-    for($x = 0; $x < $width; ++$x) {
-        $index = $y * $width + $x;
-
-        if($x == 0) $positions[$index]["left"] = 0;
-        if($x == $width - 1) $positions[$index]["right"] = 0;
-        if($y == 0) $positions[$index]["top"] = 0;
-        if($y == $height - 1) $positions[$index]["bottom"] = 0;
-    }
-}
+$picBorder = str_repeat("#", $pieceSize);
 
 for ($index = 0; $index < $nPieces; $index++) {
 
@@ -123,33 +83,29 @@ for ($index = 0; $index < $nPieces; $index++) {
     }
     
     $top = $piece[0];
-    $topID = getBorderID($top);
-    $topInvID = getBorderID(strrev($top));
+    $topInv = strrev($top);
 
     $bottom = $piece[$pieceSize - 1];
-    $bottomID = getBorderID($bottom);
-    $bottomInvID = getBorderID(strrev($bottom));
+    $bottomInv = strrev($bottom);
 
     $left = implode("", array_map(function($line) { return $line[0]; }, $piece));
-    $leftID = getBorderID($left);
-    $leftInvID = getBorderID(strrev($left));
+    $leftInv = strrev($left);
 
     $right = implode("", array_map(function($line) { return $line[-1]; }, $piece));
-    $rightID = getBorderID($right);
-    $rightInvID = getBorderID(strrev($right));
+    $rightInv = strrev($right);
 
-    //Save the piece with the borders for each rotations
+    //Save the piece 
     $pieces[] = $piece;
 
-    //The first piece can't be rotated
-    if($index == 0) $sides[] = [["top" => $topID, "right" => $rightID, "bottom" => $bottomID, "left" => $leftID]];
+    //The rotation of the first piece is certain
+    if($index == 0) {
+        $borders[$top . $left][] = [$index, 0, ["top" => $top, "right" => $right, "bottom" => $bottom, "left" => $left]];
+    }
     else {
-        $sides[] = [
-            ["top" => $topID, "right" => $rightID, "bottom" => $bottomID, "left" => $leftID], //0°
-            ["top" => $leftInvID, "right" => $topID, "bottom" => $rightInvID, "left" => $bottomID], //90°
-            ["top" => $bottomInvID, "right" => $leftInvID, "bottom" => $topInvID, "left" => $rightInvID], //180°
-            ["top" => $rightID, "right" => $bottomInvID, "bottom" => $leftID, "left" => $topInvID], //270°
-        ];
+        $borders[$top . $left][] = [$index, 0, ["top" => $top, "right" => $right, "bottom" => $bottom, "left" => $left]]; //0°
+        $borders[$leftInv . $bottom][] = [$index, 1, ["top" => $leftInv, "right" => $top, "bottom" => $rightInv, "left" => $bottom]]; //90°
+        $borders[$bottomInv . $rightInv][] = [$index, 2, ["top" => $bottomInv, "right" => $leftInv, "bottom" => $topInv, "left" => $rightInv]]; //180°
+        $borders[$right . $topInv][] = [$index, 3, ["top" => $right, "right" => $bottomInv, "bottom" => $left, "left" => $topInv]]; //270°
     }
 }
 
