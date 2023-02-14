@@ -5,14 +5,11 @@ const ROMAN = [1000 => "M", 900 => "CM", 500 => "D", 400 => "CD", 100 => "C", 90
 //Convert an integer to it's Roman-numeral representation
 function convertToRoman(int $number): string {
     $convert = "";
-    
-    while($number > 0) {
-        foreach(ROMAN as $v => $s) {
-            if($v <= $number) {
-                $convert .= $s;
-                $number -= $v;
-                continue 2; 
-            }
+
+    foreach(ROMAN as $v => $s) {
+        while($v <= $number) {
+            $convert .= $s;
+            $number -= $v; 
         }
     }
 
@@ -23,13 +20,10 @@ function convertToRoman(int $number): string {
 function convertToInteger(string $roman): int {
     $integer = 0;
 
-    while(empty($roman) != true) {
-        foreach(array_flip(ROMAN) as $s => $v) {
-            if(strpos($roman, $s) === 0) {
-                $integer += $v;
-                $roman = substr($roman, strlen($s));
-                continue 2; 
-            }
+    foreach(ROMAN as $v => $s) {
+        while(strpos($roman, $s) === 0) {
+            $integer += $v;
+            $roman = substr($roman, strlen($s));
         }
     }
 
