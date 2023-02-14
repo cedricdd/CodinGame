@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/4426874a1276dafe6bd53346f0e87bbf3e672
+https://www.codingame.com/training/medium/roman-sorting
 
 Goal
 Sort a list of integer values in alphabetical order of their standard-form Roman numeral representations.
