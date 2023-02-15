@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/45126be5da32c003fd4e32514f447a6be3bd2
+https://www.codingame.com/training/hard/ascii-art-qr-code
 
 Goal
 Your task is to implement a simplified QR code reader for ASCII Art, decoding the information that is stored inside the data area.
