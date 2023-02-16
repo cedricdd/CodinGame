@@ -79,6 +79,7 @@ class Logo {
     //Set the characters used by the pen
     public function setSymbols(string $value) {
         $this->symbols["characters"] = $value;
+        $this->symbols["index"] = 0;
     }
 }
 
