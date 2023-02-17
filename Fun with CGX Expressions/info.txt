@@ -17,7 +17,9 @@ e.g. ('v1'='v2')
 - a BLOCK with 3 KEY_VALUE num1 , num2 and an operator: + - / *,
 
 e.g. ('num1'=expression;'num2'='v2';'operator'='+') 
+
 is the value of the variable v2 plus the value of the expression.
+The order ('num1';'num2';'operator') is not guaranteed, any arrangements is possible, ex: ('num1';'operator';'num2'), ...
 
 - a fraction BLOCK in the form ('numerator'=expression;'denominator'=expression),
 
@@ -31,9 +33,10 @@ The N following lines: The CGX content.
 
 Output
 The result of the expression in the KEY_VALUE 'result'.
-
 Constraints
+
 1<=N<=30
+-2^63<=numerator and denominator <=2^63
 The CGX content supplied will always be valid.
 Each line contains maximum 1000 characters.
 All the characters are ASCII.
