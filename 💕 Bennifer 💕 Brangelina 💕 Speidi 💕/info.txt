@@ -1,0 +1,33 @@
+https://www.codingame.com/contribute/view/464135c71022fb3cb7616f5b58253359f38dc
+
+Goal
+
+On each line, there are two people, who together form a romantic couple.
+They want to combine their individual names together to create their own Couple-Name -- just for fun and to make it easier for the Tabloids to write about them.
+
+Example:
+Ben + Jennifer = Bennifer
+Brad + Angelina = Brangelina
+Heidi + Spencer = Speidi
+
+Given the following rules, print out options for that couple:
+
+RULES:
+• There must be at least 1 shared letter. In other words, there must be at least 1 letter common to both names.
+• Must include the most shared letters as possible. For example, if there is a Couple-Name that shares 2 letters, don't show any that include less than 2 shared letters.
+• Must not be shorter than the shortest person-name.
+• No spelling changes other than “sub-stringing”
+• Where there are multiple options, list them alphabetically on the same line separated by spaces.
+• If no options, print NONE
+
+Input
+Line 1: An integer n, denoting the number of couples
+Line 2: n couples, in the format of name1 (which is always a single word) and name2 (which is always a single word) 
+and then sometimes a last name or other extra information just as FYI, in case you need it for your Tabloid story.
+(name1 and name2 -- which are always the 1st word and 3rd word in the input string -- is all you will use to make the Couple-Name)
+
+Output
+n lines: Couple-Names for each couple: name1 plus name2 = alphabetized list of Couple-Names, in the format described above
+
+Constraints
+Names do not have anything other than letters. In Couple-Names, only the first letter is capitalized
