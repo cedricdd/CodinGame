@@ -4,6 +4,8 @@ const NUMBERS = 511;
 const NUMBERS_BIN = [1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64, 8 => 128, 9 => 256];
 
 $memory = [];
+$guess = 0;
+$check = 0;
 
 //Find all the digits that are used in a way to reach $sum by using $count different digits
 //We can't use the same digit multiple times, the digit we can use are given by checking the bits of $numbers
@@ -70,12 +72,14 @@ function generateAffectedPositions(): array {
 }
 
 function solve(string $grid, array $possibleDigits, array $cages, array $positionsToFind): void {
-    global $cagesMatch, $affectedPositions, $answer;
+    global $cagesMatch, $affectedPositions, $answer, $guess, $check;
 
     do {
         $numberFound = false;
 
         foreach($positionsToFind as $index => $filler) {
+
+            ++$check;
 
             //There is only only possible digit for this position
             switch($possibleDigits[$index]) {
@@ -146,6 +150,8 @@ function solve(string $grid, array $possibleDigits, array $cages, array $positio
             if(($numbers & $binary) != 0) {
                 $possibleDigits[$position] = $binary;
 
+                ++$guess;
+
                 solve($grid, $possibleDigits, $cages, $positionsToFind);
             } 
         }
@@ -187,6 +193,8 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
     $cageIndex = 0;
     $gridTime = microtime(1);
 
+    //error_log(var_export(str_split($grids[$gridID], 9), true));
+
     //Get all the positions in each cages
     for($position = 0; $position < 81; ++$position) {
         $cagesPositions[$grids[$gridID][$position]][] = $position;
@@ -226,22 +234,19 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
         $uniqueCages = [];
         $fullCages = [];
         $partialCages = [];
+        $row = [];
 
         //Get all the uniques cages on the row
         for($x = 0; $x < 9; ++$x) {
-            $uniqueCages[$grids[$gridID][$y * 9 + $x]] = 1;
+            $position = $y * 9 + $x;
+            $uniqueCages[$grids[$gridID][$position]] = 1;
+            $row[] = $position;
         }
 
         //Check if all the positions of each cages are all in the row
         foreach($uniqueCages as $name => $filler) {
-            foreach($cagesPositions[$name] as $position) {
-                if(intdiv($position, 9) != $y) {
-                    $partialCages[$name] = $cagesSum[$name];
-                    continue 2;
-                }
-            }
-
-            $fullCages[$name] = $cagesSum[$name];
+            if(count(array_diff($cagesPositions[$name], $row)) == 0) $fullCages[$name] = $cagesSum[$name];
+            else $partialCages[$name] = $cagesSum[$name];
         }
 
         $countFullCages = count($fullCages);
@@ -270,6 +275,27 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
                 }
             }
         }
+
+        
+        if(count($partialCages) == 1) {
+            $name = array_key_first($partialCages);
+
+            //error_log(var_export("row $y", true));
+            //error_log(var_export($fullCages, true));
+            //error_log(var_export($partialCages, true));
+            
+            $list = array_flip(array_diff($cagesPositions[$name], $row));
+
+            foreach($list as $position => $filler) {
+                $cagesMatch[$position][] = $cageIndex;
+            }
+
+            //error_log(var_export($list, true));
+            //error_log(var_export(reset($partialCages) - 45 + array_sum($fullCages), true));
+
+            //Create a new cage
+            $cages[$cageIndex++] = [reset($partialCages) - 45 + array_sum($fullCages), count($list), $list];
+        }
     }
 
     //Try to create more cages on cols
@@ -277,22 +303,19 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
         $uniqueCages = [];
         $fullCages = [];
         $partialCages = [];
+        $col = [];
 
         //Get all the uniques cages on the col
         for($y = 0; $y < 9; ++$y) {
-            $uniqueCages[$grids[$gridID][$y * 9 + $x]] = 1;
+            $position = $y * 9 + $x;
+            $uniqueCages[$grids[$gridID][$position]] = 1;
+            $col[] = $position;
         }
 
         //Check if all the positions of each cages are all in the col
         foreach($uniqueCages as $name => $filler) {
-            foreach($cagesPositions[$name] as $position) {
-                if($position % 9 != $x) {
-                    $partialCages[$name] = $cagesSum[$name];
-                    continue 2;
-                }
-            }
-
-            $fullCages[$name] = $cagesSum[$name];
+            if(count(array_diff($cagesPositions[$name], $col)) == 0) $fullCages[$name] = $cagesSum[$name];
+            else $partialCages[$name] = $cagesSum[$name];
         }
 
         $countFullCages = count($fullCages);
@@ -321,33 +344,50 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
                 }
             }
         }
+
+        
+        if(count($partialCages) == 1) {
+            $name = array_key_first($partialCages);
+
+            //error_log(var_export("!!!!!!!col $x", true));
+            //error_log(var_export($fullCages, true));
+            //error_log(var_export($partialCages, true));
+            
+            $list = array_flip(array_diff($cagesPositions[$name], $col));
+
+            foreach($list as $position => $filler) {
+                $cagesMatch[$position][] = $cageIndex;
+            }
+
+            //error_log(var_export($list, true));
+            //error_log(var_export(reset($partialCages) - 45 + array_sum($fullCages), true));
+
+            //Create a new cage
+            $cages[$cageIndex++] = [reset($partialCages) - 45 + array_sum($fullCages), count($list), $list];
+        }
     }
 
      //Try to create more cages on regions
-    for($region = 0; $region < 9; ++$region) {
+    for($r = 0; $r < 9; ++$r) {
         $uniqueCages = [];
         $fullCages = [];
         $partialCages = [];
+        $region = [];
+        
 
         //Get all the uniques cages in the region
-        for($y = (intdiv($region, 3) * 3); $y < ((intdiv($region, 3) + 1) * 3); ++$y) {
-            for($x = ($region % 3) * 3; $x < (($region % 3) + 1) * 3; ++$x) {
-                $uniqueCages[$grids[$gridID][$y * 9 + $x]] = 1;
+        for($y = (intdiv($r, 3) * 3); $y < ((intdiv($r, 3) + 1) * 3); ++$y) {
+            for($x = ($r % 3) * 3; $x < (($r % 3) + 1) * 3; ++$x) {
+                $position = $y * 9 + $x;
+                $uniqueCages[$grids[$gridID][$position]] = 1;
+                $region[] = $position;
             }
         }
 
         //Check if all the positions of each cages are all in the region
         foreach($uniqueCages as $name => $filler) {
-            foreach($cagesPositions[$name] as $position) {
-                [$x, $y] = [$position % 9, intdiv($position, 9)];
-
-                if(((intdiv($y, 3) * 3) + intdiv($x, 3)) != $region) {
-                    $partialCages[$name] = $cagesSum[$name];
-                    continue 2;
-                }
-            }
-
-            $fullCages[$name] = $cagesSum[$name];
+            if(count(array_diff($cagesPositions[$name], $region)) == 0) $fullCages[$name] = $cagesSum[$name];
+            else $partialCages[$name] = $cagesSum[$name];
         }
 
         $countFullCages = count($fullCages);
@@ -362,8 +402,8 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
                     $list = [];
 
                     //Find all the positions not part of the cages we have selected
-                    for($y = (intdiv($region, 3) * 3); $y < ((intdiv($region, 3) + 1) * 3); ++$y) {
-                        for($x = ($region % 3) * 3; $x < (($region % 3) + 1) * 3; ++$x) {
+                    for($y = (intdiv($r, 3) * 3); $y < ((intdiv($r, 3) + 1) * 3); ++$y) {
+                        for($x = ($r % 3) * 3; $x < (($r % 3) + 1) * 3; ++$x) {
                             $position = $y * 9 + $x;
                         
                             if(!in_array($grids[$gridID][$position], array_keys($usedCages))) {
@@ -377,6 +417,199 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
                     $cages[$cageIndex++] = [45 - array_sum($usedCages), count($list), $list];
                 }
             }
+        }
+
+        if(count($partialCages) == 1) {
+            $name = array_key_first($partialCages);
+
+            //error_log(var_export("!!!!!!!region $r", true));
+            //error_log(var_export($fullCages, true));
+            //error_log(var_export($partialCages, true));
+            
+            $list = array_flip(array_diff($cagesPositions[$name], $region));
+
+            foreach($list as $position => $filler) {
+                $cagesMatch[$position][] = $cageIndex;
+            }
+
+            //error_log(var_export($list, true));
+            //error_log(var_export(reset($partialCages) - 45 + array_sum($fullCages), true));
+
+            //Create a new cage
+            $cages[$cageIndex++] = [reset($partialCages) - 45 + array_sum($fullCages), count($list), $list];
+        }
+    }
+
+    $uniqueCages = [];
+    $rows = [];
+
+    
+    for($y = 0; $y < 9; ++$y) {
+
+        $fullCages = [];
+        $partialCages = [];
+
+        //Get all the uniques cages on the rows
+        for($x = 0; $x < 9; ++$x) {
+            $position = $y * 9 + $x;
+            $uniqueCages[$grids[$gridID][$position]] = 1;
+            $rows[] = $position;
+        }
+
+        //Check if all the positions of each cages are all in the row
+        foreach($uniqueCages as $name => $filler) {
+            if(count(array_diff($cagesPositions[$name], $rows)) == 0) $fullCages[$name] = $cagesSum[$name];
+            else $partialCages[$name] = $cagesSum[$name];
+        }
+
+        if(count($partialCages) == 1) {
+
+            //error_log(var_export("col $y", true));
+            //error_log(var_export($fullCages, true));
+            //error_log(var_export($partialCages, true));
+
+            $name = array_key_first($partialCages);
+            
+            $list = array_flip(array_diff($cagesPositions[$name], $rows));
+
+            foreach($list as $position => $filler) {
+                $cagesMatch[$position][] = $cageIndex;
+            }
+
+            //error_log(var_export($list, true));
+            //error_log(var_export(reset($partialCages) - 45 + array_sum($fullCages), true));
+
+            //Create a new cage
+            $cages[$cageIndex++] = [reset($partialCages) - (45 * ($y + 1)) + array_sum($fullCages), count($list), $list];
+        }
+    }
+
+    $uniqueCages = [];
+    $rows = [];
+
+    for($y = 8; $y >= 0; --$y) {
+
+        $fullCages = [];
+        $partialCages = [];
+
+        //Get all the uniques cages on the rows
+        for($x = 0; $x < 9; ++$x) {
+            $position = $y * 9 + $x;
+            $uniqueCages[$grids[$gridID][$position]] = 1;
+            $rows[] = $position;
+        }
+
+        //Check if all the positions of each cages are all in the row
+        foreach($uniqueCages as $name => $filler) {
+            if(count(array_diff($cagesPositions[$name], $rows)) == 0) $fullCages[$name] = $cagesSum[$name];
+            else $partialCages[$name] = $cagesSum[$name];
+        }
+
+        if(count($partialCages) == 1) {
+
+            //error_log(var_export("col $y", true));
+            //error_log(var_export($fullCages, true));
+            //error_log(var_export($partialCages, true));
+
+            $name = array_key_first($partialCages);
+            
+            $list = array_flip(array_diff($cagesPositions[$name], $rows));
+
+            foreach($list as $position => $filler) {
+                $cagesMatch[$position][] = $cageIndex;
+            }
+
+            //error_log(var_export($list, true));
+            //error_log(var_export(reset($partialCages) - 45 + array_sum($fullCages), true));
+
+            //Create a new cage
+            $cages[$cageIndex++] = [reset($partialCages) - (45 * (9 - $y)) + array_sum($fullCages), count($list), $list];
+        }
+    }
+
+    $uniqueCages = [];
+    $cols = [];
+
+    for($x = 0; $x < 9; ++$x) {
+
+        $fullCages = [];
+        $partialCages = [];
+
+        //Get all the uniques cages on the cols
+        for($y = 0; $y < 9; ++$y) {
+            $position = $y * 9 + $x;
+            $uniqueCages[$grids[$gridID][$position]] = 1;
+            $cols[] = $position;
+        }
+
+        //Check if all the positions of each cages are all in the cols
+        foreach($uniqueCages as $name => $filler) {
+            if(count(array_diff($cagesPositions[$name], $cols)) == 0) $fullCages[$name] = $cagesSum[$name];
+            else $partialCages[$name] = $cagesSum[$name];
+        }
+
+        if(count($partialCages) == 1) {
+
+            //error_log(var_export("row $x", true));
+            //error_log(var_export($fullCages, true));
+            //error_log(var_export($partialCages, true));
+
+            $name = array_key_first($partialCages);
+            
+            $list = array_flip(array_diff($cagesPositions[$name], $cols));
+
+            foreach($list as $position => $filler) {
+                $cagesMatch[$position][] = $cageIndex;
+            }
+
+            //error_log(var_export($list, true));
+            //error_log(var_export(reset($partialCages) - 45 + array_sum($fullCages), true));
+
+            //Create a new cage
+            $cages[$cageIndex++] = [reset($partialCages) - (45 * ($x + 1)) + array_sum($fullCages), count($list), $list];
+        }
+    }
+
+    $uniqueCages = [];
+    $cols = [];
+
+    for($x = 8; $x >= 0; --$x) {
+
+        $fullCages = [];
+        $partialCages = [];
+
+        //Get all the uniques cages on the cols
+        for($y = 0; $y < 9; ++$y) {
+            $position = $y * 9 + $x;
+            $uniqueCages[$grids[$gridID][$position]] = 1;
+            $cols[] = $position;
+        }
+
+        //Check if all the positions of each cages are all in the cols
+        foreach($uniqueCages as $name => $filler) {
+            if(count(array_diff($cagesPositions[$name], $cols)) == 0) $fullCages[$name] = $cagesSum[$name];
+            else $partialCages[$name] = $cagesSum[$name];
+        }
+
+        if(count($partialCages) == 1) {
+
+            //error_log(var_export("row $x", true));
+            //error_log(var_export($fullCages, true));
+            //error_log(var_export($partialCages, true));
+
+            $name = array_key_first($partialCages);
+            
+            $list = array_flip(array_diff($cagesPositions[$name], $cols));
+
+            foreach($list as $position => $filler) {
+                $cagesMatch[$position][] = $cageIndex;
+            }
+
+            //error_log(var_export($list, true));
+            //error_log(var_export(reset($partialCages) - 45 + array_sum($fullCages), true));
+
+            //Create a new cage
+            $cages[$cageIndex++] = [reset($partialCages) - (45 * (9 - $x)) + array_sum($fullCages), count($list), $list];
         }
     }
 
@@ -402,3 +635,4 @@ echo implode("\n", array_map(function($line) {
 }, $answer)) . PHP_EOL;
 
 error_log("Total duration: " . (microtime(1) - $startTime));
+error_log("Total guesses: $guess -- Total checks: $check");
