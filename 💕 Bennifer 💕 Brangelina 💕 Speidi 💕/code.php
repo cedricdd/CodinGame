@@ -36,7 +36,7 @@ function solve(string $s1, string $s2): array {
                 if(strpos($s2, $combination) === 0) continue; //Combinaison is just a sub-part of s2
 
                 //Find how many shared letters we have
-                for($shared = 1; $shared < min($size1 - $i, $size2 - $j); ++$shared) {
+                 for($shared = 1; $shared < min($size1 - $j, $size2 - $i); ++$shared) {
                     if($s1[$j + $shared] != $s2[$i + $shared]) break;
                 }
                 
@@ -51,7 +51,7 @@ function solve(string $s1, string $s2): array {
 
 fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
-    preg_match("/([a-zA-Z]+) and ([a-zA-Z]+).*/", trim(fgets(STDIN)), $matches);
+    preg_match("/([a-zA-Z]+) [aA]nd ([a-zA-Z]+).*/", trim(fgets(STDIN)), $matches);
 
     [, $name1, $name2] = $matches;
 
