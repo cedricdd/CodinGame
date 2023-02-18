@@ -138,7 +138,7 @@ function solve(string $grid, array $possibleDigits, array $cages, array $positio
     //There are some positions with multiple possibilities
     if(count($positionsToFind) > 0) {
 
-        $position = array_key_first($positionsToFind);
+        $position = array_key_last($positionsToFind);
         $numbers = $possibleDigits[$position];
 
         //Test each values for this position
