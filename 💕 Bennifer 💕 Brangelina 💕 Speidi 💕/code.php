@@ -51,7 +51,7 @@ function solve(string $s1, string $s2): array {
 
 fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
-    preg_match("/([a-zA-Z]+) [aA]nd ([a-zA-Z]+).*/", trim(fgets(STDIN)), $matches);
+    preg_match("/([a-zA-Z]+) and ([a-zA-Z]+).*/", trim(fgets(STDIN)), $matches);
 
     [, $name1, $name2] = $matches;
 
