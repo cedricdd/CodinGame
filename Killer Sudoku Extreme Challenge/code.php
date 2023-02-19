@@ -166,8 +166,13 @@ function solve(string $grid, array $possibleDigits, array $cages, array $positio
     }
 }
 
-function createCage(array $positions, int $sum, bool $checkCreated = false) {
+function createCage(array $positions, int $sum, bool $checkCreated = false, bool $isInput = false) {
     global $cageIndex, $cages, $cagesMatch, $fullCagesColCreated, $fullCagesRowCreated;
+
+    $count = count($positions);
+
+    //If the cage is big we only add if it's one of the cages from the inputs
+    if($isInput == false && $count >= 7) return;
 
     $index = implode("-", $positions);
 
@@ -181,10 +186,10 @@ function createCage(array $positions, int $sum, bool $checkCreated = false) {
     }
 
     //Create a new cage
-    $cages[$cageIndex++] = [$sum, count($positions), array_flip($positions)];
+    $cages[$cageIndex++] = [$sum, $count, array_flip($positions)];
 
     //If this cage has more than position we check if it's fully contained in a row or col and save it
-    if($checkCreated && count($positions) > 1) {
+    if($checkCreated && $count > 1) {
         $check = getDispertion($positions);
 
         if(count($check["y"]) == 1) {
@@ -262,7 +267,7 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
             }
         }
 
-        createCage($list, intval($sum));
+        createCage($list, intval($sum), false, true);
     }
 
     $fullCagesRowCreated = array_fill(0, 9, []);
@@ -675,14 +680,14 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
         }
     }
 
-    //When we update a position we want to work on cages with the less positions first
+    //When we update a position we want to work on cages with the more positions first
     foreach($cagesMatch as $a => &$list) {
         uasort($list, function($a, $b) use ($cages) {
-            return $cages[$a][1] <=> $cages[$b][1];
+            return $cages[$b][1] <=> $cages[$a][1];
         });
     }
 
-    //We want to work on positions that are part of the less cages first
+    //We want to start working on the positions that are linked to the less cages
     uksort($positionsToFind, function($a, $b) use ($cagesMatch) {
         return count($cagesMatch[$a]) <=> count($cagesMatch[$b]);
     });
