@@ -675,6 +675,18 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
         }
     }
 
+    //When we update a position we want to work on cages with the less positions first
+    foreach($cagesMatch as $a => &$list) {
+        uasort($list, function($a, $b) use ($cages) {
+            return $cages[$a][1] <=> $cages[$b][1];
+        });
+    }
+
+    //We want to work on positions that are part of the less cages first
+    uksort($positionsToFind, function($a, $b) use ($cagesMatch) {
+        return count($cagesMatch[$a]) <=> count($cagesMatch[$b]);
+    });
+
     solve($grid, $possibleDigits, $cages, $positionsToFind);
 
     error_log("Grid ID $gridID took: " . (microtime(1) - $gridTime));
