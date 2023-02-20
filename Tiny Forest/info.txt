@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/45094a56da559da9bc8948f676f5194e640f3
+https://www.codingame.com/training/medium/tiny-forest
 
 Goal
 You have just inherited of a small land of width W and height H with some trees in it and you had the idea to grow a forest.
