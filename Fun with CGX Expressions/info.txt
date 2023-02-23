@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/441387e0e76bbed19d5009ff85a020b75a559
+https://www.codingame.com/training/medium/fun-with-cgx-expressions
 
 Goal
 You have to parse the CGX file format (see CGX Formatter https://www.codingame.com/training/hard/cgx-formatter for details) to evaluate an expression.
@@ -19,7 +19,7 @@ e.g. ('v1'='v2')
 e.g. ('num1'=expression;'num2'='v2';'operator'='+') 
 
 is the value of the variable v2 plus the value of the expression.
-The order ('num1';'num2';'operator') is not guaranteed, any arrangements is possible, ex: ('num1';'operator';'num2'), ...
+The order ('num1';'num2';'operator') is not guaranteed, any arrangements are possible, ex: ('num1';'operator';'num2'), ...
 
 - a fraction BLOCK in the form ('numerator'=expression;'denominator'=expression),
 
