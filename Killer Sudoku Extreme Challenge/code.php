@@ -1,10 +1,8 @@
 <?php
 
-const NUMBERS = 511;
-const NUMBERS_BIN = [1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64, 8 => 128, 9 => 256];
-
-const BIN_DIG = [1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64, 8 => 128, 9 => 256];
-const BIN_INV = [1 => 510, 2 => 509, 3 => 507, 4 => 503, 5 => 495, 6 => 479, 7 => 447, 8 => 383, 9 => 255];
+const FULL_DIGITS = 511;
+const DIGIT_TO_BINARY = [1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64, 8 => 128, 9 => 256];
+const DIGIT_TO_INV_BINARY = [1 => 510, 2 => 509, 3 => 507, 4 => 503, 5 => 495, 6 => 479, 7 => 447, 8 => 383, 9 => 255];
 
 const REGIONS_LIMITS = [
     [0, 0, 2, 2], [3, 0, 5, 2], [6, 0, 8, 2],
@@ -21,45 +19,21 @@ const REGIONS_COMBI = [
 const MAX = [1 => 1, 2 => 3, 3 => 7, 4 => 15, 5 => 31, 6 => 63, 7 => 127, 8 => 255, 9 => 511];
 const MIN = [1 => 511, 2 => 510, 3 => 508, 4 => 504, 5 => 496, 6 => 480, 7 => 448, 8 => 384, 9 => 256];
 
-
+//Every rows, cols & regions can also be a cage
 const DEFAULT_CAGES = [
     [0, 1, 2, 3, 4, 5, 6, 7, 8], [9, 10, 11, 12, 13, 14, 15, 16, 17], [18, 19, 20, 21, 22, 23, 24, 25, 26], [27, 28, 29, 30, 31, 32, 33, 34, 35], [36, 37, 38, 39, 40, 41, 42, 43, 44], [45, 46, 47, 48, 49, 50, 51, 52, 53], [54, 55, 56, 57, 58, 59, 60, 61, 62], [63, 64, 65, 66, 67, 68, 69, 70, 71], [72, 73, 74, 75, 76, 77, 78, 79, 80], //ROWS
     [0, 9, 18, 27, 36, 45, 54, 63, 72], [1, 10, 19, 28, 37, 46, 55, 64, 73], [2, 11, 20, 29, 38, 47, 56, 65, 74], [3, 12, 21, 30, 39, 48, 57, 66, 75], [4, 13, 22, 31, 40, 49, 58, 67, 76], [5, 14, 23, 32, 41, 50, 59, 68, 77], [6, 15, 24, 33, 42, 51, 60, 69, 78], [7, 16, 25, 34, 43, 52, 61, 70, 79], [8, 17, 26, 35, 44, 53, 62, 71, 80], //COLS
     [0, 1, 2, 9, 10, 11, 18, 19, 20], [3, 4, 5, 12, 13, 14, 21, 22, 23], [6, 7, 8, 15, 16, 17, 24, 25, 26], [27, 28, 29, 36, 37, 38, 45, 46, 47], [30, 31, 32, 39, 40, 41, 48, 49, 50], [33, 34, 35, 42, 43, 44, 51, 52, 53], [54, 55, 56, 63, 64, 65, 72, 73, 74], [57, 58, 59, 66, 67, 68, 75, 76, 77], [60, 61, 62, 69, 70, 71, 78, 79, 80], //REGIONS
 ];
 
-$memory = [];
+const MAX_SEARCH_TURNS = 2;
+
 $totalCages = 0;
 $totalGuess = 0;
 $totalCheck = 0;
 
-function getDispersion(array $positions): array {
-    $results = [];
-
-    foreach($positions as $position) {
-        $results["x"][$position % 9] = 1;
-        $results["y"][intdiv($position, 9)] = 1;
-    }
-
-    return $results;
-}
-
 //Check if a list of positions all have unique digits, if they are in a single row or a single col
 function checkUniqueDigits(array $positions): bool {
-    $results = [];
-
-    foreach($positions as $position) {
-        $results["x"][$position % 9] = 1;
-        $results["y"][intdiv($position, 9)] = 1;
-    }
-
-    if(count($results["x"]) == 1) return true; //All the positions are on the same column
-    if(count($results["y"]) == 1) return true; //All the positions are on the same row
-    return false;
-}
-
-//Check if a list of positions all have unique digits, if they are in a single row or a single col
-function checkUniqueDigits2(array $positions): bool {
     $results = [];
 
     foreach(array_keys($positions) as $position) {
@@ -72,92 +46,52 @@ function checkUniqueDigits2(array $positions): bool {
     return false;
 }
 
+function findSumPermutations(int $sum, int $count, int $mask): array {
 
-//Find all the digits that are used in a way to reach $sum by using $count different digits
-//We can't use the same digit multiple times, the digit we can use are given by checking the bits of $numbers
-function findSumPermutations(int $sum, int $count, int $numbers): int {
+    static $memory;
+    global $maskInfo;
 
-    global $memory;
-
-    if(isset($memory[$sum][$count][$numbers])) return $memory[$sum][$count][$numbers];
-
-    //Sum is too big, we reached the max # of digits or we used all the possible digits
-    if($sum < 0 || $count == 0 || $numbers == 0) return 0;
-
-    foreach(NUMBERS_BIN as $value => $binary) {
-
-        //If this digit can be used
-        if($numbers & $binary) {
-
-            if($count == 1 && $sum == $value) return $memory[$sum][$count][$numbers] = $binary;
-
-            //Case where we don't use the current digit
-            $result = findSumPermutations($sum, $count, $numbers & BIN_INV[$value]);
-
-            //If by using the current digit there's a way to reach the sum
-            if($solution = findSumPermutations($sum - $value, $count - 1, $numbers & BIN_INV[$value])) {
-                $result |= $solution; //All digits we used in the recursion are part of the solution
-                $result |= $binary; //The current digit is part of the solution
-            }
-
-            return $memory[$sum][$count][$numbers] = $result;
-        }
-    } 
-
-    return $memory[$sum][$count][$numbers] = 0;
-}
-
-$memory2 = [];
-
-function findSumPermutations2(int $sum, int $count, int $numbers): array {
-
-    global $memory2;
-
-    if(isset($memory2[$sum][$count][$numbers])) return $memory2[$sum][$count][$numbers];
+    //We already know the result
+    if(isset($memory[$sum][$count][$mask])) return $memory[$sum][$count][$mask];
 
     //Sum is too big, we reached the max # of digits or we used all the possible digits
-    if($sum < 0 || $count == 0 || $numbers == 0) return [0, 0];
+    if($sum < 0 || $count == 0 || $mask == 0) return [0, 0];
 
-    //error_log("$sum $count $numbers");
+    foreach($maskInfo[$mask]["digits"] as $digit => $binary) {
 
-    foreach(BIN_DIG as $value => $binary) {
-
-        //If this digit can be used
-        if($numbers & $binary) {
-
-            if($count == 1 && $sum == $value) {
-                //error_log("found one: $value $binary " . BIN_INV[$value]);
-                return $memory2[$sum][$count][$numbers] = [$binary, BIN_DIG[$value]];
-            }
-
-            //Case where we don't use the current digit
-            [$a, $b] = findSumPermutations2($sum, $count, $numbers & BIN_INV[$value]);
-
-            //If by using the current digit there's a way to reach the sum
-            [$c, $d] = findSumPermutations2($sum - $value, $count - 1, $numbers & BIN_INV[$value]);
-
-            //error_log("sum $sum -- count $count -- numbers $numbers -- digit $value -- a $a -- b $b -- c $c -- d $d");
-
-            if($c != 0) {
-                if($a != 0) $b &= $d;
-                else $b = ($d | BIN_DIG[$value]);
-
-                $a = $a | $c | $binary;
-            }
-
-            //error_log("returned $a $b");
-
-            return $memory2[$sum][$count][$numbers] = [$a, $b];
+        if($count == 1 && $sum == $digit) {
+            //We have found a solution
+            return $memory[$sum][$count][$mask] = [$binary, $binary];
         }
+
+        $maskUpdated = $mask & DIGIT_TO_INV_BINARY[$digit]; //Remove the digit from the list
+
+        //Case where we DON'T use the current digit
+        [$sumDigits, $forcedDigits] = findSumPermutations($sum, $count, $maskUpdated);
+
+        //Case where we USE the current digit
+        [$sumDigits2, $forcedDigits2] = findSumPermutations($sum - $digit, $count - 1, $maskUpdated);
+
+        //If by using the current digit there's a way to reach the sum, update the values
+        if($sumDigits2 != 0) {
+            //We have solutions with and without the digit, the forced digits must be present in both
+            if($sumDigits != 0) $forcedDigits &= $forcedDigits2;
+            //We only have solutions with the digit, the digit is part of the forced digits
+            else $forcedDigits = ($forcedDigits2 | $binary);
+
+            $sumDigits |= ($sumDigits2 | $binary);
+        }
+
+        return $memory[$sum][$count][$mask] = [$sumDigits, $forcedDigits];
     } 
 
-    return $memory2[$sum][$count][$numbers] = [0, 0];
+    return $memory[$sum][$count][$mask] = [0, 0];
 }
 
 //Get the all the positions in the grid that are affected when we set a number
 //Positions in the same row, col or region
 function generateAffectedPositions(): array {
-    $affected = [];
+    global $affected;
 
     for($y = 0; $y < 9; ++$y) {
         for($x = 0; $x < 9; ++$x) {
@@ -184,15 +118,15 @@ function generateAffectedPositions(): array {
     return $affected;
 }
 
-function solve(string $grid, array $possibleDigits, array $cages, array $positionsToFind): void {
+function solve(array $grid, array $possibleDigits, array $cages, array $positionsToFind): void {
     global $cagesMatch, $affectedPositions, $answer, $totalGuess, $totalCheck, $maskInfo;
 
-    $test = 5;
+    $turn = 0;
 
     while(true) {
-    
+
         do {
-            $numberFound = false;
+            $positionFound = false;
 
             foreach($positionsToFind as $index => $filler) {
 
@@ -220,7 +154,7 @@ function solve(string $grid, array $possibleDigits, array $cages, array $positio
 
                 //Update all the possitions where this digit can no longer be used
                 foreach($affectedPositions[$index] as $position => $filler) {
-                    if(($possibleDigits[$position] &= ~NUMBERS_BIN[$value]) == 0) return;
+                    if(($possibleDigits[$position] &= ~DIGIT_TO_BINARY[$value]) == 0) return;
                 }
 
                 //Update all the cages that this position is part of
@@ -239,217 +173,120 @@ function solve(string $grid, array $possibleDigits, array $cages, array $positio
                     unset($cages[$cageIndex][2][$index]); //This position has been set
                 }
 
-                $numberFound = true;
-                $test = 5;
+                $positionFound = true;
+                $turn = 0;
             }
-        } while($numberFound); //Restart the loop as long as some digit has been found
+        } while($positionFound); //Restart the loop as long as some digit has been found
 
-        if(count($positionsToFind) == 0) break;
+        if(count($positionsToFind) == 0 || $turn == MAX_SEARCH_TURNS) break;
 
-        
-        foreach($cages as $cagesIndex => [$sum2, $count2, $positions2, $uniqueDigits]) {
+        foreach($cages as $cagesIndex => [$cageSum, $cageCount, $cagePositions, $uniqueDigits]) {
 
-            if($count2 == 1) {
-                if(!isset(BIN_DIG[$sum2])) return;
+            //There's only one position left in this cage
+            if($cageCount == 1) {
+                //The sum isn't a digit
+                if(!isset(DIGIT_TO_BINARY[$cageSum])) return;
 
-                $possibleDigits[array_key_first($positions2)] = BIN_DIG[$sum2];
-                $numberFound = true;
-                //error_log("setting unique " . array_key_first($positions2) . " to $sum2");
+                $possibleDigits[array_key_first($cagePositions)] = DIGIT_TO_BINARY[$cageSum];
+               
+                $turn = 0;
                 continue;
             }
 
-            //error_log(var_export($positions2, true));
+            //For each positions in the cage we check what the max and min sum we can make by using all the other positions
+            //Here we are simply taking the max & min digits for each positions, if the cage contains only unique digits we could get the "real" max & min but it's takes too much time
+            foreach($cagePositions as $position1 => $f1) {
+                $sumMin = $cageSum;
+                $sumMax = $cageSum;
 
-            foreach($positions2 as $pos1 => $filler1) {
-                $sumMin2 = $sum2;
-                $sumMax2 = $sum2;
+                foreach($cagePositions as $position2 => $f2) {
+                    if($position1 == $position2) continue;
 
-                //error_log(var_export("working on $pos1", true));
-
-                foreach($positions2 as $pos2 => $filler2) {
-                    if($pos1 == $pos2) continue;
-
-                    $sumMin2 -= $maskInfo[$possibleDigits[$pos2]]["max"];
-                    $sumMax2 -= $maskInfo[$possibleDigits[$pos2]]["min"];
+                    $sumMin -= $maskInfo[$possibleDigits[$position2]]["max"]; //Remove the max digit this position can use
+                    $sumMax -= $maskInfo[$possibleDigits[$position2]]["min"]; //Remove the min digit this position can use
                 }
 
-                if($sumMax2 < 1 ) return;
-                elseif($sumMax2 < 9)  $possibleDigits[$pos1] &= MAX[$sumMax2];
+                if($sumMax < 1) return; //It's impossible to reach the sum, the grid is invalid
+                elseif($sumMax < 9) $possibleDigits[$position1] &= MAX[$sumMax]; //We know that the position can't be more than $sumMax
                 
-                if($sumMin2 > 9) return;
-                elseif($sumMin2 > 1) $possibleDigits[$pos1] &= MIN[$sumMin2]; 
+                if($sumMin > 9) return; //It's impossible to reach the sum, the grid is invalid
+                elseif($sumMin > 1) $possibleDigits[$position1] &= MIN[$sumMin]; //We know that the position can't be less than $sumMin
             }
 
+            //We can only do these checks if we know all the digits of the cage are unique
             if($uniqueDigits) {
 
-                //if($cagesIndex == 26) error_log(var_export($positions2, true));
-                
-                $testing = [];
-                foreach($positions2 as $index => $filler)  {
-                    $mask = $possibleDigits[$index];
-                    $count33 = $maskInfo[$mask]["count"];
-                    $string = $maskInfo[$mask]["string"];
+                $availableDigits = 0;
 
-                    if(!isset($testing[$count33][$string])) $testing[$count33][$string] = [$mask, []];
+                //We group the positions in the cage by the digits they can use
+                $dispersion = [];
+                foreach($cagePositions as $index => $filler)  {
+                    $mask = $possibleDigits[$index]; 
+
+                    $dispersion[$mask][$index] = 1;
+                    $availableDigits |= $mask; //We also get all the available digits in the cage
+                }
+
+                //If we have X positions that can use the same X digits, we know none of the other positions in the cage can use any of these X digits
+                foreach($dispersion as $mask => $listPositions) {
+                    if($maskInfo[$mask]["count"] == count($listPositions)) {
+                        foreach(array_diff_key($cagePositions, $listPositions) as $index => $filler) {
+                            $possibleDigits[$index] &= ~$mask;
+                        }
+                    }
+                }
+
+                [$digitsSum, $uniqueDigits] = findSumPermutations($cageSum, $cageCount, $availableDigits);
+
+                foreach($maskInfo[$uniqueDigits]["digits"] as $digit => $binary) {
                     
-                    array_push($testing[$count33][$string][1], $index);
-                }
-
-                //error_log(var_export($testing, true));
-
-                foreach($testing as $number => $list) {
-                    if($number >= $count2) continue;
-                    foreach($list as $implode => [$mask, $indexList]) {
-                        if($number == count($indexList)) {
-                            //error_log("!!!!!!!!!!!!!!!$number $count2 $implode");
-                            //error_log(var_export($testing, true));
-
-                            foreach($positions2 as $index => $filler) {
-                                if(!in_array($index, $indexList)) {
-                                    //error_log("$index can't be $implode");
-                                    $possibleDigits[$index] &= ~$mask;
-                                }
-                            }
-                            //exit();
+                    $uniquePosition = null;
+                    
+                    foreach($cagePositions as $position => $filler) {
+                        if(isset($maskInfo[$possibleDigits[$position]]["digits"][$digit])) {
+                            //This is the first position where we can use the digit
+                            if($uniquePosition === null) $uniquePosition = $position;
+                            else continue 2; //We can place the digit at more than one position
                         }
                     }
+                    
+                    $possibleDigits[$uniquePosition] = $binary;
+                    $turn = 0;
                 }
-
-                //We get all the digits that can still be used in the cage
-                $digits = 0;
-                foreach($positions2 as $cagePosition => $filler) $digits |= $possibleDigits[$cagePosition];
-
-                [$a, $b] = findSumPermutations2($sum2, $count2, $digits);
-
                 
-                if($count2 > 1 && $b != 0) {
-
-                    //error_log("$cagesIndex -- $sum2 $count2 $digits => $a $b");
-                    //error_log(var_export($positions2, true));
-
-                    foreach(BIN_DIG as $digit => $binary) {
-                        if($binary & $b) {
-                            //error_log(decbin($b) . " $digit is mandatory");
-
-                            $position3 = null;
-                            
-                            foreach($positions2 as $cagePosition => $filler) {
-                                //If one position is set to 0, the grid is invalid
-
-                                //error_log("$cagePosition " . decbin($possibleDigits[$cagePosition]));
-
-                                if($possibleDigits[$cagePosition] & $binary) {
-                                    //error_log("$cagePosition can be $digit");
-
-                                    if($position3 === null) {
-                                        //error_log("first possibility");
-                                        $position3 = $cagePosition;
-                                    }
-                                    else {
-                                        //error_log("second possibility");
-                                        continue 2;
-                                    }
-                                } //else error_log("$cagePosition can't");
-                            }
-                            
-                            //error_log("$cagesIndex -- $sum2 $count2 $digits => $a $b");
-                            //error_log("setting $position3 to $digit");
-
-                            $possibleDigits[$position3] = $binary;
-                            $numberFound = true;
-
-                            break 2;
-                        }
-                    }
-                } 
-                
-                if($a != NUMBERS) {
+                if($digitsSum != FULL_DIGITS) {
                     //Update all the positions left in the cage
-                    foreach($positions2 as $cagePosition => $filler) {
+                    foreach($cagePositions as $cagePosition => $filler) {
                         //If one position is set to 0, the grid is invalid
-                        if(($possibleDigits[$cagePosition] &= $a) == 0) return;
+                        if(($possibleDigits[$cagePosition] &= $digitsSum) == 0) return;
                     } 
                 }
             } 
         }
 
-        if(--$test == 0) break;
-        
+        ++$turn;
     }
 
-    //error_log(var_export($possibleDigits[69], true));
-
-    /*
-    foreach($cagesMatch[59] as $cageIndex) {
-        [$a, $b, $c, $d] = $cages[$cageIndex];
-
-        error_log("$cageIndex -- $a $b $d");
-        foreach($c as $e => $f) error_log($e . " " . decbin($possibleDigits[$e]));
-    }*/
-
-
-
-
-
-    //error_log("total possible left $count");
-
-
-    /*
-    if(count($positionsToFind) > 0) {
-        error_log(var_export(str_split($grid, 9), true));
-        error_log(var_export(substr_count($grid, "0"), true));
-        error_log(var_export(count($cages), true));
-    }
-    */
-    
     //There are some positions with multiple possibilities
     if(count($positionsToFind) > 0) {
 
         $position = array_key_last($positionsToFind);
-        $numbers = $possibleDigits[$position];
 
         //Test each values for this position
-        foreach(NUMBERS_BIN as $value => $binary) {
-            if(($numbers & $binary) != 0) {
-                $possibleDigits[$position] = $binary;
+        foreach($maskInfo[$possibleDigits[$position]]["digits"] as $value => $binary) {
+            $possibleDigits[$position] = $binary;
 
-                ++$totalGuess;
+            ++$totalGuess;
 
-                solve($grid, $possibleDigits, $cages, $positionsToFind);
-            } 
+            solve($grid, $possibleDigits, $cages, $positionsToFind);
         }
 
         return;
     } 
-    
-    /*
-    foreach($positionsToFind as $index => $filler) {
-       
-        $digits = [];
-        foreach(BIN_DIG as $digit => $binary) {
-            if($possibleDigits[$index] & $binary) $digits[] = $digit;
-        }
-
-        error_log($index . " " . implode("-", $digits));
-    }
-
-    [$a, $b] = findSumPermutations2(27, 4, 424);
-    error_log(decbin($a) . " -- " . decbin($b));
-
-    [$a, $b] = findSumPermutations2(39, 6, 511);
-    error_log(decbin($a) . " -- " . decbin($b));
- 
- */
-
-
-   //error_log($gridID . " " . $grid);
-  
 
     //We have found the solution, add it to the answer
-    for($y = 0; $y < 9; ++$y) {
-        for($x = 0; $x < 9; ++$x) {
-            $answer[$y][$x] += $grid[$y * 9 + $x];
-        }
+    for($i = 0; $i < 81; ++$i) {
+        $answer[$i] += $grid[$i];
     }
 }
 
@@ -476,29 +313,31 @@ function createCage(array $positions, int $sum, bool $uniqueDigits = true) {
     $cages[$cageIndex++] = [$sum, $count, $positions, $uniqueDigits];
 }
 
-function generateMaskInfo(int $mask = 0, int $index = 0, int $max = 0, int $min = 0, int $count = 0, string $string = "") {
+//For each possible digit mask we generate the count of digits, the min & max and the list of digits to speed up the code
+function generateMaskInfo(int $mask = 0, int $index = 0, array $digits = []) {
     global $maskInfo;
 
     //We have reach 9 bits, it's over
     if($index == 9) {
-        $maskInfo[$mask] = ["count" => $count, "min" => $min, "max" => $max, "string" => $string];
+        $maskInfo[$mask] = ["count" => count($digits), "min" => array_key_first($digits), "max" => array_key_last($digits), "digits" => $digits];
         return;
     }
 
     $binary = 2 ** $index;
     $index += 1;
 
-    generateMaskInfo($mask, $index, $max, $min, $count, $string); //We set this position as 0
+    generateMaskInfo($mask, $index, $digits); //We set this position as 0
 
-    if($min == 0) $min = $index; //If this is the first 1, it's the min digit
+    $digits[$index] = $binary;
 
-    generateMaskInfo($mask + $binary, $index, $index, $min, $count + 1, $string . $index); //We set this positions as 1
+    generateMaskInfo($mask + $binary, $index, $digits); //We set this positions as 1
 }
 
 $startTime = microtime(1);
-$answer = array_fill(0, 9, array_fill(0, 9, 0));
+$answer = array_fill(0, 81, 0);
 
 generateMaskInfo();
+generateAffectedPositions();
 
 fscanf(STDIN, "%d", $numPuzzles);
 
@@ -509,14 +348,11 @@ for($i = 0; $i < $numPuzzles; ++$i) {
     $cageValues[] = trim(fgets(STDIN));
 }
 
-$affected = generateAffectedPositions();
-
 error_log("End init: " . (microtime(1) - $startTime));
 
 for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
     $affectedPositions = $affected;
-    $possibleDigits = array_fill(0, 81, NUMBERS);
-    $grid = str_repeat("0", 81);
+    $possibleDigits = array_fill(0, 81, FULL_DIGITS);
     $positionsToFind = range(0, 80);
     $cagesPositions = [];
     $cagesPositions2 = [];
@@ -583,7 +419,6 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
         //Check if the cages are fully contained in the row or not
         foreach($uniqueCages[$y] as $nameCage => $sumCage) {
             if(count(array_diff($cagesPositions[$nameCage], $rows[$y])) == 0) {
-                $fullCagesRow[$y][] = [$sumCage, $cagesPositions[$nameCage]];
                 $fullCagesRow[$y]["total"] += $sumCage;
                 $fullCagesRow[$y]["cages"][] = [$sumCage, $cagesPositions2[$nameCage]];
             }
@@ -674,14 +509,14 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
             //All the positions OUTSIDE of the group of regions
             $outsidePositions = array_diff_key($partialPositions, $rowsGroup);
             $sumOutside = $partialSum - $totalSum + $fullCagesSum;
-            $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits2($outsidePositions);
+            $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($outsidePositions);
     
             createCage($outsidePositions, $sumOutside, $uniqueDigits);
     
             //All the positions INSIDE of the group of regions
             $insidePositions = array_diff_key($partialPositions, $outsidePositions);
             $sumInside = $totalSum - $fullCagesSum;
-            $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits2($insidePositions);
+            $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($insidePositions);
     
             createCage($insidePositions, $sumInside, $uniqueDigits);
         }
@@ -803,14 +638,14 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
             //All the positions OUTSIDE of the group of regions
             $outsidePositions = array_diff_key($partialPositions, $colsGroup);
             $sumOutside = $partialSum - $totalSum + $fullCagesSum;
-            $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits2($outsidePositions);
+            $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($outsidePositions);
     
             createCage($outsidePositions, $sumOutside, $uniqueDigits);
     
             //All the positions INSIDE of the group of regions
             $insidePositions = array_diff_key($partialPositions, $outsidePositions);
             $sumInside = $totalSum - $fullCagesSum;
-            $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits2($insidePositions);
+            $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($insidePositions);
     
             createCage($insidePositions, $sumInside, $uniqueDigits);
         }
@@ -916,14 +751,14 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
         //All the positions OUTSIDE of the group of regions
         $outsidePositions = array_diff_key($partialPositions, $regionsGroup);
         $sumOutside = $partialSum - $totalSum + $fullCagesSum;
-        $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits2($outsidePositions);
+        $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($outsidePositions);
 
         createCage($outsidePositions, $sumOutside, $uniqueDigits);
 
         //All the positions INSIDE of the group of regions
         $insidePositions = array_diff_key($partialPositions, $outsidePositions);
         $sumInside = $totalSum - $fullCagesSum;
-        $uniqueDigits = count($partialCagesGroup) == 1 || count($regionsUsed) == 1 || checkUniqueDigits2($insidePositions);
+        $uniqueDigits = count($partialCagesGroup) == 1 || count($regionsUsed) == 1 || checkUniqueDigits($insidePositions);
 
         createCage($insidePositions, $sumInside, $uniqueDigits);
     }
@@ -931,30 +766,26 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
     //For each cages try to reduce the possible digits of their positions
     foreach($cages as $cageIndex => [$cageSum, $cageCount, $cagePositions, $uniqueDigits]) {
 
-        if(!$uniqueDigits) continue;
+        if(!$uniqueDigits || $cageCount == 9) continue;
 
-        [$digitsSum, ] = findSumPermutations2($cageSum, $cageCount, NUMBERS);
+        [$digitsSum, ] = findSumPermutations($cageSum, $cageCount, FULL_DIGITS);
 
-        //Update all the positions in the cage
-        foreach($cagePositions as $position => $filler) $possibleDigits[$position] &= $digitsSum;
+        if($digitsSum != FULL_DIGITS) {
+            //Update all the positions in the cage
+            foreach($cagePositions as $position => $filler) $possibleDigits[$position] &= $digitsSum;
+        }
     }
-
-    //We want to work on positions that are part of the less cages first
-    uksort($positionsToFind, function($a, $b) use ($cagesMatch) {
-        return count($cagesMatch[$a]) <=> count($cagesMatch[$b]);
-    });
-    
 
     $totalCages += count($cages);
 
-    solve($grid, $possibleDigits, $cages, $positionsToFind);
+    solve([], $possibleDigits, $cages, $positionsToFind);
 
     error_log("Grid ID $gridID took: " . (microtime(1) - $gridTime));
 }
 
 echo implode("\n", array_map(function($line) {
     return implode(" ", $line);
-}, $answer)) . PHP_EOL;
+}, array_chunk($answer, 9))) . PHP_EOL;
 
 error_log("Total duration: " . (microtime(1) - $startTime));
 error_log("Guess: $totalGuess -- Check: $totalCheck -- Cages: $totalCages");
