@@ -28,10 +28,6 @@ const DEFAULT_CAGES = [
 
 const MAX_SEARCH_TURNS = 2;
 
-$totalCages = 0;
-$totalGuess = 0;
-$totalCheck = 0;
-
 //Check if a list of positions all have unique digits, if they are in a single row or a single col
 function checkUniqueDigits(array $positions): bool {
     $results = [];
@@ -119,7 +115,7 @@ function generateAffectedPositions(): array {
 }
 
 function solve(array $grid, array $possibleDigits, array $cages, array $positionsToFind): void {
-    global $cagesMatch, $affectedPositions, $answer, $totalGuess, $totalCheck, $maskInfo;
+    global $cagesMatch, $affectedPositions, $answer, $maskInfo;
 
     $turn = 0;
 
@@ -129,8 +125,6 @@ function solve(array $grid, array $possibleDigits, array $cages, array $position
             $positionFound = false;
 
             foreach($positionsToFind as $index => $filler) {
-
-                ++$totalCheck;
 
                 //There is only only possible digit for this position
                 switch($possibleDigits[$index]) {
@@ -276,8 +270,6 @@ function solve(array $grid, array $possibleDigits, array $cages, array $position
         foreach($maskInfo[$possibleDigits[$position]]["digits"] as $value => $binary) {
             $possibleDigits[$position] = $binary;
 
-            ++$totalGuess;
-
             solve($grid, $possibleDigits, $cages, $positionsToFind);
         }
 
@@ -335,6 +327,9 @@ function generateMaskInfo(int $mask = 0, int $index = 0, array $digits = []) {
 
 $startTime = microtime(1);
 $answer = array_fill(0, 81, 0);
+$totalCages = 0;
+$maskInfo = [];
+$generated = [];
 
 generateMaskInfo();
 generateAffectedPositions();
@@ -438,6 +433,7 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
         * ...
         * 
         * Cages 'c' & cage 'e' are fully contained in the row, hence we can find the sum of 'bb...dee', 'bbcccd...'
+        * The case where we remove all the fully contained cages in the row is done when working with combinaisons of rows
         */
         if($countFullCages > 0) {
             for($size = 1; $size <= $countFullCages; ++$size) {
@@ -482,8 +478,6 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
             }
 
             /*
-            * If in a group of rows there's only one cage not fully contained
-            * 
             * EX:
             * abcccdeee
             * fbbgddhie
@@ -494,7 +488,7 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
             * The only cage not fully contained in the group (1-4) is the cage 'n', hence we can find the sum of all the positions of 'n' that are not in the group
             */
 
-            //There are not partial cages in the group of regions, we check the next one
+            //There are not partial cages in the group of rows, we check the next one
             if(count($partialCagesGroup) == 0) continue;
 
             //All the positions of the partial cages
@@ -506,14 +500,14 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
                 $partialSum += $cageSum;
             }
     
-            //All the positions OUTSIDE of the group of regions
+            //All the positions OUTSIDE of the group of rows
             $outsidePositions = array_diff_key($partialPositions, $rowsGroup);
             $sumOutside = $partialSum - $totalSum + $fullCagesSum;
             $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($outsidePositions);
     
             createCage($outsidePositions, $sumOutside, $uniqueDigits);
     
-            //All the positions INSIDE of the group of regions
+            //All the positions INSIDE of the group of rows
             $insidePositions = array_diff_key($partialPositions, $outsidePositions);
             $sumInside = $totalSum - $fullCagesSum;
             $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($insidePositions);
@@ -550,7 +544,7 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
         $countFullCages = count($fullCagesCol[$x]["cages"]);
 
         /*
-        * If there is at least one cage that is fully contained in the col
+        * If there is at least 2 cageq that are fully contained in the col
         *
         * EX:
         * bb...
@@ -607,8 +601,6 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
             }
 
             /*
-            * If in a group of cols there's only one cage not fully contained
-            * 
             * EX:
             * abc...
             * fbb...
@@ -623,7 +615,7 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
             * The only cage not fully contained in the group (1-2) is the cage 'b', hence we can find the sum of all the positions of 'b' that are not in the group
             */
 
-            //There are not partial cages in the group of regions, we check the next one
+            //There are not partial cages in the group of cols, we check the next one
             if(count($partialCagesGroup) == 0) continue;
     
             //All the positions of the partial cages
@@ -635,14 +627,14 @@ for($gridID = 0; $gridID < $numPuzzles; ++$gridID) {
                 $partialSum += $cageSum;
             }
     
-            //All the positions OUTSIDE of the group of regions
+            //All the positions OUTSIDE of the group of cols
             $outsidePositions = array_diff_key($partialPositions, $colsGroup);
             $sumOutside = $partialSum - $totalSum + $fullCagesSum;
             $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($outsidePositions);
     
             createCage($outsidePositions, $sumOutside, $uniqueDigits);
     
-            //All the positions INSIDE of the group of regions
+            //All the positions INSIDE of the group of cols
             $insidePositions = array_diff_key($partialPositions, $outsidePositions);
             $sumInside = $totalSum - $fullCagesSum;
             $uniqueDigits = count($partialCagesGroup) == 1 || checkUniqueDigits($insidePositions);
@@ -787,5 +779,4 @@ echo implode("\n", array_map(function($line) {
     return implode(" ", $line);
 }, array_chunk($answer, 9))) . PHP_EOL;
 
-error_log("Total duration: " . (microtime(1) - $startTime));
-error_log("Guess: $totalGuess -- Check: $totalCheck -- Cages: $totalCages");
+error_log("Total duration: " . (microtime(1) - $startTime) . " -- Cages: $totalCages");
