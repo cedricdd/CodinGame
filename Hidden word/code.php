@@ -8,8 +8,8 @@ function getRegex(string $word, int $w): array {
     return [
         ["/" . $word . "|" . $reverse . "/", 1], //Vertical
         ["/" . implode(".{" . ($w + 1) . "}", $split) . "|" . implode(".{" . ($w + 1) . "}", $splitReverse) . "/", $w + 2], //Horizontal
-        ["/" . implode(".{" . ($w + 2) . "}", $split) . "/", $w + 3], //Diagonal top to bottom
-        ["/" . implode(".{" . $w . "}", $splitReverse) . "/", $w + 1], //Diagonal bottom to top
+        ["/" . implode(".{" . ($w + 2) . "}", $split) . "|" . implode(".{" . ($w + 2) . "}", $splitReverse) . "/", $w + 3], //Diagonal top to bottom
+        ["/" . implode(".{" . $w . "}", $split) . "|" . implode(".{" . $w . "}", $splitReverse) . "/", $w + 1], //Diagonal bottom to top
     ];
 }
 
