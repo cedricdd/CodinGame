@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/335109b05841b7d6d8df103e0c3062ad09e74
+https://www.codingame.com/training/medium/chain-reaction
 
 Goal
 You're in a maze.
