@@ -103,6 +103,7 @@ foreach($clues as $index => $count) {
     //error_log(var_export($possibleIslands, true));
 
     if($possibleIslandsCount == 1) {
+        error_log(var_export("!!!!! $index", true));
         $islandPositions = array_pop($possibleIslands);
 
         foreach($islandPositions as $position => $filler) {
@@ -130,14 +131,26 @@ foreach($clues as $index => $count) {
 }
 
 error_log(var_export(str_split($grid, $N), true));
+error_log(microtime(1) - $start);
 //error_log(var_export($clues, true));
 //error_log(var_export($counts, true));
 //exit();
 
 function checkWater(string $grid) {
-    global $water, $neighbors, $N;
+    static $count;
+    global $water, $neighbors, $N, $start;
 
-    $startPosition = strpos($grid, ".");
+    $grid = str_replace(".", "~", $grid);
+
+    $formattedGrid = implode("", array_map(function($line) {
+        return "#" . $line . "#";
+    }, str_split($grid, $N)));
+
+    //error_log(var_export(++$count, true));
+
+    if(preg_match("/~~.{" . $N . "}~~/", $formattedGrid)) return;
+
+    $startPosition = strpos($grid, "~");
     $toCheck = [$startPosition];
     $count = 0;
     $list = [];
@@ -164,15 +177,18 @@ function checkWater(string $grid) {
 
     if($count == $water) {
         //error_log(var_export(str_split($grid, $N), true));
-        error_log(var_export("found one", true));
-        //exit();
+        echo implode("\n", str_split($grid, $N)) . PHP_EOL;
+        error_log(microtime(1) - $start);
+        exit();
     } else {
         //error_log(var_export("water doesn't match $count != $water", true));
     }
 }
 
-function solve(array $islands, array $counts, string $grid, int $islandsToFind) {
+function solve(array $islands, array $counts, string $grid, int $islandsToFind, bool $debug = false) {
     global $islandsWithWater, $positions, $clues, $N;
+
+    //error_log(var_export("left $islandsToFind", true));
 
     if($islandsToFind == 0) {
         checkWater($grid);
@@ -198,6 +214,8 @@ function solve(array $islands, array $counts, string $grid, int $islandsToFind) 
     
     foreach($islands[$clue] as $islandIndex => $island) {
 
+        //if($clue == 9 && $islandIndex == 1) exit();
+
         $islands2 = $islands;
         $counts2 = $counts;
         $grid2 = $grid;
@@ -205,11 +223,21 @@ function solve(array $islands, array $counts, string $grid, int $islandsToFind) 
         unset($islands2[$clue]);
         unset($counts2[$clue]);
 
-        //error_log("using island #$islandIndex " . implode("-", array_keys($island)));
+        //if(implode("-", array_keys($island)) == "18-23") $debug = true;
+
+        //error_log("using island #$islandIndex " . implode("-", array_keys($island)) . " for clue #$clue");
+
+        if($clue == 23) {
+            //error_log("using island #$islandIndex " . implode("-", array_keys($island)) . " for clue #$clue");
+            //error_log($counts2[15]);
+            //error_log(var_export(implode("-", array_keys($islands2[15])), true));
+        }
 
         foreach($island as $islandPosition => $filler) {
             $grid2[$islandPosition] = $clues[$clue];
         }
+
+        //if(implode("-", array_keys($island)) == "10-11-15-16-20-21") error_log(var_export(str_split($grid2, $N), true));
 
         foreach($islandsWithWater[$islandIndex] as $islandPosition => $filler) {
 
@@ -219,20 +247,32 @@ function solve(array $islands, array $counts, string $grid, int $islandsToFind) 
                 if(!isset($counts2[$clueIndex2])) continue;
 
                 foreach($listIslands as $indexToRemove) {
-                    //error_log("island #$indexToRemove for clue #$clueIndex2 can't be used anymore because of pos $islandPosition");
+                    if(!isset($islands2[$clueIndex2][$indexToRemove])) continue;
+
+                    //if($indexToRemove == 13) error_log("island #$indexToRemove for clue #$clueIndex2 can't be used anymore because of pos $islandPosition");
 
                     if(--$counts2[$clueIndex2] == 0) continue 4;
+
+                    if($debug) {
+                        //error_log($counts2[$clueIndex2]);
+                    }
+            
 
                     unset($islands2[$clueIndex2][$indexToRemove]);
                 }
             }
         }
 
+        if($debug) {
+            //error_log(count($islands[15]));
+        }
+
+        if($clue == 9 && $islandIndex != 0) $debug = 0;
+
         solve($islands2, $counts2, $grid2, $islandsToFind - 1);
 
     }
 }
 
-solve($islands, $counts, $grid, $islandsToFind);
+solve($islands, $counts, $grid, $islandsToFind, 1);
 
-error_log(microtime(1) - $start);
