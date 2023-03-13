@@ -5,19 +5,19 @@ $start = microtime(1);
 
 fscanf(STDIN, "%d", $N);
 
-$grid = "";
+$grid = str_repeat("#", $N + 2);
 $water = $N * $N;
 
 for($y = 0; $y < $N; ++$y) {
     $line = trim(fgets(STDIN));
 
     foreach(str_split($line) as $x => $c) {
-        $index = $y * $N + $x;
+        $index = ($y + 1) * ($N + 2) + $x + 1;
 
         if($x > 0) $neighbors[$index][] = $index - 1;
         if($x < $N - 1) $neighbors[$index][] = $index + 1;
-        if($y > 0) $neighbors[$index][] = $index - $N;
-        if($y < $N - 1) $neighbors[$index][] = $index + $N;
+        if($y > 0) $neighbors[$index][] = $index - ($N + 2);
+        if($y < $N - 1) $neighbors[$index][] = $index + $N + 2;
 
         if($c != ".") {
             $clues[$index] = $c;
@@ -25,9 +25,12 @@ for($y = 0; $y < $N; ++$y) {
         }
     }
 
-    $grid .= $line;
+    $grid .= "#" . $line . "#";
 }
 
+$grid .= str_repeat("#", $N + 2);
+
+/*
 foreach($clues as $position => $count) {
     if($count == 1) {
         foreach($neighbors[$position] as $neighbor) {
@@ -36,16 +39,12 @@ foreach($clues as $position => $count) {
 
         unset($clues[$position]);
     }
-}
+}*/
 
-function placeForcedWater() {
-    global $grid, $N, $clues, $neighbors;
+function placeForcedWater(string &$grid, int $N): bool {
 
-    $gridRegex = str_repeat("#", $N + 2) . implode("", array_map(function($line) {
-        return "#" . $line . "#";
-    }, str_split($grid, $N))) . str_repeat("#", $N + 2);
-
-    foreach(str_split($gridRegex, $N + 2) as $line) error_log($line);
+    //foreach(str_split($grid, $N + 2) as $line) error_log($line);
+    $positionFound = false;
 
     $regexes = [
         //X.X
@@ -68,38 +67,37 @@ function placeForcedWater() {
         ["/[1-9](?=.{" . ($N + 1) . "}\.[1-9])/", $N + 2],
         //.X.
         //X~X
-        ["/[1-9#](?=.{" . $N . "}[0-9#]~[0-9#])/", ($N + 2) * 2],
+        //*.*
+        ["/[1-9#](?=.{" . $N . "}[0-9#]~[0-9#].{" . $N . "}\.)/", ($N + 2) * 2],
+        //*.*
         //X~X
         //.X.
-        ["/[1-9#](?=~[0-9#].{" . $N . "}[0-9#])/", -($N + 1)],
-        //.X
-        //X~
-        //.X
-        ["/[1-9#](?=.{" . $N . "}[0-9#]~.{" . ($N + 1) . "}[0-9#])/", $N + 3],
-        //X.
-        //~X
-        //X.
-        ["/[1-9#](?=.{" . ($N + 1) . "}~[0-9#].{" . $N . "}[0-9#])/", $N + 1],
+        ["/\..{" . $N . "}[1-9#](?=~[0-9#].{" . $N . "}[0-9#])/", 0],
+        //.X*
+        //X~.
+        //.X*
+        ["/[1-9#](?=.{" . $N . "}[0-9#]~\..{" . $N . "}[0-9#])/", $N + 3],
+        //*X.
+        //.~X
+        //*X.
+        ["/[1-9#](?=.{" . $N . "}\.~[0-9#].{" . $N . "}[0-9#])/", $N + 1],
     ];
 
     foreach($regexes as [$regex, $shift]) {
         //error_log(var_export($gridRegex, true));
-        preg_match_all($regex, $gridRegex, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all($regex, $grid, $matches, PREG_OFFSET_CAPTURE);
 
         //error_log(var_export($matches, true));
     
         foreach($matches[0] as [, $position]) {
-            $waterPosition = $position + $shift;
-
-            $gridRegex[$waterPosition] = "~";
-
-            [$x, $y] = [($waterPosition % ($N + 2)) - 1, intdiv($waterPosition, $N + 2) - 1];
-    
-            //error_log(var_export("$x $y " . ($y * $N + $x) . " -- $waterPosition", true));
-    
-            $grid[$y * $N + $x] = "~";
+            $grid[$position + $shift] = "~";
+            //error_log(var_export($regex, true));
+            //error_log(var_export($matches[0], true));
+            $positionFound = true;
         }
     }
+
+    return $positionFound;
 }
 
 function getIslands(int $position, int $count): array {
@@ -145,43 +143,117 @@ function getIslands(int $position, int $count): array {
     return $islands;
 }
 
+function checkSquareWater(string &$grid, array &$possibleIslands, int $size) {
+
+    //foreach(str_split($grid, $size + 2) as $line) error_log($line);
+
+    $regexes = [
+        //~~
+        //~.
+        ["/~~.{" . $size . "}~\./", $size + 3],
+        //~~
+        //.~
+        ["/~~.{" . $size . "}\.~/", $size + 2],
+        //.~
+        //~~
+        ["/\.~.{" . $size . "}~~/", 0],
+        //~.
+        //~~
+        ["/~\..{" . $size . "}~~/", 1],
+    ];
+
+    $regexes = [
+        //~.
+        //..
+        ["/[~\.](?=[~\.].{" . $size . "}[~\.][~\.])/", [0, 1, $size + 2, $size + 3]],
+    ];
+
+
+    while(true) {
+        [$regex, $listShift] = current($regexes);
+        $possibilitesReduced = false;
+
+        //error_log(var_export("$regex $shift", true));
+        preg_match_all($regex, $grid, $matches, PREG_OFFSET_CAPTURE);
+
+        //error_log(var_export($matches, true));
+    
+        foreach($matches[0] as [, $position]) {
+            $possibilites = [];
+
+            error_log(var_export($position, true));
+
+            foreach($possibleIslands as $clueIndex => $islands) {
+                foreach($islands as $islandIndex => $listPositions) {
+                    foreach($listShift as $shift) {
+                        if(isset($listPositions[$position + $shift])) {
+                            $possibilites[$clueIndex][$islandIndex] = 1;
+                        }
+                    }
+                }
+            }
+            
+            if(count($possibilites) == 1) {
+                
+                $clueIndex = array_key_first($possibilites);
+                $countBefore = count($possibleIslands[$clueIndex]);
+
+                $possibleIslands[$clueIndex] = array_intersect_key($possibleIslands[$clueIndex], $possibilites[$clueIndex]);
+
+                $countAfter = count($possibleIslands[$clueIndex]);
+
+                error_log(var_export("only clue $clueIndex -- $countBefore => $countAfter", true));
+
+                $possibilitesReduced |= ($countBefore != $countAfter);
+            }
+        }
+
+        if($possibilitesReduced) reset($regexes);
+        elseif(next($regexes) == false) break;
+    };
+}
+
 do {
     error_log(var_export("run search", true));
 
-    $islandsToFind = count($clues);
-    $counts = [];
-    $islands = [];
+    //$islandsToFind = count($clues);
+    $possibleIslands = [];
     $indexIsland = 0;
     $positions = array_fill(0, $N * $N, []);
-    $test = 0;
-    $uniqueIslandFound = false;
-    $noIsland = [];
 
-    placeForcedWater($grid, $N);
 
-    for($i = 0; $i < $N * $N; ++$i) {
-        if($grid[$i] == ".") $noIsland[$i] = 1;
+    $positionFound = placeForcedWater($grid, $N);
+
+    foreach($clues as $cluePosition => $clueCount) {
+
+        foreach(getIslands($cluePosition, $clueCount) as $islandPositions) {
+            foreach($islandPositions as $position => $filler) {
+                $positions[$position][$cluePosition][$indexIsland] = 1;
+
+                /*
+                foreach($neighbors[$position] as $neighbor) {
+                    $islandsWithWater[$indexIsland][$neighbor] = 1;
+                }*/
+            }
+
+            $possibleIslands[$cluePosition][$indexIsland++] = $islandPositions;
+        }
+
+        //$counts[$index] = $possibleIslandsCount;
     }
 
-    foreach($clues as $index => $count) {
-        $possibleIslands = getIslands($index, $count);
-        $possibleIslandsCount = count($possibleIslands);
+    checkSquareWater($grid, $possibleIslands, $N);
 
-        $test += $possibleIslandsCount;
-
-        //error_log(var_export($possibleIslands, true));
-
-        if($possibleIslandsCount == 1) {
-            error_log(var_export("!!!!! $index", true));
-            $uniqueIslandFound = true;
-            $islandPositions = array_pop($possibleIslands);
-
+    foreach($possibleIslands as $clueIndex => $islands) {
+        if(count($islands) == 1) {
+            $positionFound = true;
+            $islandPositions = array_pop($islands);
+    
             foreach($islandPositions as $position => $filler) {
                 unset($positions[$position]);
-                unset($counts[$position]);
-                unset($noIsland[$position]);
-                $grid[$position] = $count;
 
+                $grid[$position] = $clues[$clueIndex];
+    
                 foreach($neighbors[$position] as $neighbor) {
                     if(!isset($islandPositions[$neighbor])) {
                         $grid[$neighbor] = "~";
@@ -189,35 +261,39 @@ do {
                 }
             }
 
-            --$islandsToFind;
-        } else {
-            foreach($possibleIslands as $islandPositions) {
-                foreach($islandPositions as $position => $filler) {
-                    $positions[$position][$index][] = $indexIsland;
-
-                    foreach($neighbors[$position] as $neighbor) {
-                        $islandsWithWater[$indexIsland][$neighbor] = 1;
-                    }
-
-                    unset($noIsland[$position]);
-                }
-
-                $islands[$index][$indexIsland++] = $islandPositions;
-            }
-
-            $counts[$index] = $possibleIslandsCount;
+            unset($clues[$clueIndex]);
         }
     }
 
-    foreach($noIsland as $position => $filler) {
-        $grid[$position] = "~";
+    $unknownPositions = array_filter(str_split($grid), function($position) {
+        return $position == ".";
+    });
+
+    //error_log(var_export($unknownPositions, true));
+
+    foreach($possibleIslands as $islands) {
+        foreach($islands as $island) {
+            foreach($island as $position => $filler) {
+                unset($unknownPositions[$position]);
+            }
+        }
     }
 
-} while($uniqueIslandFound);
+    foreach($unknownPositions as $position => $filler) {
+        $grid[$position] = "~";
+        $positionFound = true;
+    }
 
-foreach(str_split($grid, $N) as $line) error_log($line);
-error_log(var_export($test, true));
+    foreach(str_split($grid, $N + 2) as $line) error_log($line);
+
+} while($positionFound && count($clues));
+
 error_log(microtime(1) - $start);
+
+echo implode("\n", array_map(function($line) {
+    return substr($line, 1, -1);
+}, array_slice(str_split($grid, $N + 2), 1, -1))) . PHP_EOL;
+
 exit();
 
 //All positions with no island is a forced water
