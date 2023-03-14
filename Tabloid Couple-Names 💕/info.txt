@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/464135c71022fb3cb7616f5b58253359f38dc
+https://www.codingame.com/training/easy/tabloid-couple-names
 
 Goal
 When two famous people get together and form a romantic couple, the Tabloids love to write about them and their adventures, scandals, and relationship drama.
