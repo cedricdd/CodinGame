@@ -1,11 +1,10 @@
-https://www.codingame.com/contribute/view/46053956831b4324bf2a6e36521916e52a727
+https://www.codingame.com/training/easy/fix-the-spaces
 
 Goal
 You are given two strings, the first contains the original sentence, with words in the right order but no spaces. 
 The second has the words in random order but with spaces to differentiate them. Fix the original sentence by adding spaces where they should be.
 
-Every test has at least one solution, but there are some cases where the original sentence can not unambiguously be deciphered. 
-In those cases print Unsolvable.
+Every test has at least one solution, but there are some cases where the original sentence can not unambiguously be deciphered. In those cases print Unsolvable.
 
 NB: Tests 1-8 cover simple cases and should help you debug your program. Tests 9-10 check the performance.
 
