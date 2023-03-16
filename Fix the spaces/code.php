@@ -1,33 +1,44 @@
 <?php
 
-function solve(string $sentence, array $words, array $list) {
+function solve(string $sentence, array $words, array $result) {
     global $solutions;
 
     //We have used all the words, we have found a solution
     if(empty($sentence)) {
-        $solutions[] = $list;
+        $solutions[] = $result;
         return;
-    } else $indexWord = count($list); //The index of the next word
+    } else $indexWord = count($result); //The index of the next word
 
     //We test all the words that are left
-    foreach($words as $word => [$count, $size]) {
-        //If the sentence starts with the word, we try to use that word
-        if(substr($sentence, 0, $size) == $word) {
-            $wordsUpdated = $words;
+    foreach($words as $size => $list) {
+        $match = substr($sentence, 0, $size);
+        $rest = substr($sentence, $size);
 
-            if($wordsUpdated[$word][0]-- == 1) unset($wordsUpdated[$word]); 
+         foreach($list as $word => $count) {
+            //If the sentence starts with the word, we try to use that word
+            if($match == $word) {
+                $wordsUpdated = $words;
 
-            solve(substr($sentence, $size), $wordsUpdated, $list + [$indexWord => $word]);
-        }
+                if($count == 1) { 
+                    if(count($list) == 1) unset($wordsUpdated[$size]); //This was the last word of this size
+                    else unset($wordsUpdated[$size][$word]);  //We can't use this word anymore
+                }
+                else $wordsUpdated[$size][$word]--; //We can use this word again
+
+                solve($rest, $wordsUpdated, $result + [$indexWord => $word]);
+            }
+         }
     }
 }
 
+
 $original = trim(fgets(STDIN));
 foreach(explode(" ", trim(fgets(STDIN))) as $word) {
-    if(isset($words[$word])) $words[$word][0]++;
-    else $words[$word] = [1, strlen($word)];
+    $size = strlen($word);
+
+    if(isset($words[$size][$word])) $words[$size][$word]++;
+    else $words[$size][$word] = 1;
 }
-$solutions = [];
 
 solve($original, $words, []);
 
