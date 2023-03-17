@@ -36,68 +36,66 @@ function canReachBorder(string $grid, int $start, array &$isLinkedToBorder): boo
 
 //Check if all the water is forming a continuous shape
 function checkContinuousWater(string $grid): bool {
-    global $totalWater, $neighborsC;
+    global $neighborsC;
 
+    $totalWater = substr_count($grid, "~");
     $startPosition = strpos($grid, "~");
     $toCheck = [$startPosition];
-    $count = 0;
-    $list = [];
+    $waterFound = 0;
+    $visited = [];
 
     while(count($toCheck)) {
         $newCheck = [];
 
         foreach($toCheck as $position) {
-            if(isset($list[$position])) continue;
-            else $list[$position] = 1;
+            if(isset($visited[$position]) || ctype_digit($grid[$position])) continue;
+            else $visited[$position] = 1;
 
-            if(++$count >= $totalWater) return true; //We count all the "." or "~" we can reach
+            if($grid[$position] == "~") ++$waterFound;
 
             foreach($neighborsC[$position] as $neighbor) {
-                if(!ctype_digit($grid[$neighbor])) $newCheck[] = $neighbor;
+                $newCheck[] = $neighbor;
             }
         }
 
         $toCheck = $newCheck;
     }
 
-    return false;
+    return $waterFound == $totalWater;
 }
 
 //There are no water areas of 2x2 so we need a part of an island in at least one of the 4 positions
 function checkSquareWater(string &$grid, array &$positions, array &$possibleIslands, int $size) {
 
-    do {
+    $lastChecked = null;
 
+    do {
         $possibilitesReduced = false;
 
         preg_match_all("/[~\.](?=[~\.].{" . $size . "}[~\.][~\.])/", $grid, $matches, PREG_OFFSET_CAPTURE);
 
         foreach($matches[0] as [, $position]) {
-            //if($debug) error_log("working on position: $position");
-
             $candidatesIslands = [];
 
+            //Get all the islands that can reach any of the 4 positions
             foreach([0, 1, $size + 2, $size + 3] as $shift) {
-                if(!isset($positions[$position + $shift])) continue;
+                if(!isset($positions[$position + $shift])) continue; //This positions has already been found
 
                 $candidatesIslands += $positions[$position + $shift];
             }
-
-            //First we need to check if only islands from the same clue can reach all the positions
-            if(count(array_unique($candidatesIslands)) == 1) {
-
+            
+            //We can only eliminate islands if all the solutions are part of the same clue
+            if(count(array_flip($candidatesIslands)) == 1) {
                 $clueIndex = reset($candidatesIslands);
 
-                //Every possible islands that's not in the candidate list can be elimnated
+                //Every possible islands that's not in the candidate list can be eliminated
                 foreach(array_diff_key($possibleIslands[$clueIndex], $candidatesIslands) as $islandIndex => $filler) {
-                    //if($debug) error_log(var_export("need to remove $islandIndex", true));
                     removedPossibleIsland($possibleIslands, $positions, $clueIndex, $islandIndex);
 
                     $possibilitesReduced = true;
                 }
             }
         }
-
     } while($possibilitesReduced);
 }
 
@@ -122,7 +120,7 @@ function generateIslands(int $startPosition, int $count, string $grid): array {
                     //We can't expand the island on this position
                     if(isset($forbidden[$neighbor]) || isset($islandPositions[$neighbor])) continue; 
 
-                    //This position is water of another clue
+                    //This position is water or another clue
                     if($grid[$neighbor] != ".") {
                         $forbidden[$neighbor] = 1;
                         continue; 
@@ -154,12 +152,11 @@ function generateIslands(int $startPosition, int $count, string $grid): array {
     return $islands;
 }
 
+//Remove an island from the list of possible islands for a clue
 function removedPossibleIsland(array &$possibleIslands, array &$positions, int $clueIndex, int $islandIndex) {
 
     //Update all the positions this island would have occupied
     foreach($possibleIslands[$clueIndex][$islandIndex] as $position => $filler) {
-        if(!isset($positions[$position])) continue;
-
         unset($positions[$position][$islandIndex]);
     }
 
@@ -167,20 +164,19 @@ function removedPossibleIsland(array &$possibleIslands, array &$positions, int $
     unset($possibleIslands[$clueIndex][$islandIndex]);
 }
 
+//We set a position of the grid
 function setPosition(int $position, int $clueIndex, string &$grid, array &$clueByPosition, array &$positions, array &$possibleIslands, bool $dropIslands = true): bool {
     global $clues;
 
-    if($grid[$position] != ".") return false;
-
-    //if($debug) error_log("setting $position as " . ($clues[$clueIndex] ?? "~"));
+    if($grid[$position] != ".") return false; //This position was already set
 
     $grid[$position] = $clues[$clueIndex] ?? "~";
 
     $clueByPosition[$position] = $clueIndex; //We save what clue this position belongs to (only used if it's not water)
 
-    //We don't want to drop the island when we are only adding partial island
+    //We don't want to drop the associated islands when we are only adding partial island
     if($dropIslands) {
-        //Every islands that was using this position can't be used anymore
+        //Every islands that is using this position need to be removed
         foreach($positions[$position] as $islandIndex => $clueIndex) {
             removedPossibleIsland($possibleIslands, $positions, $clueIndex, $islandIndex);
         }
@@ -191,12 +187,100 @@ function setPosition(int $position, int $clueIndex, string &$grid, array &$clueB
     return true;
 }
 
+function solve(string $grid, array $positions, array $possibleIslands, array $clueByPosition, array $isLinkedToBorder) {
+
+    global $W, $neighborsC, $start;
+
+    do {
+        $positionFound = false;
+
+        checkSquareWater($grid, $positions, $possibleIslands, $W);
+
+        foreach($possibleIslands as $clueIndex => $islands) {
+            //There are no possible island left for this clue, one of the guess was wrong
+            if(count($islands) == 0) return;
+            //There is only one possible island for this clue, we use it
+            elseif(count($islands) == 1) {
+                $islandPositions = array_pop($islands);
+
+                foreach($islandPositions as $position => $filler) {
+                    $positionFound |= setPosition($position, $clueIndex, $grid, $clueByPosition, $positions, $possibleIslands);
+
+                    //Every direct neighbor of the island is water
+                    foreach($neighborsC[$position] as $neighbor) {
+                        if(!isset($islandPositions[$neighbor])) {
+                            setPosition($neighbor, 0, $grid, $clueByPosition, $positions, $possibleIslands);
+                        }
+                    }
+                }
+    
+                unset($possibleIslands[$clueIndex]);
+            } 
+            //There are multiple possible islands, check if they all have common positions
+            else {    
+                $positionsCommon = $positionsCommon = array_intersect_key(...$islands);
+
+                //Every islands uses the clue, we need more than one
+                if(count($positionsCommon) > 1) {
+                    foreach($positionsCommon as $position => $filler) {
+                        $positionFound |= setPosition($position, $clueIndex, $grid, $clueByPosition, $positions, $possibleIslands, false);
+                    }
+                }
+            }
+        }
+
+        //Every positions that no island can reach has to be water
+        foreach(array_filter($positions, function($possibilites) { return count($possibilites) == 0; }) as $position => $filler) {
+            //error_log(var_export("$position is water", true));
+            $positionFound |= setPosition($position, 0, $grid, $clueByPosition, $positions, $possibleIslands);
+        }
+
+        $positionFound |= placeForcedWater($grid, $clueByPosition, $positions, $possibleIslands, $isLinkedToBorder);
+
+    } while($positionFound && count($possibleIslands));
+
+
+    if(checkContinuousWater($grid) == false) return;
+
+    //We are done, we have found all the islands
+    if(count($possibleIslands) == 0) {
+
+        //We need to remove the "#" used for regex
+        echo implode("\n", array_map(function($line) {
+            return substr($line, 1, -1);
+        }, array_slice(str_split($grid, $W + 2), 1, -1))) . PHP_EOL;
+
+        error_log(microtime(1) - $start);
+        exit();
+
+    } else {
+        //We make a guess for the clue that has the less possible islands
+        uasort($possibleIslands, function($a, $b) {
+            return count($a) <=> count($b);
+        });
+
+        $clueIndex = array_key_first($possibleIslands);
+
+        foreach($possibleIslands[$clueIndex] as $islandIndex => $island) {
+            $possibleIslands2 = $possibleIslands;
+            $positions2 = $positions;
+            
+            foreach($possibleIslands[$clueIndex] as $islandIndex2 => $island2) {
+                if($islandIndex == $islandIndex2) continue;
+
+                removedPossibleIsland($possibleIslands2, $positions2, $clueIndex, $islandIndex2);
+            }
+
+            solve($grid, $positions2, $possibleIslands2, $clueByPosition, $isLinkedToBorder); 
+        }
+    }
+}
+
 //Place water everywhere we are sure there must be water
 function placeForcedWater(string &$grid, array &$clueByPosition, array &$positions, array &$possibleIslands, array &$isLinkedToBorder): bool {
 
     global $W;
 
-    //foreach(str_split($grid, $N + 2) as $line) error_log($line);
     $positionFound = false;
 
     //All islands are isolated from each other horizontally and vertically
@@ -225,12 +309,9 @@ function placeForcedWater(string &$grid, array &$clueByPosition, array &$positio
         preg_match_all($regex, $grid, $matches, PREG_OFFSET_CAPTURE);
 
         foreach($matches[0] as [, $position]) {
-
-            //if($position == 10) error_log("!!!!!!!! " . ($position + $s1) . "(". $clueByPosition[$position + $s1] . ") & " .($position + $s2) . "(" . $clueByPosition[$position + $s2] . ")");
-
-            //The numbers are not from the same island
+            //The digits need to be related to different clues
             if($clueByPosition[$position + $s1] != $clueByPosition[$position + $s2]) {
-                $positionFound -= setPosition($position, 0, $grid, $clueByPosition, $positions, $possibleIslands);
+                $positionFound |= setPosition($position, 0, $grid, $clueByPosition, $positions, $possibleIslands);
             }
         }
     }
@@ -308,17 +389,8 @@ function placeForcedWater(string &$grid, array &$clueByPosition, array &$positio
         preg_match_all($regex, $grid, $matches, PREG_OFFSET_CAPTURE);
 
         foreach($matches[0] as [, $position]) {
-            if($clueByPosition[$position + $s1] != $clueByPosition[$position + $s2]) {
-
-                if(canReachBorder($grid, $position + $s1, $isLinkedToBorder) && canReachBorder($grid, $position + $s2, $isLinkedToBorder)) {
-                    
-                        //error_log("$regex -- $position need to check " . ($position + $s1) . "(" . $clueByPosition[$position + $s1] . ") & " . ($position + $s2) . "(" . $clueByPosition[$position + $s2] . ")");
-                        //error_log(($position + $s2) . " " . canReachBorder($grid, $position + $s2));
-                    
-
-
-                    $positionFound |= setPosition($position, 0, $grid, $clueByPosition, $positions, $possibleIslands);
-                }
+            if($clueByPosition[$position + $s1] != $clueByPosition[$position + $s2] && canReachBorder($grid, $position + $s1, $isLinkedToBorder) && canReachBorder($grid, $position + $s2, $isLinkedToBorder)) {
+                $positionFound |= setPosition($position, 0, $grid, $clueByPosition, $positions, $possibleIslands);
             }
         }
     }
@@ -347,10 +419,6 @@ function placeForcedWater(string &$grid, array &$clueByPosition, array &$positio
         preg_match_all($regex, $grid, $matches, PREG_OFFSET_CAPTURE);
 
         foreach($matches[0] as [, $position]) {
-
-            error_log($position . " is " . canReachBorder($grid, $position + $shift, $isLinkedToBorder));
-            //exit();
-
             if(canReachBorder($grid, $position + $shift, $isLinkedToBorder)) {
                 $positionFound |= setPosition($position, 0, $grid, $clueByPosition, $positions, $possibleIslands);
             }
@@ -364,13 +432,12 @@ $start = microtime(1);
 
 fscanf(STDIN, "%d", $W);
 
-$grid = str_repeat("#", $W + 2);
 $clueByPosition = [];
-$totalWater = $W * $W;
 $positions = [];
 $possibleIslands = [];
 $indexIsland = 0;
 $isLinkedToBorder = [];
+$grid = str_repeat("#", $W + 2); //We surround the grid with "#" to make some regex search
 
 for($y = 0; $y < $W; ++$y) {
     $line = trim(fgets(STDIN));
@@ -389,7 +456,6 @@ for($y = 0; $y < $W; ++$y) {
             $clueByPosition[$index] = $index;
 
             $clues[$index] = $c;
-            $totalWater -= $c;
         } else {
             $positions[$index] = [];
         }
@@ -403,119 +469,14 @@ $grid .= str_repeat("#", $W + 2);
 placeForcedWater($grid, $clueByPosition, $positions, $possibleIslands, $isLinkedToBorder);
 
 foreach($clues as $clueIndex => $clueCount) {
-
     foreach(generateIslands($clueIndex, $clueCount, $grid) as $island) {
         foreach($island as $position => $filler) {
 
-            //For each positions we want to know what island are using it
+            //For each positions we want to know what island are reaching it
             $positions[$position][$indexIsland] = $clueIndex;
         }
 
         $possibleIslands[$clueIndex][$indexIsland++] = $island;
-    }
-}
-
-function solve(string $grid, array $positions, array $possibleIslands, array $clueByPosition, array $isLinkedToBorder) {
-
-    global $W, $clues, $neighborsC, $start;
-
-    do {
-        $positionFound = false;
-
-        //error_log("start new round");
-
-        checkSquareWater($grid, $positions, $possibleIslands, $W);
-
-        foreach($possibleIslands as $clueIndex => $islands) {
-            //There is only one possible island for this clue, we use it
-            if(count($islands) == 0) {
-                //error_log("stop because no more island for clue $clueIndex");
-                return;
-            }
-            elseif(count($islands) == 1) {
-                $islandPositions = array_pop($islands);
-
-                //if($debug) error_log("clue $clueIndex only one island");
-
-                foreach($islandPositions as $position => $filler) {
-                    $positionFound |= setPosition($position, $clueIndex, $grid, $clueByPosition, $positions, $possibleIslands);
-
-                    //Every direct neighbor of the island is water
-                    foreach($neighborsC[$position] as $neighbor) {
-                        if(!isset($islandPositions[$neighbor])) {
-                            setPosition($neighbor, 0, $grid, $clueByPosition, $positions, $possibleIslands);
-                        }
-                    }
-                }
-    
-                unset($possibleIslands[$clueIndex]);
-            } else {
-                
-                $positionsCommon = reset($islands);
-    
-                while($next = next($islands)) {
-                    $positionsCommon = array_intersect_key($positionsCommon, $next);
-                }
-
-                //error_log(var_export($clueIndex, true));
-                //error_log(var_export($positionsCommon, true));
-    
-                if(count($positionsCommon) > 1) {
-                    foreach($positionsCommon as $position => $filler) {
-                        $positionFound |= setPosition($position, $clueIndex, $grid, $clueByPosition, $positions, $possibleIslands, false);
-                    }
-                }
-            }
-        }
-
-        //Every positions that no island can reach has to be water
-        foreach(array_filter($positions, function($possibilites) { return count($possibilites) == 0; }) as $position => $filler) {
-            //error_log(var_export("$position is water", true));
-            $positionFound |= setPosition($position, 0, $grid, $clueByPosition, $positions, $possibleIslands);
-        }
-
-        $positionFound |= placeForcedWater($grid, $clueByPosition, $positions, $possibleIslands, $isLinkedToBorder);
-
-    } while($positionFound && count($possibleIslands));
-
-    //foreach(str_split($grid, $W + 2) as $line) error_log(var_export($line, true));
-
-    if(checkContinuousWater($grid) == false) {
-        //error_log("not continuous water");
-        return;
-    }
-
-    //We are done, we have found all the islands
-    if(count($possibleIslands) == 0) {
-
-        echo implode("\n", array_map(function($line) {
-            return substr($line, 1, -1);
-        }, array_slice(str_split($grid, $W + 2), 1, -1))) . PHP_EOL;
-
-        error_log(microtime(1) - $start);
-        exit();
-
-    } else {
-        uasort($possibleIslands, function($a, $b) {
-            return count($a) <=> count($b);
-        });
-
-        $clueIndex = array_key_first($possibleIslands);
-
-        foreach($possibleIslands[$clueIndex] as $islandIndex => $island) {
-            //error_log("we need to test $islandIndex for $clueIndex -- " . (microtime(1) - $start));
-
-            $possibleIslands2 = $possibleIslands;
-            $positions2 = $positions;
-            
-            foreach($possibleIslands[$clueIndex] as $islandIndex2 => $island2) {
-                if($islandIndex == $islandIndex2) continue;
-
-                removedPossibleIsland($possibleIslands2, $positions2, $clueIndex, $islandIndex2);
-            }
-
-            solve($grid, $positions2, $possibleIslands2, $clueByPosition, $isLinkedToBorder); 
-        }
     }
 }
 
