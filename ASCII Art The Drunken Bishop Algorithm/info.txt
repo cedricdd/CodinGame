@@ -1,4 +1,4 @@
-
+https://www.codingame.com/training/easy/ascii-art-the-drunken-bishop-algorithm
 
 Goal
 Have you ever wondered how the OpenSSH Random Art is produced?
