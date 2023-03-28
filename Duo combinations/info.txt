@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/444003c378ae1693cd64fa0ee55052d59e9b9
+https://www.codingame.com/training/medium/duo-combinations
 
 Goal
 We as programmers know about the binary, which machine understands. A Binary combination of 0 and 1 for n bits holds 1 < < n or 2 raised to the power of n combinations. 
