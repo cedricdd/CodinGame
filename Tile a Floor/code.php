@@ -7,6 +7,7 @@ const REP3 = ['/' => '\\'];
 fscanf(STDIN, "%d", $N);
 $size = $N * 2 - 1;
 
+//Start with the borders of the 4 quadrants
 for($y = 0; $y < 4 * $N + 1; ++$y) {
     $floor[] = str_repeat(" ", 4 * $N + 1);
 
@@ -22,17 +23,16 @@ for ($y = 1; $y <= $N; $y++) {
     for ($x = 1; $x <= $N; $x++) {
         if($line[$x - 1] == " ") continue;
 
+        //For the 4 quadrants, top-left, top-right, bottom-left, bottom-right
         foreach([[0, 0], [2 * $N, 0], [0, 2 * $N], [2 * $N, 2 * $N]] as [$xm, $ym]) {
+            //Top left tile 
             $floor[$y + $ym][$x + $xm] = $line[$x - 1];
-            if($x != $N) {
-                $floor[$y + $ym][2 * $N - $x + $xm] = strtr($line[$x - 1], array_merge(REP1, array_flip(REP1), REP3, array_flip(REP3)));
-            }
-            if($y != $N) {
-                $floor[2 * $N - $y + $ym][$x + $xm] = strtr($line[$x - 1], array_merge(REP2, array_flip(REP2), REP3, array_flip(REP3)));
-            }
-            if($x != $N && $y != $N) {
-                $floor[2 * $N - $y + $ym][2 * $N - $x + $xm] = strtr($line[$x - 1], array_merge(REP1, array_flip(REP1), REP2, array_flip(REP2)));
-            }
+            //Top right tile
+            if($x != $N) $floor[$y + $ym][2 * $N - $x + $xm] = strtr($line[$x - 1], array_merge(REP1, array_flip(REP1), REP3, array_flip(REP3)));
+            //Bottom left tile
+            if($y != $N) $floor[2 * $N - $y + $ym][$x + $xm] = strtr($line[$x - 1], array_merge(REP2, array_flip(REP2), REP3, array_flip(REP3)));
+            //Bottom right tile
+            if($x != $N && $y != $N) $floor[2 * $N - $y + $ym][2 * $N - $x + $xm] = strtr($line[$x - 1], array_merge(REP1, array_flip(REP1), REP2, array_flip(REP2)));
         }
     }
 }
