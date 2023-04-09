@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/49680acaee1723d188d1b3d8b1984bbfd8f39
+https://www.codingame.com/training/easy/number-formatting
 
 Goal
 Based on the specially formatted number numberstring, you need to output the number divided by two in that same special format.
