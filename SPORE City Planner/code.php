@@ -1,61 +1,53 @@
-https://www.codingame.com/training/medium/spore-city-planner
+<?php
 
-Goal
-You are playing the SPORE Galactic Adventures game. https://en.wikipedia.org/wiki/Spore_Galactic_Adventures
-In the Civilization stage and in the Space stage, you can manage your cities using the City Planner.
-Inside each city there are several places (up to 11, depend on the level of the city) for placing objects and one especial place in the city center - the City Hall.
-There are 3 types of objects.
-The House does nothing.
-Entertainment increases the happiness of the city.
-Factory reduces the happiness of the city.
-The City Hall is a House type object and cannot be removed from the city center.
+function solve(array $values, int $happiness, int $production): int {
+    global $N, $links;
 
-Some places in the city are connected by roads.
-The road becomes a colored link if the objects are placed both sides of the link.
-Colored links have an effect.
-Blue links (House - Factory) increase the production of the city.
-Green links (House - Entertainment) increase the city's happiness.
-Red links (Factory - Entertainment) decrease the city's happiness.
-White links (between objects of the same type) are neutral.
+    $index = count($values);
 
-You should place objects in the city in order to get the maximum production of the city. But a city cannot have negative happiness.
+    if($index == $N + 1) return ($happiness >= 0) ? $production : 0; //We have selected a type for each locations
 
-Example
-City has configuration (1) - - (0) - - (2) - - (3)
-Input for this city are
-3
-3
-0 1
-0 2
-2 3
-Placing objects like
-1 - Factory
-2 - Factory
-3 - House
-(Factory) - blue - (House) - blue - (Factory) - blue - (House)
-gives 3 production (3 blue links)
-but have -2 happiness (two Factories)
-(-1) - - (0) - - (-1) - - (0)
-This placement is not acceptable.
+    if($happiness + (($N - $index + 1) * 2) < 0) return 0; //We can't have a positive happiness
+    
+    //We test the types for the current locations
+    foreach ([-1, 0, 1] as $value) {
 
-Correct placement is
-1 - Entertainment
-2 - Factory
-3 - House
-(Entertainment) - green - (House) - blue - (Factory) - blue - (House)
-gives 2 production (2 blue links)
-and have +1 happiness (1 Entertainment + 1 green link - 1 Factory)
-(1) - 1 - (0) - - (-1) - - (0)
-So, answer for this city is 2
+        $values[$index] = $value;
+        $happinessUpdated = $happiness + $value;
+        $productionUpdated = $production;
+        
+        //Check all the links that are complete with the addition of the current location
+        foreach($links[$index] as $dest) {
+            switch($values[$dest]) {
+                case -1:
+                    if($value == 0) ++$productionUpdated;
+                    elseif($value == 1) --$happinessUpdated;
+                    break;
+                case 0:
+                    if($value == -1) ++$productionUpdated;
+                    elseif($value == 1) ++$happinessUpdated;
+                    break;
+                case 1:
+                    if($value == -1) --$happinessUpdated;
+                    elseif($value == 0) ++$happinessUpdated;
+                    break;
+            }
+        }
 
-Input
-Line 1: An integer N for the number of places inside the city (City Hall not included to N).
-Line 2: An integer L for the number of links.
-Next L lines: Two space separated integers A and B (from 0 to N) - two node numbers for describe Link. Place 0 means City Hall.
+        $results[] = solve($values, $happinessUpdated, $productionUpdated);
+    }
 
-Output
-The maximum possible value of city's production.
+    return max($results);
+}
 
-Constraints
-1 < N ≤ 11
-0 ≤ A,B ≤ N
+fscanf(STDIN, "%d", $N);
+fscanf(STDIN, "%d", $L);
+
+$links = array_fill(0, $N, []);
+for ($i = 0; $i < $L; $i++) {
+    [$a, $b] = explode(" ", trim(fgets(STDIN)));
+    if($a > $b) $links[$a][] = $b;
+    else $links[$b][] = $a;
+}
+
+echo solve([0], 0, 0) . PHP_EOL;
