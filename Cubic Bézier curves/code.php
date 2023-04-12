@@ -10,7 +10,7 @@ fscanf(STDIN, "%d %d", $Dx, $Dy);
 $canvas = array_fill(0, $height, "." . str_repeat(" ", $width - 1));
 
 //https://en.wikipedia.org/wiki/B%C3%A9zier_curve
-//B(w) = (1-w)³ * P0 + 3 * (1-w)² * w * P1 + 3 * (1-w) * w² * P2 + t³ * P4 
+//B(w) = (1-w)³ * P0 + 3 * (1-w)² * w * P1 + 3 * (1-w) * w² * P2 + w³ * P4 
 function interpolation($w): array {
     global $Ax, $Ay, $Bx, $By, $Cx, $Cy, $Dx, $Dy;
 
