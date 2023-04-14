@@ -9,27 +9,41 @@ for ($i = 0; $i < $N; $i++) {
     }
 }
 
-$learned = [];
+$answer = INF;
 
-foreach($sentences as $sentence) {
-    $list = [];
-    $wordsNeeded = ceil(count($sentence) / 2);
+function solve(int $start, array $words): int {
+    global $sentences, $N;
 
-    foreach($sentence as $word) {
-        if(isset($learned[$word])) --$wordsNeeded; //We already know this word
-        else $list[$word] = $words[$word]; //This word could be leaned
+    $learned = [];
 
-        $words[$word]--; //Update frenquecu without this sentence
-    }
-
-    arsort($list); //We want to learn the words that are the most used in other sentences first
-
-    while($wordsNeeded > 0) {
-        $learned[key($list)] = 1;
+    for($i = 0; $i < $N; ++$i) {
+        $list = [];
+        $sentence = $sentences[($i + $start) % $N];
+        $wordsNeeded = ceil(count($sentence) / 2);
     
-        --$wordsNeeded;
-        next($list);
+        foreach($sentence as $word) {
+            if(isset($learned[$word])) --$wordsNeeded; //We already know this word
+            else $list[$word] = $words[$word]; //This word could be learned
+    
+            $words[$word]--; //Update frenquecu without this sentence
+        }
+    
+        arsort($list); //We want to learn the words that are the most used in other sentences first
+    
+        while($wordsNeeded > 0) {
+            $learned[key($list)] = 1;
+        
+            --$wordsNeeded;
+            next($list);
+        }
     }
+
+    return count($learned);
 }
 
-echo count($learned) . PHP_EOL;
+$answer = INF;
+
+//We start at each sentences and use the best result
+for($i = 0; $i < $N; ++$i) $answer = min($answer, solve($i, $words));
+
+echo $answer . PHP_EOL;
