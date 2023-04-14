@@ -25,7 +25,7 @@ function solve(int $start, array $words): int {
             if(isset($learned[$word])) --$wordsNeeded; //We already know this word
             else $list[$word] = $words[$word]; //This word could be learned
     
-            $words[$word]--; //Update frenquecu without this sentence
+            $words[$word]--; //Update frenquecy without this sentence
         }
     
         arsort($list); //We want to learn the words that are the most used in other sentences first
