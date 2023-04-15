@@ -2,6 +2,8 @@
 
 $start = microtime(1);
 
+$wordsID = [];
+
 fscanf(STDIN, "%d", $N);
 for ($i = 0; $i < $N; $i++) {
     $sentences[] = explode(" ", strtolower(trim(fgets(STDIN))));
@@ -9,6 +11,8 @@ for ($i = 0; $i < $N; $i++) {
     foreach($sentences[$i] as $word) {
         $words[$word] = ($words[$word] ?? 0) + 1;
         $wordsUsage[$word][$i] = 1;
+        
+        if(!isset($wordsID[$word])) $wordsID[$word] = count($wordsID);
     }
     
     $counts[$i] = ceil(count($sentences[$i]) / 2);
@@ -24,17 +28,12 @@ foreach($sentences as $i => $listWords) {
 
 //print_r($sentences);
 
-function solve(array $counts, array $sentences, array $wordsUsage, array $learned) {
+function solve(array $counts, array $sentences, array $wordsUsage, array $learned, string $hash) {
     global $answer;
     static $history = [];
     
     if(count($learned) >= $answer) return;
     
-    
-    ksort($learned);
-    $hash = implode("-", array_keys($learned));
-    
-    //echo "Hash is $hash" . PHP_EOL;
     
     if(isset($history[$hash])) return;
     else $history[$hash] = 1;
@@ -66,7 +65,10 @@ function solve(array $counts, array $sentences, array $wordsUsage, array $learne
             if(reset($sentences[$index]) == 1) {
                 //echo "We only have words with 1 frenquency for this sentence" . PHP_EOL;
     
-                $learned += array_slice($sentences[$index], 0, $count);
+                foreach(array_slice($sentences[$index], 0, $count) as $word => $filler) {
+                    $hash[$wordsID[$word]] = 1;
+                    $learned[$word] = 1;
+                }
     
                 unset($counts[$index]); //No need to update info, these words don't affect other sentences
                 
@@ -92,6 +94,7 @@ function solve(array $counts, array $sentences, array $wordsUsage, array $learne
             
                    // echo "We are using $word for sentence $index" . PHP_EOL;
             
+                    $hashUpdated = $hash;
                     $updatedCounts = $counts;
                     $updatedSentences = $sentences;
                     $wordsUsageUpdated = $wordsUsage;
@@ -101,9 +104,10 @@ function solve(array $counts, array $sentences, array $wordsUsage, array $learne
                         $updatedCounts[$indexUsage]--;
                     }
     
+                    $hashUpdated[$wordsID[$word]] = 1;
                     unset($wordsUsageUpdated[$word]);
             
-                    solve($updatedCounts, $updatedSentences, $wordsUsageUpdated, $learned + [$word => 1]);
+                    solve($updatedCounts, $updatedSentences, $wordsUsageUpdated, $learned + [$word => 1], $hashUpdated);
                 }
                 
                 return;
