@@ -29,7 +29,7 @@ foreach($sentences as $i => $listWords) {
 //print_r($sentences);
 
 function solve(array $counts, array $sentences, array $wordsUsage, array $learned, string $hash) {
-    global $answer;
+    global $answer, $wordsID;
     static $history = [];
     
     if(count($learned) >= $answer) return;
