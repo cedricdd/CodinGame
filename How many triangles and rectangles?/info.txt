@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/50208c3f0edfa6d1dd7651888cd69eaabab4d
+https://www.codingame.com/training/hard/how-many-triangles-and-rectangles
 
 Goal
 Find the number of triangles and rectangles in the ASCII art picture.
