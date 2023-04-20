@@ -9,13 +9,13 @@ for ($i = 0; $i < $N; $i++) {
     $sentences[] = explode(" ", strtolower(trim(fgets(STDIN))));
 
     foreach($sentences[$i] as $word) {
-        $words[$word] = ($words[$word] ?? 0) + 1;
-        $wordsUsage[$word][$i] = 1;
+        $words[$word] = ($words[$word] ?? 0) + 1; //The amounts of times this word is used globally
+        $wordsUsage[$word][$i] = 1; //The sentences where this word is used
         
-        if(!isset($wordsID[$word])) $wordsID[$word] = count($wordsID);
+        if(!isset($wordsID[$word])) $wordsID[$word] = count($wordsID); //We keep a list of unique words
     }
     
-    $counts[$i] = ceil(count($sentences[$i]) / 2);
+    $counts[$i] = ceil(count($sentences[$i]) / 2); //The amount of words we need to learn in this sentence
 }
 
 foreach($sentences as $i => $listWords) {
@@ -32,28 +32,23 @@ function solve(array $counts, array $sentences, array $wordsUsage, array $learne
     global $answer, $wordsID;
     static $history = [];
     
-    if(count($learned) >= $answer) return;
+    if(count($learned) >= $answer) return; //We have already learned more words than the current best solution
     
-    
-    if(isset($history[$hash])) return;
+    if(isset($history[$hash])) return; //We have already tested this combinaison of words
     else $history[$hash] = 1;
     
     asort($counts);
     
     foreach($counts as $index => $count) {
-        //echo "Working on sentence $index, we need $count more word(s)" . PHP_EOL;
-        
+        //We are done with this sentence
         if($count == 0) {
-            //echo "We are done with sentence $index, update info" . PHP_EOL;
-            //print_r($sentences[$index]);
-            
+            //Update all the words we didn't use in this sentence
             foreach($sentences[$index] as $word => $freq) {
                 unset($wordsUsage[$word][$index]);
         
+                //Update the count of this word in other sentences
                 foreach($wordsUsage[$word] as $indexUsage => $filler) {
                     $sentences[$indexUsage][$word]--;
-            
-                    //echo "Updating the count for the word $word on sentence $indexUsage" . PHP_EOL;
                 }
             }
             
@@ -62,9 +57,8 @@ function solve(array $counts, array $sentences, array $wordsUsage, array $learne
         } else {
             arsort($sentences[$index]);
     
+            //All the words left for this sentence are only appearing in this sentence, doesn't matter witch ones we learn
             if(reset($sentences[$index]) == 1) {
-                //echo "We only have words with 1 frenquency for this sentence" . PHP_EOL;
-    
                 foreach(array_slice($sentences[$index], 0, $count) as $word => $filler) {
                     $hash[$wordsID[$word]] = 1;
                     $learned[$word] = 1;
@@ -76,23 +70,11 @@ function solve(array $counts, array $sentences, array $wordsUsage, array $learne
                 
                 unset($sentences[$index]);
             } else {
-                $first = array_key_first($sentences[$index]);
+                $first = array_key_first($sentences[$index]); //The # of sentences the most used word is used in
                 $affectedSentences = $wordsUsage[$first];
         
                 foreach($sentences[$index] as $word => $frequency) {
-                    if($frequency == 1) break;
-                    
-                    if($word != $first) {
-                        do {
-                            foreach($wordsUsage[$word] as $indexUsage => $filler) {
-                                if(!isset($affectedSentences[$indexUsage])) break 2;
-                            }
-                            
-                            continue 2;
-                        } while(true);
-                    }
-            
-                   // echo "We are using $word for sentence $index" . PHP_EOL;
+                    if($frequency == 1) break; //We only do recursive calls for words that appear in at least 2 sentences
             
                     $hashUpdated = $hash;
                     $updatedCounts = $counts;
@@ -115,20 +97,13 @@ function solve(array $counts, array $sentences, array $wordsUsage, array $learne
         }
     }
     
-    
-    if(count($learned) < $answer) {
-        $answer = count($learned);
-        error_log("We are done, we have learned " . count($learned) . " words");
-        ksort($learned);
-        error_log(implode(", ", array_map(function($word) {
-            return "\"" . $word . "\"";
-        }, array_keys($learned))));
-    }
+    //We have found a better solution
+    if(count($learned) < $answer) $answer = count($learned);
 }
 
 $answer = INF;
 
-solve($counts, $sentences, $wordsUsage, []);
+solve($counts, $sentences, $wordsUsage, [], str_repeat("0", count($wordsID)));
 
 echo $answer . PHP_EOL;
-error_log("Answer: $answer -- Memory: " . memory_get_usage() . " -- Total time: " . (microtime(1) - $start));
+error_log(microtime(1) - $start);
