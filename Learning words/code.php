@@ -7,7 +7,7 @@ $wordsID = [];
 fscanf(STDIN, "%d", $N);
 for ($i = 0; $i < $N; $i++) {
     $sentences[] = explode(" ", strtolower(trim(fgets(STDIN))));
-
+    
     foreach($sentences[$i] as $word) {
         $words[$word] = ($words[$word] ?? 0) + 1; //The amounts of times this word is used globally
         $wordsUsage[$word][$i] = 1; //The sentences where this word is used
@@ -32,6 +32,15 @@ function solve(array $sentences, int $learned, string $hash) {
     
     if(isset($history[$hash])) return; //We have already tested this combinaison of words
     else $history[$hash] = 1;
+
+    //We want to work on the sentence that has the least words appearting in other sentences
+    uasort($sentences, function($a, $b) {
+        $countA = count(array_filter($a, function($v) { return $v > 1; }));
+
+        $countB = count(array_filter($b, function($v) { return $v > 1; }));
+
+        return $countA <=> $countB;
+    });
     
     foreach($sentences as $index => $list) {
         arsort($list);
