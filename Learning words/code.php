@@ -17,11 +17,11 @@ for ($i = 0; $i < $N; $i++) {
 }
 
 foreach($sentences as $i => $listWords) {
-    $wordsByFrequency = [];
+    $wordsWithCounts = [];
     
-    foreach($listWords as $word) $wordsByFrequency[$word] = $words[$word];
+    foreach($listWords as $word) $wordsWithCounts[$word] = $words[$word];
     
-    $sentences[$i] = $wordsByFrequency;
+    $sentences[$i] = $wordsWithCounts;
 }
 
 function solve(array $sentences, int $learned, string $hash) {
@@ -30,53 +30,67 @@ function solve(array $sentences, int $learned, string $hash) {
     
     if($learned >= $answer) return; //We have already learned more words than the current best solution
     
-    if(isset($history[$hash])) return; //We have already tested this combinaison of words
+    if(isset($history[$hash])) return; //We have already tested this combination of words
     else $history[$hash] = 1;
-
-    //We want to work on the sentence that has the least words appearting in other sentences
+    
+    //We want to work on the sentence that has the least words appearing in other sentences
     uasort($sentences, function($a, $b) {
-        $countA = count(array_filter($a, function($v) { return $v > 1; }));
-
-        $countB = count(array_filter($b, function($v) { return $v > 1; }));
-
+        $countA = 0;
+        foreach($a as $v) if($v > 1) ++$countA;
+    
+        $countB = 0;
+        foreach($b as $v) if($v > 1) ++$countB;
+        
         return $countA <=> $countB;
     });
     
     foreach($sentences as $index => $list) {
         arsort($list);
-
+        
         //All the words left for this sentence are only appearing in this sentence, doesn't matter witch one we learn
         if(reset($list) == 1) {
             $word = array_key_first($list);
-
+            
             $hash[$wordsID[$word]] = 1;
             ++$learned;
-
+            
             unset($sentences[$index]);
         } else {
+            $sentencesAffected = [];
+            
             foreach($list as $wordUsed => $frequency) {
                 if($frequency == 1) break; //We only do recursive calls for words that appear in at least 2 sentences
-
+                
+                //We check if all the sentences affected by this word is just a sub-part of another set of sentences we have already tested.
+                //If one word will affect sentence 1, 2 & 3 and another will affect 1 & 2 or 1 & 3 there's no need to check it, it can't be better.
+                foreach($sentencesAffected as $affected) {
+                    if(count(array_diff_key($wordsUsage[$wordUsed], $affected)) == 0) {
+                        continue 2;
+                    }
+                }
+                
+                $sentencesAffected[] = $wordsUsage[$wordUsed];
+                
                 $hashUpdated = $hash;
                 $updatedSentences = $sentences;
-        
+                
                 //All the sentences this word is appearing are now good
                 foreach($wordsUsage[$wordUsed] as $indexUsage => $filler) {
                     unset($updatedSentences[$indexUsage]);
                 }
-
+                
                 $hashUpdated[$wordsID[$wordUsed]] = 1;
                 
-                //Update the count of all the words we didn't not learn for this sentence
+                //Update the count of all the words we did not learned for this sentence
                 foreach($sentences[$index] as $wordLeft => $usage) {
-
+                    
                     if($usage == 1 || $wordLeft == $wordUsed) continue;
-
+                    
                     foreach($wordsUsage[$wordLeft] as $indexUsage => $filler) {
-                        if(isset($updatedSentences[$indexUsage])) $updatedSentences[$indexUsage][$wordLeft]--;
+                        if(isset($updatedSentences[$indexUsage])) --$updatedSentences[$indexUsage][$wordLeft];
                     }
                 }
-        
+                
                 solve($updatedSentences, $learned + 1, $hashUpdated);
             }
             
