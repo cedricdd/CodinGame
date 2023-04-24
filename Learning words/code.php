@@ -6,7 +6,7 @@ $wordsID = [];
 
 fscanf(STDIN, "%d", $N);
 for ($i = 0; $i < $N; $i++) {
-    $sentences[] = explode(" ", strtolower(trim(fgets(STDIN))));
+    $sentences[] = array_unique(explode(" ", strtolower(trim(fgets(STDIN)))));
     
     foreach($sentences[$i] as $word) {
         $words[$word] = ($words[$word] ?? 0) + 1; //The amounts of times this word is used globally
