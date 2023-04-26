@@ -18,11 +18,11 @@ $LCM = LCM($l1, $l2);
 $answer = array_fill(0, $LCM + 2, str_repeat(" ", $LCM));
 
 for($i = 0; $i < $LCM; ++$i) {
-    $answer[0][$i] = $name1[$i % $l1];
-    $answer[$i + 1][$LCM - 1] = $name1[$i % $l1];
+    $answer[0][$i] = $name1[$i % $l1]; //Top
+    $answer[$i + 1][$LCM - 1] = $name1[$i % $l1]; //Right
 
-    $answer[$i + 1][0] = $name2[$i % $l2];
-    $answer[$LCM + 1][$i] = $name2[$i % $l2];
+    $answer[$i + 1][0] = $name2[$i % $l2]; //Left
+    $answer[$LCM + 1][$i] = $name2[$i % $l2]; //Bottom
 }
 
 echo implode("\n", $answer) . PHP_EOL;
