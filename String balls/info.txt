@@ -1,0 +1,36 @@
+https://www.codingame.com/contribute/view/388573d78acaeca9e34861401284ecfbe5447
+
+Goal
+Let's name the string abcdefghijklmnopqrstuvwxyz the alphabet, and let d be the distance between two elements in the alphabet defined 
+by the absolute value of the difference of their indexes. 
+For example:
+
+  d("b", "d") = d("d", "b") = 2
+  d("f", "f") = 0
+  d("a", "z") = 25
+
+We can extend d to strings as follows. Given two strings sa, sb of respective length la, lb: if la != lb, then d(sa, sb) = +INF, and if la == lb, then d(sa, sb) is the sum of the pairwise d(sa[i], sb[i]) for all index values (i) from 0 to la-1. For example:
+
+  d("ab", "ac") = d("ac", "ab") = 1
+  d("a",  "ab") = +INF
+  d("ac", "bb") = 2
+
+
+We can now define a (closed) ball of center a given string and of (integer) radius. 
+A point p (i.e. a string with letters in the alphabet) is inside the ball if d(center, p) <= radius.
+
+Find the number of points contained in the ball of center center and radius radius.
+
+NB: Tests 1-7 cover simple cases and should help you debug your program. Tests 8-11 check the performance.
+
+Input
+Line 1: An integer radius, the radius of the ball.
+Line 2: A string center, the center of the ball.
+
+Output
+The amount of points inside the ball of center center and radius radius
+Constraints
+0 < radius <= 100
+0 < len(center) < 20
+0 <= answer <= 1e6
+The string center contains only lowercase English letters.
