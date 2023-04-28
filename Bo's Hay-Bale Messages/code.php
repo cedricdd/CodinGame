@@ -11,7 +11,7 @@ const ALPHABET = [
 
 function getCostByColor(string $color): int {
     if($color == "plain") return 3;
-    if(in_array($color, ["black", "white", "red", "blue", "green"])) return 4;
+    if(in_array($color, ["black", "white", "red", "blue", "yellow"])) return 4;
     if(in_array($color, ["violet", "orange", "green"])) return 5;
     return 6;
 }
@@ -21,8 +21,6 @@ $letterCost = getCostByColor(trim(fgets(STDIN)));
 $backgroundCost = getCostByColor(trim(fgets(STDIN)));
 $cost = 0;
 
-error_log($message);
-
 foreach(str_split($message) as $c) {
     $letter = [];
 
@@ -31,23 +29,22 @@ foreach(str_split($message) as $c) {
        $letter[] = $line;
     }
 
+    //You don't need any hay-bales for any totally blank level, on the bottom. 
     for($yMax = 7; $yMax >= 0; --$yMax) {
         if($letter[$yMax] != "00000000") break;
     }
 
-    //error_log(var_export($yMax, true));
-    //error_log(var_export($letter, true));
-
     for($x = 0; $x < 8; ++$x) {
         $background = 0;
+
         for($y = 0; $y <= $yMax; ++$y) {
+            //This is a hay part of the letter
             if($letter[$y][$x]) {
                 $background = 1;
                 $cost += $letterCost;
-                error_log("$x $y $letterCost");
-            } elseif($background) {
+            } //This is a supporting hay
+            elseif($background) {
                 $cost += $backgroundCost;
-                error_log("$x $y $backgroundCost");
             }
         }
     }
