@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/439391d1962cacc9a04e76f932b8fc7f43816
+https://www.codingame.com/training/easy/library-dependencies
 
 Goal
 You are given n_imp lines, each representing a library import in python style. 
