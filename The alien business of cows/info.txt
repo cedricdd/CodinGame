@@ -1,36 +1,66 @@
 https://www.codingame.com/training/easy/the-alien-business-of-cows
 
 Goal
-Within the Universe, Earth cows are highly prized. Some would accuse aliens of stealing them to supply the best restaurants in the galaxy with meat. Others argue that cows are used as Earth ambassadors within the galaxy, because aliens have experimented with all the beings of Earth, and have learned that cows are the most intelligent and wise.
+Within the Universe, Earth cows are highly prized. Some would accuse aliens of stealing them to supply the best restaurants in the galaxy with meat. 
+Others argue that cows are used as Earth ambassadors within the galaxy, because aliens have experimented with all the beings of Earth, 
+and have learned that cows are the most intelligent and wise.
 
-On 23rd of March 1983, President Ronald Reagan of the USA announced the Strategic Defense Initiative (SDI), nicknamed by the medias as the Star Wars program. Although most people thought that it was a missile defense system to protect the USA from USSR attacks by ballistic nuclear weapons, the Department of Defense organized it as the military answer to alien operations on North America. Since the beginning of 1984, the Homing Overlay Experiment (HOE) provides hit-to-kill missiles going up to 6km/s to search and destroy any object until an altitude of 160 km. Those Minuteman missiles are launched from the Space Launch Complexe 1 of the Vandenberg Space Force Base, Santa Barbara County, California (34°45'21.8"N, 120°37'34.8"W, elevation: 46 meters).
+On 23rd of March 1983, President Ronald Reagan of the USA announced the Strategic Defense Initiative (SDI), nicknamed by the medias as the Star Wars program.
+Although most people thought that it was a missile defense system to protect the USA from USSR attacks by ballistic nuclear weapons, 
+the Department of Defense organized it as the military answer to alien operations on North America. 
+Since the beginning of 1984, the Homing Overlay Experiment (HOE) provides hit-to-kill missiles going up to 6km/s to search and destroy any object until an altitude of 160 km. 
+Those Minuteman missiles are launched from the Space Launch Complexe 1 of the Vandenberg Space Force Base, Santa Barbara County, 
+California (34°45'21.8"N, 120°37'34.8"W, elevation: 46 meters).
 
-You are an alien mercenary working for the Corporation of Abduction and Transfer of Typical Livestock from Earth (C.A.T.T.L.E.), the biggest industry of its kind in the Milky Way. This corporation has a hidden base on one of Jupiter's moons, from where different types of collectors are sent to Earth. Your corporation takes a very dim view of the new earth defense system, which has already caused the company's stock to fall in value on the Universe stock exchange. The CEO, Elon Mowsk, has tasked you with defining the feasibility of upcoming missions.
+You are an alien mercenary working for the Corporation of Abduction and Transfer of Typical Livestock from Earth (C.A.T.T.L.E.), 
+the biggest industry of its kind in the Milky Way. This corporation has a hidden base on one of Jupiter's moons, from where different types of collectors are
+sent to Earth. Your corporation takes a very dim view of the new earth defense system, which has already caused the company's stock to fall in value on the
+Universe stock exchange. The CEO, Elon Mowsk, has tasked you with defining the feasibility of upcoming missions.
 
-C.A.T.T.L.E. collectors take off vertically at a speed of collector speed to escape Earth's gravity, and this speed is kept until the moon orbit atitude (385 000km). A collector aims at its target point, stops at 500 meters above the ground, out of effective range of assault rifles. It then abducts as many cows as possible until collector maximum capacity, and takes off. To not kill the cow during the abduction, they are captured one by one at a speed of 9.81m/s . This collecting speed is multiplied by the collector levitation efficiency parameter.
-However, once the abducting device is on, a special SDI radar detects it and a MinuteMan missile is immediatly launched at maximum speed from the Space Launch Complexe 1 of the Vandenberg Space Force Base. It goes in a straight line from the silo to its limit altitude above the anomaly pointed by the HOE radar, then fall vertically. If it collides with a C.A.T.T.L.E. collector, both explode, Elon Mowsk is furious, the collector crew is dead, and you are held responsible for the deaths.
+C.A.T.T.L.E. collectors take off vertically at a speed of collector speed to escape Earth's gravity, and this speed is kept until the moon orbit atitude (385 000km). 
+A collector aims at its target point, stops at 500 meters above the ground, out of effective range of assault rifles. 
+It then abducts as many cows as possible until collector maximum capacity, and takes off. 
+To not kill the cow during the abduction, they are captured one by one at a speed of 9.81m/s . 
+This collecting speed is multiplied by the collector levitation efficiency parameter.
+However, once the abducting device is on, a special SDI radar detects it and a MinuteMan missile is immediatly launched at maximum speed from the 
+Space Launch Complexe 1 of the Vandenberg Space Force Base. It goes in a straight line from the silo to its limit altitude above the anomaly pointed by the
+HOE radar, then fall vertically. If it collides with a C.A.T.T.L.E. collector, both explode, Elon Mowsk is furious, the collector crew is dead, and you are
+held responsible for the deaths.
 
-As you don't want to go to intergalactic jail, you must tell if a mission is possible or not, given the name of the destination, its latitude, longitude, and elevation. A mission is possible if one collector abduct cows and flee without getting hit by a MinuteMan missile. if the mission is possible, you have to give the collector type to send and the number of cows it will bring back. Beware, sending a collector has a cost that must be covered by the number of cows brought back.
+As you don't want to go to intergalactic jail, you must tell if a mission is possible or not, given the name of the destination, its latitude, longitude, 
+and elevation. A mission is possible if one collector abduct cows and flee without getting hit by a MinuteMan missile. if the mission is possible, 
+you have to give the collector type to send and the number of cows it will bring back. 
+Beware, sending a collector has a cost that must be covered by the number of cows brought back.
 
 Collectors type
-The VaCoWM Cleaner is the formula 1 of the collectors. Designed to be fast, it can get to 44.7 km/s in Earth atmosphere. However, the lack of space limits the capacity to 3 cows only, and its smaller abduction beams has a levitation efficiency of 0.85. It is the cheapest collector, and make profitable missions if it brings back at least one cow.
-The L4nd MoWer is the medium collector. It was designed to have a good balance between speed (22.38 km/s and capacity (10 cows), with a good quality abduction device (efficiency of 1.2). 4th generation of its kind, it must bring back at least 6 cows to be profitable.
-The Cow Harvester is the biggest of its kind, just fast enough to escape Earth's gravity (11.19 km/s). Its "slowness" is compensated by its capacity (20 cows !) and its premium abduction device which can levitate cows with an impressive 1.5 efficiency. King of collectors, it is not cheap to send it, and must bring at least 14 cows for a mission to be worth it.
+The VaCoWM Cleaner is the formula 1 of the collectors. Designed to be fast, it can get to 44.7 km/s in Earth atmosphere. 
+However, the lack of space limits the capacity to 3 cows only, and its smaller abduction beams has a levitation efficiency of 0.85. 
+It is the cheapest collector, and make profitable missions if it brings back at least one cow.
+The L4nd MoWer is the medium collector. It was designed to have a good balance between speed (22.38 km/s and capacity (10 cows), 
+with a good quality abduction device (efficiency of 1.2). 4th generation of its kind, it must bring back at least 6 cows to be profitable.
+The Cow Harvester is the biggest of its kind, just fast enough to escape Earth's gravity (11.19 km/s). 
+Its "slowness" is compensated by its capacity (20 cows !) and its premium abduction device which can levitate cows with an impressive 1.5 efficiency. 
+King of collectors, it is not cheap to send it, and must bring at least 14 cows for a mission to be worth it.
 
 Example
-If a L4nd Mower can get 8 cows and a VaCoWM 3 cows, send the first one (more cows !). But if a L4nd Mower can get 5 cows and a VaCoWM 3 cows, send the last one, because sending the first one is not profitable.
+If a L4nd Mower can get 8 cows and a VaCoWM 3 cows, send the first one (more cows !). 
+But if a L4nd Mower can get 5 cows and a VaCoWM 3 cows, send the last one, because sending the first one is not profitable.
 
 Help
 Coordinates in degrees/minutes/seconds should be converted to decimal using the simplest conversion: Decimal Degrees = degrees + (minutes/60) + (seconds/3600).
 One degree in latitude is equal to 111.11 km.
 One degree in longitude between two points is equal to 111.11*cos( (latitude1+latitude2) /2).
+
 Input
 First line : N number of upcoming missions.
 N next lines : a string upcomingMission with the name of the location, coordinates latitude and longitude in degrees/minutes/seconds, elevation in meters.
+
 Output
 N lines : For each mission, the output form should be one of these :
 name of the location: impossible.
-name of the location: possible. Send a collector type to bring back number of abducted cows cow/ cows. (English rules, so cow has an s if there is more than one cow).
+name of the location: possible. Send a collector type to bring back number of abducted cows cow/ cows. 
+(English rules, so cow has an s if there is more than one cow).
+
 Constraints
 The cow-llect area is North america. Hence :
 - latitude is always in N
