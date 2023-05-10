@@ -13,8 +13,6 @@ for ($i = 0; $i < 9; $i++) {
 
 $toCheck = [];
 
-error_log($grid);
-
 //First step we get all the possibilites for the numbers we have to find
 for($y = 0; $y < 9; ++$y) {
     for($x = 0; $x < 9; ++$x) {
@@ -50,23 +48,22 @@ for($y = 0; $y < 9; ++$y) {
 
             unset($related[$index]);
 
-            $possibilities[$index] = $numbers; //We save the possibilites
-            $relations[$index] = $related;
-            $toFind[$index] = 1;
+            $possibleNumbers[$index] = $numbers; //We save the possibilites
+            $relations[$index] = $related; //The positions we need to update when setting this position
+            $positionToFind[$index] = 1; //This position needs to be found
         }
     }
 }
 
-
-function setNumbers(string &$grid, array &$possibilities, array &$relations, array &$toFind): int {
+function setNumbers(string &$grid, array &$possibleNumbers, array &$relations, array &$positionToFind): int {
 
     //Setting number might leave only 1 possibility for other position
     do {
         $numberFound = false;
 
-        foreach($toFind as $index => $filler) {
+        foreach($positionToFind as $index => $filler) {
 
-            switch($possibilities[$index]) {
+            switch($possibleNumbers[$index]) {
                 case 1: $value = 1; break;
                 case 2: $value = 2; break;
                 case 4: $value = 3; break;
@@ -79,48 +76,40 @@ function setNumbers(string &$grid, array &$possibilities, array &$relations, arr
                 default: continue 2;
             }
 
-            //error_log("setting $index as $value");
-
             $numberFound = true;
 
             //Update the grid
             $grid[$index] = $value;
 
-            //We can only use this number once in the row
+            //We can only use this number once in the row/col & square
             foreach($relations[$index] as $indexToCheck => $filler) {
-                if(($possibilities[$indexToCheck] &= REMOVE[$value]) == 0) {
-                    //error_log("$indexToCheck is now empty");
+                if(($possibleNumbers[$indexToCheck] &= REMOVE[$value]) == 0) {
                     return -1;
                 }
             }
 
-            unset($toFind[$index]);
+            unset($positionToFind[$index]);
         }
     } while ($numberFound);
 
-    if(count($toFind) == 0) return 1;
+    if(count($positionToFind) == 0) return 1;
     else return 0;
 }
 
 //Guess a number for the sudoku
-function getGuess(array $toFind, array &$possibilities, array &$fobidden): bool {
+function getGuess(int $index, array &$possibleNumbers, array &$fobidden): bool {
 
-    $index = array_key_first($toFind);
-    $numbers = $possibilities[$index];
-
-    //error_log("$index -- $numbers");
+    $numbers = $possibleNumbers[$index];
 
     foreach(VALUES as $value => $mask) {
 
         //We already tried, we got an invalid grid
         if(isset($fobidden[$index][$value])) continue; 
 
+        //This is a possible number for the position
         if($numbers & $mask) {
             $fobidden[$index][$value] = 1;
-            $possibilities[$index] = $mask;
-
-            //error_log("we can guess $value for $index");
-            //exit();
+            $possibleNumbers[$index] = $mask;
     
             return true;
         }
@@ -136,8 +125,8 @@ $forbidden = [];
 //Solve the sudoky
 while(true) {
 
-    //We start by setting all the position with only one possibility
-    $result = setNumbers($grid, $possibilities, $relations, $toFind);
+    //We start by setting all the positions with only one possibility
+    $result = setNumbers($grid, $possibleNumbers, $relations, $positionToFind);
 
     if($result == 1) break; //Solution has been found
 
@@ -145,28 +134,21 @@ while(true) {
     while(true) {
         $toCheck = [];
 
-        //error_log("need to guess");
-
         //Invalid grid, reload last backup
-        if($result == -1) {
-            [$grid, $possibilities, $relations, $forbidden, $toFind] = array_pop($backups);
-        }
+        if($result == -1) [$grid, $possibleNumbers, $forbidden, $positionToFind] = array_pop($backups);
 
-        $temp = $possibilities;
+        $temp = $possibleNumbers;
 
         //No possible guess, invalid grid
-        if(getGuess($toFind, $possibilities, $forbidden) == false) $result == -1;
+        if(getGuess(array_key_first($positionToFind), $possibleNumbers, $forbidden) == false) $result == -1;
         else {
-            //error_log("using guess");
-
             //We have a guess, backup info
-            $backups[] = [$grid, $temp, $relations, $forbidden, $toFind];
+            $backups[] = [$grid, $temp, $forbidden, $positionToFind];
             break;
         }
     }
 }
 
 echo implode("\n", str_split($grid, 9)) . "\n";
-
 
 error_log(microtime(1) - $start);
