@@ -1,9 +1,37 @@
 <?php
 
-const REMOVE = ["A" => 33554430, "B" => 33554429, "C" => 33554427, "D" => 33554423, "E" => 33554415, "F" => 33554399, "G" => 33554367, "H" => 33554303, "I" => 33554175, "J" => 33553919, "K" => 33553407, "L" => 33552383, "M" => 33550335, "N" => 33546239, "O" => 33538047, "P" => 33521663, "Q" => 33488895, "R" => 33423359, "S" => 33292287, "T" => 33030143, "U" => 32505855, "V" => 31457279, "W" => 29360127, "X" => 25165823, "Y" => 16777215];
-const VALUES = ["A" => 1, "B" => 2, "C" => 4, "D" => 8, "E" => 16, "F" => 32, "G" => 64, "H" => 128, "I" => 256, "J" => 512, "K" => 1024, "L" => 2048, "M" => 4096, "N" => 8192, "O" => 16384, "P" => 32768, "Q" => 65536, "R" => 131072, "S" => 262144, "T" => 524288, "U" => 1048576, "V" => 2097152, "W" => 4194304, "X" => 8388608, "Y" => 16777216];
-
 $start = microtime(1);
+
+const REMOVE = [
+    1 => 33554430, 2 => 33554429, 3 => 33554427, 4 => 33554423, 5 => 33554415,
+    6 => 33554399, 7 => 33554367, 8 => 33554303, 9 => 33554175, 10 => 33553919,
+    11 => 33553407, 12 => 33552383, 13 => 33550335, 14 => 33546239, 15 => 33538047,
+    16 => 33521663, 17 => 33488895, 18 => 33423359, 19 => 33292287, 20 => 33030143,
+    21 => 32505855, 22 => 31457279, 23 => 29360127, 24 => 25165823, 25 => 16777215,
+];
+const VALUES = [
+    1 => 1, 2 => 2, 4 => 3, 8 => 4, 16 => 5,
+    32 => 6, 64 => 7, 128 => 8, 256 => 9, 512 => 10,
+    1024 => 11, 2048 => 12, 4096 => 13, 8192 => 14, 16384 => 15,
+    32768 => 16, 65536 => 17, 131072 => 18, 262144 => 19, 524288 => 20,
+    1048576 => 21, 2097152 => 22, 4194304 => 23, 8388608 => 24, 16777216 => 25,
+];
+const VALUES_INV = [
+    1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16,
+    6 => 32, 7 => 64, 8 => 128, 9 => 256, 10 => 512,
+    11 => 1024, 12 => 2048, 13 => 4096, 14 => 8192, 15 => 16384,
+    16 => 32768, 17 => 65536, 18 => 131072, 19 => 262144, 20 => 524288,
+    21 => 1048576, 22 => 2097152, 23 => 4194304, 24 => 8388608, 25 => 16777216,
+];
+
+const ALPHABET = [
+    1 => 'A', 2 => 'B', 3 => 'C', 4 => 'D', 5 => 'E',
+    6 => 'F', 7 => 'G', 8 => 'H', 9 => 'I', 10 => 'J',
+    11 => 'K', 12 => 'L', 13 => 'M', 14 => 'N', 15 => 'O',
+    16 => 'P', 17 => 'Q', 18 => 'R', 19 => 'S', 20 => 'T',
+    21 => 'U', 22 => 'V', 23 => 'W', 24 => 'X', 25 => 'Y',
+];
+const FULL_NUMBERS = 33554431;
 
 $grid = "";
 
@@ -11,309 +39,234 @@ for ($i = 0; $i < 25; $i++) {
     $grid .= trim(fgets(STDIN));
 }
 
-
-$rows = array_fill(0, 25, ["numbers" => array_flip(range("A", "Y")), "positions" => []]);
-$columns = array_fill(0, 25, ["numbers" => array_flip(range("A", "Y")), "positions" => []]);
-$squares = array_fill(0, 25, ["numbers" => array_flip(range("A", "Y")), "positions" => []]);
-
-$time1 = 0.0;
-$time2 = 0.0;
+//Every row, col & square contains each numbers
+$cages = array_fill(0, 75, [[], VALUES_INV]);
 
 //First step we get all the possibilites for the numbers we have to find
 for($y = 0; $y < 25; ++$y) {
     for($x = 0; $x < 25; ++$x) {
-
+        
         $index = $y * 25 + $x;
         $colIndex = $x;
         $rowIndex = $y;
         $squareIndex = (intdiv($y, 5) * 5) + intdiv($x, 5);
         $squareY = intdiv($squareIndex, 5) * 5;
         $squareX = ($squareIndex % 5) * 5;
-
+        
         //This number is missing
         if($grid[$index] == ".") {
-            $numbers = 33554431;
-            $related = [];
-
-            //error_log("$x $y -- $squareX $squareY");
-
-            $squares[$squareIndex]["positions"][$index] = 1;
-            $columns[$colIndex]["positions"][$index] = 1;
-            $rows[$rowIndex]["positions"][$index] = 1;
-
+            $numbers = FULL_NUMBERS;
+            $affected = [];
+            
             //Check row & column
             for($i = 0; $i < 25; ++$i) {
                 $indexRow = intval($y * 25 + $i);
-
-                if($grid[$indexRow] == ".") $related[$indexRow] = 1;
-                else $numbers &= REMOVE[$grid[$indexRow]];
-
+                
+                if($grid[$indexRow] == ".") $affected[$indexRow] = 1; //Position to find
+                else $numbers &= REMOVE[ord($grid[$indexRow]) - 64]; //Position already set
+                
                 $indexCol = intval($i * 25 + $x);
-
-                if($grid[$indexCol] == ".") $related[$indexCol] = 1;
-                else $numbers &= REMOVE[$grid[$indexCol]];
+                
+                if($grid[$indexCol] == ".") $affected[$indexCol] = 1; //Position to find
+                else $numbers &= REMOVE[ord($grid[$indexCol]) - 64]; //Position already set
             }
-
+            
             //Check the square
             for($y2 = $squareY; $y2 < $squareY + 5; ++$y2) {
                 for($x2 = $squareX; $x2 < $squareX + 5; ++$x2) {
                     $indexSquare = intval($y2 * 25 + $x2);
-
-                    if($grid[$indexSquare] == ".") $related[$indexSquare] = 1;
-                    else $numbers &= REMOVE[$grid[$indexSquare]];
+                    
+                    if($grid[$indexSquare] == ".") $affected[$indexSquare] = 1; //Position to find
+                    else $numbers &= REMOVE[ord($grid[$indexSquare]) - 64]; //Position already set
                 }
             }
-
-            unset($related[$index]);
-
-            $possibleNumbers[$index] = $numbers; //We save the possibilites
-            $positionToFind[$index] = 1; //This position needs to be found
-
-            $infos[$index] = [$colIndex, $rowIndex, $squareIndex, array_keys($related)];
+            
+            unset($affected[$index]); //Setting a position won't affect itself
+            
+            $possibleNumbers[$index] = $numbers; //We save the possibilities
+            $positionToFind[$index] = 1; //This position we needs to be find
+            $positionsAffected[$index] = array_keys($affected); //The positions to update when we set this position
+            
+            $cages[$rowIndex][0][$index] = 1;
+            $cages[$colIndex + 25][0][$index] = 1;
+            $cages[$squareIndex + 50][0][$index] = 1;
+            $cagesMatch[$index] = [$rowIndex, $colIndex + 25, $squareIndex +50]; //We save the cages this position belongs to
         } else {
-            unset($squares[$squareIndex]["numbers"][$grid[$index]]);
-            unset($columns[$colIndex]["numbers"][$grid[$index]]);
-            unset($rows[$rowIndex]["numbers"][$grid[$index]]);
+            //This number is already set for the cages
+            $number = ord($grid[$index]) - 64;
+            
+            unset($cages[$rowIndex][1][$number]);
+            unset($cages[$colIndex + 25][1][$number]);
+            unset($cages[$squareIndex + 50][1][$number]);
         }
     }
 }
 
-//error_log(var_export($infos[18], true));
-//error_log(var_export($squares, true));
-//error_log(var_export($infos[3], true));
+//Get the number of bits set to 1 (ie the number of possible numbers) in 0(1)
+function getCountNumbers(int $mask): int {
+    static $counts = [];
+    
+    if(isset($counts[$mask])) return $counts[$mask];
+    
+    $uCount = $mask - (($mask >> 1) & 033333333333) - (($mask >> 2) & 011111111111);
+    return $counts[$mask] = (($uCount + ($uCount >> 3)) & 030707070707) % 63;
+}
 
-function setNumbers(string &$grid, array &$possibleNumbers, array &$positionToFind, array &$rows, array &$columns, array &$squares): int {
-
-    global $infos, $time1, $time2;
-
-    $searchBlock = true;
-
-    //Setting number might leave only 1 possibility for other position
+function setNumbers(string &$grid, array &$positionToFind, array &$possibleNumbers, array &$cages): int {
+    
+    global $positionsAffected, $cagesMatch;
+    
     do {
         $numberFound = false;
-
-        $a = microtime(1);
-
+        
         foreach($positionToFind as $index => $filler) {
-
-            switch($possibleNumbers[$index]) {
-                case 1:         $value = "A"; break;
-                case 2:         $value = "B"; break;
-                case 4:         $value = "C"; break;
-                case 8:         $value = "D"; break;
-                case 16:        $value = "E"; break;
-                case 32:        $value = "F"; break;
-                case 64:        $value = "G"; break;
-                case 128:       $value = "H"; break;
-                case 256:       $value = "I"; break;
-                case 512:       $value = "J"; break;
-                case 1024:      $value = "K"; break;
-                case 2048:      $value = "L"; break;
-                case 4096:      $value = "M"; break;
-                case 8192:      $value = "N"; break;
-                case 16384:     $value = "O"; break;
-                case 32768:     $value = "P"; break;
-                case 65536:     $value = "Q"; break;
-                case 131072:    $value = "R"; break;
-                case 262144:    $value = "S"; break;
-                case 524288:    $value = "T"; break;
-                case 1048576:   $value = "U"; break;
-                case 2097152:   $value = "V"; break;
-                case 4194304:   $value = "W"; break;
-                case 8388608:   $value = "X"; break;
-                case 16777216:  $value = "Y"; break;
-                default: continue 2;
-            }
-
+            
+            if(!isset(VALUES[$possibleNumbers[$index]])) continue; //There are still multiple possibilities for this position
+            
+            $number = VALUES[$possibleNumbers[$index]];
             $numberFound = true;
-            $searchBlock = true;
-
-            [$colIndex, $rowIndex, $squareIndex, $related] = $infos[$index];
-
-            //error_log("setting $index as $value");
-
+            
             //Update the grid
-            $grid[$index] = $value;
-
-            //We can only use this number once in the row/col & square
-            foreach($related as $indexToCheck) {
-                if(($possibleNumbers[$indexToCheck] &= REMOVE[$value]) == 0) {
-                    return -1;
-                }
+            $grid[$index] = ALPHABET[$number];
+            
+            //We can no longer use the number in any of the possitions that are affected by the current position
+            foreach($positionsAffected[$index] as $indexToCheck) {
+                //If another position has no possible number left it's an invalid grid
+                if(($possibleNumbers[$indexToCheck] &= REMOVE[$number]) == 0) return -1;
             }
-
+            
             unset($positionToFind[$index]);
-
-            unset($squares[$squareIndex]["numbers"][$value]);
-            unset($squares[$squareIndex]["positions"][$index]);
-            unset($columns[$colIndex]["numbers"][$value]);
-            unset($columns[$colIndex]["positions"][$index]);
-            unset($rows[$rowIndex]["numbers"][$value]);
-            unset($rows[$rowIndex]["positions"][$index]);
+            
+            //Update all the cages that this position is part of
+            foreach($cagesMatch[$index] as $cageIndex) {
+                unset($cages[$cageIndex][0][$index]); //This position has been set
+                unset($cages[$cageIndex][1][$number]); //This number has been set
+            }
         }
+        
+        if($numberFound == false) {
+            
+            foreach($cages as $cagesIndex => [$cagePositions, $numbersToFind]) {
+                
+                //We group the positions in the cage by the numbers they can use
+                $groups = [];
 
-        $time1 += (microtime(1) - $a);
-
-        if($numberFound == false && $searchBlock) {
-            $searchBlock = false;
-
-            $a = microtime(1);
-
-            foreach($squares as $squareIndex => $square) {
-
-                if(!$square["numbers"]) {
-                    unset($squares[$squareIndex]);
-                    continue;
+                foreach($cagePositions as $index => $filler)  {
+                    $groups[$possibleNumbers[$index]][$index] = 1;
                 }
                 
-                foreach($square["numbers"] as $number => $filler) {
-                    $uniquePosition = null;
-
-                    foreach($square["positions"] as $position => $filler) {
-                        if($possibleNumbers[$position] & VALUES[$number]) {
-                            if($uniquePosition !== null) continue 2;
-                            else $uniquePosition = $position;
-                        }
-                    }
-
-                    if($uniquePosition === null) return -1;
-                    else {
-                        //error_log("in square $squareIndex only one pos for $number");
-                        //error_log(var_export($possibilities, true));
-
-                        $possibleNumbers[$uniquePosition] = VALUES[$number];
-                        $numberFound = true;
-                    }
-                }
-            }
-
-            foreach($columns as $colIndex => $column) {
-
-
-                if(!$column["numbers"]) {
-                    unset($columns[$colIndex]);
-                    continue;
-                }
-
-                foreach($column["numbers"] as $number => $filler) {
-                    $uniquePosition = null;
-
-                    foreach($column["positions"] as $position => $filler) {
-                        if($possibleNumbers[$position] & VALUES[$number]) {
-                            if($uniquePosition !== null) continue 2;
-                            else $uniquePosition = $position;
-                        }
-                    }
-
-                    if($uniquePosition === null) return -1;
-                    else {
-                        //error_log("in square $squareIndex only one pos for $number");
-                        //error_log(var_export($possibilities, true));
-
-                        $possibleNumbers[$uniquePosition] = VALUES[$number];
-                        $numberFound = true;
-                    }
-                }
-            }
-
-            foreach($rows as $rowIndex => $row) {
-
-                if(!$row["numbers"]) {
-                    unset($rows[$rowIndex]);
-                    continue;
-                }
-                
-                foreach($row["numbers"] as $number => $filler) {
-                    $uniquePosition = null;
+                //If we have X positions that can use the same X numbers, we know none of the other positions in the cage can use any of these X numbers
+                foreach($groups as $mask => $listPositions) {
                     
-                    foreach($row["positions"] as $position => $filler) {
-                        if($possibleNumbers[$position] & VALUES[$number]) {
-                            if($uniquePosition !== null) continue 2;
-                            else $uniquePosition = $position;
+                    if(getCountNumbers($mask) == count($listPositions)) {
+                        foreach($cagePositions as $index => $filler) {
+                            //For all the other postions
+                            if(!isset($listPositions[$index])) {
+                                //If another position has no possible number left it's an invalid grid
+                                if(($possibleNumbers[$index] &= ~$mask) == 0) return -1;
+                            }
                         }
                     }
+                }
+                
+                //For each number left to find in the cage we check if there's only position where it could be set
+                foreach($numbersToFind as $value => $mask) {
+        
+                    $indexUnique = null;
 
-                    if($uniquePosition === null) return -1;
+                    foreach($cagePositions as $index => $filler) {
+                        if($possibleNumbers[$index] & $mask) {
+                            //There are at least 2 positions for this number
+                            if($indexUnique !== null) continue 2;
+                
+                            $indexUnique = $index;
+                        }
+                    }
+        
+                    if($indexUnique === null) return -1; //There are no position left it's an invalid grid
                     else {
-                        //error_log("in square $squareIndex only one pos for $number");
-                        //error_log(var_export($possibilities, true));
-
-                        $possibleNumbers[$uniquePosition] = VALUES[$number];
-                        $numberFound = true;
+                        //There is only one position, we can set the number
+                        $possibleNumbers[$indexUnique] = $mask;
+                        $numberFound = 1;
                     }
                 }
             }
-
-            $time2 += (microtime(1) - $a);
         }
-
+        
     } while ($numberFound);
-
+    
     if(count($positionToFind) == 0) return 1;
     else return 0;
 }
 
 //Guess a number for the sudoku
-function getGuess(int $index, array &$possibleNumbers, array &$fobidden): bool {
-
+function getGuess(int $index, array $possibleNumbers): int {
+    
     $numbers = $possibleNumbers[$index];
 
-    foreach(VALUES as $value => $mask) {
-
-        //We already tried, we got an invalid grid
-        if(isset($fobidden[$index][$value])) continue; 
-
-        //This is a possible number for the position
-        if($numbers & $mask) {
-            $fobidden[$index][$value] = 1;
-            $possibleNumbers[$index] = $mask;
+    if($numbers == 0) return 0;
     
-            return true;
-        }
+    foreach(VALUES_INV as $value => $mask) {
+        
+        //This is a possible number for the position
+        if($numbers & $mask) return $value;
     }
-
-    //All the possibilites for this position are forbidden, invalid grid
-    return false;
+    
+    //All the possibilities for this position have been eliminated, invalid grid
+    return 0;
 }
 
 $backups = [];
-$forbidden = [];
+$guessMade = 0;
 
 //Solve the sudoku
 while(true) {
-
+    
     //We start by setting all the positions with only one possibility
-    $result = setNumbers($grid, $possibleNumbers, $positionToFind, $rows, $columns, $squares);
-
-    //break;
-
+    $result = setNumbers($grid, $positionToFind,$possibleNumbers, $cages);
+    
     if($result == 1) break; //Solution has been found
-
-    //arsort($possibleNumbers);
-
+    
     //Until we find a guess to test
     while(true) {
         //Invalid grid, reload last backup
         if($result == -1) {
-            [$grid, $possibleNumbers, $forbidden, $positionToFind, $rows, $columns, $squares] = array_pop($backups);
+            [$grid, $positionToFind, $possibleNumbers, $cages] = array_pop($backups);
         }
-
-        $temp = $possibleNumbers;
-
-        //No possible guess, invalid grid
-        if(getGuess(array_key_first($positionToFind), $possibleNumbers, $forbidden) == false) $result == -1;
+        
+        $min = INF;
+        $indexToGuess = "";
+        
+        //We can to make a guess on the position with the less possibilities
+        foreach($positionToFind as $index => $filler) {
+            $numbers = $possibleNumbers[$index];
+            
+            $count = getCountNumbers($numbers);
+            
+            if($count < $min) {
+                $indexToGuess = $index;
+                $min = $count;
+            }
+            
+            if($count <= 2) break;
+        }
+        
+        $guess = getGuess($indexToGuess, $possibleNumbers);
+        ++$guessMade;
+         
+        if($guess == 0) $result = -1; //No possible guess, invalid grid
         else {
-            //We have a guess, backup info
-            $backups[] = [$grid, $temp, $forbidden, $positionToFind, $rows, $columns, $squares];
+            $possibleNumbers[$indexToGuess] &= REMOVE[$guess]; //Remove the guess for the backup
+    
+            $backups[] = [$grid, $positionToFind, $possibleNumbers, $cages]; //Create a backup
+    
+            $possibleNumbers[$indexToGuess] = VALUES_INV[$guess]; //Use the guess
             break;
         }
     }
 }
 
-//error_log(var_export($squares, true));
-
 echo implode("\n", str_split($grid, 25)) . "\n";
 
-error_log(microtime(1) - $start);
-error_log($time1);
-error_log($time2);
+error_log((microtime(1) - $start));
+error_log("Guess Made $guessMade");
