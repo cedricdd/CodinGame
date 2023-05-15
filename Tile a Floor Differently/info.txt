@@ -1,0 +1,54 @@
+https://www.codingame.com/training/easy/tile-a-floor-differently
+
+Goal
+You saw the success your brother had as a manufacturer and installer of Floor-Tiles in the original “Tile a Floor” puzzle. 
+So you start a rival business doing something similar but different, specializing in what you call the bdpq-effect.
+
+The beauty of Tiles comes from their symmetry, in that the quadrants of a Tile are mirror/reflections of each other.
+
+So, when you get an order for a Tile, only the pattern of the top left quadrant is the input.
+Graphically explained here:
+
+☑☑☑☐☐☐
+☑☑☑☐☐☐
+☑☑☑☐☐☐
+☐☐☐☐☐☐
+☐☐☐☐☐☐
+☐☐☐☐☐☐
+
+From that limited input, your task is to:
+Create a full Tile
+And display a 2x2 floor (i.e., a floor consisting of 4 of those Tiles)
+
+Flip/Mirror patterns:
+Generally, a character appearing in the first quadrant just replicates in the other quadrants.
+However, your beautiful Tiles exploit the particular symmetry of:
+
+b d
+p q
+
+and
+
+\/
+/\
+
+For those, you'll want to put the proper reflected/flipped version in each quadrant.
+
+Details:
+➤ You only make square Tiles, where the side-length is an even number
+➤ Each Tile is a square; the input therefore is also a square
+➤ The input has a side-length of quarterSize; therefore the full Tile has a side-length of 2*quarterSize
+➤ The full floor needs a grout border, and grout separating the individual Tiles. Grout is represented by - on top/bottom, | on left/right, and + on corners
+
+
+Happy trowelling
+
+Input
+Line 1: An integer quarterSize, denoting the number of rows of Tile pattern in the top left quadrant
+Next quarterSize lines: row of Tile pattern in the top left quadrant
+
+Output
+The entire floor
+
+Constraints
+3 ≤ quarterSize ≤ 7
