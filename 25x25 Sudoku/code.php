@@ -121,9 +121,11 @@ function setNumbers(string &$grid, array &$positionToFind, array &$possibleNumbe
         
         foreach($positionToFind as $index => $filler) {
             
-            if(!isset(VALUES[$possibleNumbers[$index]])) continue; //There are still multiple possibilities for this position
+            $numbers = $possibleNumbers[$index];
             
-            $number = VALUES[$possibleNumbers[$index]];
+            if(($numbers & ($numbers - 1))) continue; //It's not a power of 2
+            
+            $number = VALUES[$numbers];
             $numberFound = true;
             
             //Update the grid
@@ -159,11 +161,13 @@ function setNumbers(string &$grid, array &$positionToFind, array &$possibleNumbe
                 foreach($groups as $mask => $listPositions) {
                     
                     if(getCountNumbers($mask) == count($listPositions)) {
+                        $maskInv = ~$mask;
+
                         foreach($cagePositions as $index => $filler) {
                             //For all the other postions
                             if(!isset($listPositions[$index])) {
                                 //If another position has no possible number left it's an invalid grid
-                                if(($possibleNumbers[$index] &= ~$mask) == 0) return -1;
+                                if(($possibleNumbers[$index] &= $maskInv) == 0) return -1;
                             }
                         }
                     }
