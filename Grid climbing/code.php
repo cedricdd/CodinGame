@@ -6,7 +6,10 @@ $start = microtime(1);
 function getJumpCost(int $xa, int $ya, int $xb, int $yb): int {
     global $costs, $map;
 
-    return $costs[max(abs($xa - $xb), abs($ya - $yb)) - 1] + $map[$yb][$xb];
+    $X = abs($xa - $xb);
+    $Y = abs($ya - $yb);
+
+    return $costs[($X > $Y ? $X : $Y) - 1] + $map[$yb][$xb];
 }
 
 fscanf(STDIN, "%d", $n);
@@ -39,7 +42,7 @@ while(1) {
     }
 
     unset($jumps[$indexToCheck]);
-    $min = INF;
+    $minCost = INF;
 
     //Foreach position we haven't reached yet, check if we can reach them with smaller cost
     foreach($jumps as $index => [&$cost, $xj, $yj]) {
@@ -48,8 +51,8 @@ while(1) {
         if($jumpCost < $cost) $cost = $jumpCost;
 
         //At the same time we look for the next index to check (ie the position we can reach with the lowest cost)
-        if($cost < $min) {
-            $min = $cost;
+        if($cost < $minCost) {
+            $minCost = $cost;
             $indexToCheck = $index;
         }
     }
