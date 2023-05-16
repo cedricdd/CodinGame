@@ -27,10 +27,10 @@ for($y = 0; $y < $n; ++$y) {
     }
 }
 
-while(1) {
-    rsort($jumps); //We're always working on the position we can reach with the lowest cost
+$indexToCheck = 0;
 
-    [$currentCost, $x, $y] = array_pop($jumps);
+while(1) {
+    [$currentCost, $x, $y] = $jumps[$indexToCheck];
 
     //We have reach the destination
     if($y * $n + $x == $lastPosition) {
@@ -38,10 +38,19 @@ while(1) {
         exit("$currentCost");
     }
 
+    unset($jumps[$indexToCheck]);
+    $min = INF;
+
     //Foreach position we haven't reached yet, check if we can reach them with smaller cost
-    foreach($jumps as $index => [$cost, $xj, $yj]) {
+    foreach($jumps as $index => [&$cost, $xj, $yj]) {
         $jumpCost = $currentCost + getJumpCost($x, $y, $xj, $yj);
 
-        if($jumpCost < $jumps[$index][0]) $jumps[$index][0] = $jumpCost;
+        if($jumpCost < $cost) $cost = $jumpCost;
+
+        //At the same time we look for the next index to check (ie the position we can reach with the lowest cost)
+        if($cost < $min) {
+            $min = $cost;
+            $indexToCheck = $index;
+        }
     }
 }
