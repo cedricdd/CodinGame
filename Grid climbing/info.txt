@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/29649c6f594e71b69c8ca2567c8acfa06e207
+https://www.codingame.com/training/hard/grid-climbing
 
 Goal
 You are given an integer n, an array costs of n-1 integers and a n times n grid of digits. 
