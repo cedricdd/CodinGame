@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/45324e0e8f1ee6f058defff3f07f28b432c70
+https://www.codingame.com/training/medium/one-for-his-nobs
 
 Goal
 It's two years into the apocalypse and you've been living alone in a bunker. The only soul you can talk to is an AI bot named Nobs. 
