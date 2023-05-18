@@ -29,7 +29,7 @@ foreach($visitors as $visitorIndex => $visitorTime) {
     if($counters[$counterIndex][2] >= $worktime) {
         $counters[$counterIndex][1] += 10;
         $counters[$counterIndex][2] = 0;
-        $counters[$counterIndex][4]++;
+        $counters[$counterIndex][4]++; //Increase # of break taken
     }
 
     $counters[$counterIndex][3]++; //Increase # of visitors helped
