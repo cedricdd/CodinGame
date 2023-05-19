@@ -21,7 +21,7 @@ for ($i = 0; $i < $n; $i++) {
 
         $distance = sqrt(array_sum(array_map(function($value) { return $value ** 2; }, $vector)));
 
-        if($distance < $min[1]) $min = [$name . $match[1], $distance, implode(",", $vector)];
+        if($distance > 0 && $distance < $min[1]) $min = [$name . $match[1], $distance, implode(",", $vector)];
         if($distance > $max[1]) $max = [$name . $match[1], $distance, implode(",", $vector)];
     }
 
