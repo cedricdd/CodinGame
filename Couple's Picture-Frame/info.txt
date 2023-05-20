@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/54201edd9ae0d83c6f5cdbb1b6a8ccfcd3d3f
+https://www.codingame.com/training/easy/couples-picture-frame
 
 Goal
 You manufacture custom picture-frames for couples, such that:
