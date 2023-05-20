@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/55191b71a36e9ff405077d85287b66d1f904f
+https://www.codingame.com/training/easy/the-leaking-bathtub
 
 Goal
 Bob has a bathtub.
