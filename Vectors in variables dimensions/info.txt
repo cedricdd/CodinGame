@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/55554420ae4736b420bee3d1a2d043f055ef0
+https://www.codingame.com/training/easy/vectors-in-variables-dimensions
 
 Goal
 You are a space-time traveller who travel across universes. 
