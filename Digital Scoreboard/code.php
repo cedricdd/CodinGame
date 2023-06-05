@@ -1,6 +1,6 @@
 <?php
 
-const DIGITS = [119 => 0, 18 => 1, 93 => 2, 91 => 3, 58 => 4, 107 => 5, 111 => 6, 82 => 7, 127 => 8, 122 => 9];
+const DIGITS = [119 => 0, 18 => 1, 93 => 2, 91 => 3, 58 => 4, 107 => 5, 111 => 6, 82 => 7, 127 => 8, 123 => 9];
 const CHECKS = [6 => [1, 3], 5 => [2, 2], 4 => [2, 6], 3 => [3, 3], 2 => [4, 2], 1 => [4, 6], 0 => [5, 3]];
 
 function readInput(int &$digit1, int &$digit2, int $startLine, array $inputs, bool $addition = true) {
