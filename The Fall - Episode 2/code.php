@@ -237,10 +237,10 @@ function checkRocks(array $path, array $positions, int $startStep, int $rockID):
 
         $stepRock++;
 
-        list($x, $y, $dir) = getNextPosition($gridRock, $x, $y, $dir);
+        [$x, $y, $dir] = getNextPosition($gridRock, $x, $y, $dir);
 
         //Rock is out of the grid or it got destroyed
-        if($x < 0 || $x >= $W || $y >= $H || $gridRock[$y][$x] == 0) {
+        if($x == -1 && $y == -1) {
             return checkRocks($path, $positions, $startStep, $rockID + 1);
         }
         
