@@ -182,7 +182,7 @@ function getNextPosition(array &$grid, int $x, int $y, string $dir): array {
 }
 
 //Check if a rotation would destroy the rock
-function getDestroyAction(&$grid, $x, $y, $dir) {
+function getDestroyAction(array &$grid, int $x, int $y, string $dir) {
     switch($grid[$y][$x]) {
         case 2:
         case 3:
@@ -217,7 +217,7 @@ function getDestroyAction(&$grid, $x, $y, $dir) {
 }
 
 function checkRocks(array $path, array $positions, int $startStep, int $rockID): array {
-    global $grid, $rocks;
+    global $grid, $rocks, $W, $H;
 
     //We have checked all the rocks
     if($rockID == count($rocks)) return $path;
@@ -240,7 +240,7 @@ function checkRocks(array $path, array $positions, int $startStep, int $rockID):
         list($x, $y, $dir) = getNextPosition($gridRock, $x, $y, $dir);
 
         //Rock is out of the grid or it got destroyed
-        if($x == -1) {
+        if($x < 0 || $x >= $W || $y >= $H || $gridRock[$y][$x] == 0) {
             return checkRocks($path, $positions, $startStep, $rockID + 1);
         }
         
@@ -250,7 +250,7 @@ function checkRocks(array $path, array $positions, int $startStep, int $rockID):
             //No solution to destroy this rock
             if(count($destroyActions) == 0) return [];
 
-            //Search for a WAIT a action to replace
+            //Search for a WAIT action to replace
             for($i = $startStep; $i < count($path); ++$i) {
                 if($path[$i][0] !== "WAIT") continue;
 
@@ -308,7 +308,7 @@ while (TRUE)
         fscanf(STDIN, "%d %d %s", $xr, $yr, $dr);
 
         //The rock is on a position indy was before, it can't catch up
-        if(isset($visited[$xr . "-" . $yr])) continue;
+        if(isset($visited[$xr . "-" .$yr])) continue;
     
         $rocks[] = [$xr, $yr, $dr];
     }
@@ -319,7 +319,7 @@ while (TRUE)
         foreach($paths as $key => [$path, $positions]) {
 
             //Indy is not in the right position to use this path
-            if(($positions[$step] ?? "") != "$xi-$yi") continue;
+            if($positions[$step] != "$xi-$yi") continue;
 
             $updatedPath = checkRocks($path, $positions, $step, 0);
 
@@ -333,10 +333,10 @@ while (TRUE)
         //Use the first valid path
         foreach($paths as $key => [$path, $positions]) {
             //Indy is not in the right position to use this path
-            if(($positions[$step] ?? "") != "$xi-$yi") continue;
+            if($positions[$step] != "$xi-$yi") continue;
 
             break;
-        }   
+        }  
     }
 
     if($path[$step][0] !== "WAIT") {
