@@ -24,8 +24,8 @@ const TRANSFORMATION = [
 
 //Get the possible exit from a room based on entering direction
 const MOVES = [
+    //[x modifier, y modifier, new entry direction, rotation needed, rotation direction]
     1 => [
-        //[x modifier, y modifier, new entry direction, rotation needed, rotation direction]
         "TOP" => [[0, 1, "TOP", 0, ""]],
         "LEFT" => [[0, 1, "TOP", 0, ""]],
         "RIGHT" => [[0, 1, "TOP", 0, ""]],
@@ -56,7 +56,7 @@ const MOVES = [
         "RIGHT" => [[-1, 0, "RIGHT", 0, ""], [0, 1, "TOP", 1, "RIGHT"]],
     ],
     7 => [
-        "TOP" => [[0, 1, "TOP", 0, ""], [0, 1, "TOP", 2, "LEFT"]],
+        "TOP" => [[0, 1, "TOP", 0, ""]],
         "LEFT" => [[1, 0, "LEFT", 1, "LEFT"], [0, 1, "TOP", 1, "RIGHT"]],
         "RIGHT" => [[0, 1, "TOP", 0, ""], [-1, 0, "RIGHT", 1, "LEFT"]],
     ],
@@ -66,7 +66,7 @@ const MOVES = [
         "RIGHT" => [[0, 1, "TOP", 0, ""], [-1, 0, "RIGHT", 2, "LEFT"]],
     ],
     9 => [
-        "TOP" => [[0, 1, "TOP", 0, ""], [0, 1, "TOP", 2, "LEFT"]],
+        "TOP" => [[0, 1, "TOP", 0, ""]],
         "LEFT" => [[0, 1, "TOP", 0, ""], [1, 0, "LEFT", 1, "RIGHT"]],
         "RIGHT" => [[0, 1, "TOP", 1, "LEFT"], [-1, 0, "RIGHT", 1, "RIGHT"]],
     ],
