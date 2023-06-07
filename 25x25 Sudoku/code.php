@@ -241,7 +241,7 @@ while(true) {
         $min = INF;
         $indexToGuess = "";
         
-        //We can to make a guess on the position with the less possibilities
+        //We want to make a guess on the position with the less possibilities
         foreach($positionToFind as $index => $filler) {
             $numbers = $possibleNumbers[$index];
             
