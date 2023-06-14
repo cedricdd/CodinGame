@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/57336471622c996ca0f3d426c4d75e22f6450
+https://www.codingame.com/training/easy/nato-alphabets-odd-uncles
 
 Goal
 The NATO alphabet is the standard now for using a word to indicate the letter that word starts with:
