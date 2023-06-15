@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/59580fb2f8efdf4d6aefc8bc29def565fcc3f
+https://www.codingame.com/training/easy/furlongs-per-fortnight
 
 Goal
 Background:
