@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/5565366ad6d449d56f7e91d450829b88dbb88
+https://www.codingame.com/training/expert/25x25-sudoku
 
 Goal
 You have to solve a 25x25 sudoku grid!
