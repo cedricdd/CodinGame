@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/7676d22a5b0dadd36eb85d0396919bf1ac8f
+https://www.codingame.com/training/medium/chebyshev-orbiting
 
 Goal
 Spaceship is orbiting the planet in the Discrete Chebyshev 2D Space. By given initial spaceship position and velocity predict its position after time seconds.
