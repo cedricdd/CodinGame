@@ -17,7 +17,7 @@ for($i = strlen($N) - 1; $i >= 0; --$i) {
 }
 
 //What's on the left doesn't change, we increase by one at the position and just 0s at the right
-$N = ($i > 0 ? substr($N, 0, $i) : "") . strval(($i == -1 ? 0 : $N[$i]) + 1) . str_repeat("0", strlen($N) - $i - 1);
+$N = substr($N, 0, max($i, 0)) . strval(($i == -1 ? 0 : $N[$i]) + 1) . str_repeat("0", strlen($N) - $i - 1);
 
 $i = strlen($N) - 1;
 $sum -= array_sum(str_split($N)); //The amount missing to have the same sum as input number
