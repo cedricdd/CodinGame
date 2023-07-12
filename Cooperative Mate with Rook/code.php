@@ -1,5 +1,21 @@
 <?php
 
+//Generate the minimum distance to the edge of the board from any positions
+function generateDistanceToEdge(): array {
+    $distances = [];
+
+    for($y = 0; $y < 8; ++$y) {
+        for($x = 0; $x < 8; ++$x) {
+            $index = $y * 8 + $x;
+
+            $distances[$index] = min($x, $y, 7 - $x, 7 - $y);
+        }
+    }
+
+    return $distances;
+}
+
+//Generate all the moves a king can do from any positions
 function generateKingsMoves(): array {
     $moves = [];
 
@@ -20,20 +36,7 @@ function generateKingsMoves(): array {
     return $moves;
 }
 
-function generateDistanceToEdge(): array {
-    $distances = [];
-
-    for($y = 0; $y < 8; ++$y) {
-        for($x = 0; $x < 8; ++$x) {
-            $index = $y * 8 + $x;
-
-            $distances[$index] = min($x, $y, 7 - $x, 7 - $y);
-        }
-    }
-
-    return $distances;
-}
-
+//Generate all the moves a rook can do from any positions
 function generateRookMoves(): array {
     $moves = [];
 
@@ -56,45 +59,38 @@ function generateRookMoves(): array {
     return $moves;
 }
 
+//This is assuming that the rook only has to move to checkmate, there are no test/validator that requires the rook to move more than one
 function generateWinPositions(int $rookPosition): array {
     $positions = [];
 
     [$xR, $yR] = [$rookPosition % 8, intdiv($rookPosition, 8)];
 
     //Wining with black king on the top row
-    if($yR != 0) {
-        for($x = 0; $x < 8; ++$x) {
-            if(abs($x - $xR) <= 1) continue;
-    
-            $positions[$x][2 * 8 + $x] = $xR;
-        }
+    for($x = 0; $x < 8; ++$x) {
+        if(abs($x - $xR) <= 1) continue;
+
+        $positions[$x][2 * 8 + $x] = $xR; 
     }
 
     //Wining with black king on the bottom row
-    if($yR != 7) {
-        for($x = 0; $x < 8; ++$x) {
-            if(abs($x - $xR) <= 1) continue;
-    
-            $positions[7 * 8 + $x][5 * 8 + $x] = 7 * 8 + $xR;
-        }
+    for($x = 0; $x < 8; ++$x) {
+        if(abs($x - $xR) <= 1) continue;
+
+        $positions[7 * 8 + $x][5 * 8 + $x] = 7 * 8 + $xR;
     }
 
     //Wining with black king on the left col
-    if($xR != 0) {
-        for($y = 0; $y < 8; ++$y) {
-            if(abs($y - $yR) <= 1) continue;
-    
-            $positions[$y * 8][$y * 8 + 2] = $yR * 8;
-        }
+    for($y = 0; $y < 8; ++$y) {
+        if(abs($y - $yR) <= 1) continue;
+
+        $positions[$y * 8][$y * 8 + 2] = $yR * 8;
     }
 
     //Wining with black king on the right col
-    if($xR != 7) {
-        for($y = 0; $y < 8; ++$y) {
-            if(abs($y - $yR) <= 1) continue;
-    
-            $positions[$y * 8 + 7][$y * 8 + 5] = $yR * 8 + 7;
-        }
+    for($y = 0; $y < 8; ++$y) {
+        if(abs($y - $yR) <= 1) continue;
+
+        $positions[$y * 8 + 7][$y * 8 + 5] = $yR * 8 + 7;
     }
 
     return $positions;
@@ -103,12 +99,14 @@ function generateWinPositions(int $rookPosition): array {
 $alphabet = range("a", "h");
 $alphabetFlipped = array_flip($alphabet);
 
+//Convert a board position into it's position into the array a8 = 0, b8 = 1, ..., h1 = 63
 function boardToArray(string $position): int {
     global $alphabetFlipped;
 
     return (8 - intval($position[1])) * 8 + $alphabetFlipped[$position[0]];
 }
 
+//Convert an array position into it's position on the board 0 = a8, 1 = b8, ..., 63 = h1
 function arrayToBoard(int $position): string {
     global $alphabet;
 
@@ -118,10 +116,6 @@ function arrayToBoard(int $position): string {
     return $alphabet[$x] . (8 - $y);
 }
 
-// $movingPlayer: Either black or white
-// $whiteKing: Position of the white king, e.g. a2
-// $whiteRook: Position of the white rook
-// $blackKing: Position of the black king
 fscanf(STDIN, "%s %s %s %s", $movingPlayer, $whiteKing, $whiteRook, $blackKing);
 
 $start = microtime(1);
@@ -131,52 +125,34 @@ $whiteKing = boardToArray($whiteKing);
 $whiteRook = boardToArray($whiteRook);
 $blackKing = boardToArray($blackKing);
 
-error_log(var_export("Next player $movingPlayer", true));
-error_log(var_export("White King $whiteKing " . arrayToBoard($whiteKing), true));
-error_log(var_export("White Rook $whiteRook " . arrayToBoard($whiteRook), true));
-error_log(var_export("Black King $blackKing " . arrayToBoard($blackKing), true));
-
 $distances = generateDistanceToEdge();
-
-//error_log(var_export($distances, true));
 
 $movesKing = generateKingsMoves();
 
-//error_log(var_export($movesKing, true));
-
 $movesRook = generateRookMoves();
-
-//error_log(var_export($movesRook, true));
 
 $winPositions = generateWinPositions($whiteRook);
 
-//error_log(var_export($winPositions, true));
-
-$map = str_repeat(" ", 64);
-$map[$whiteRook] = "R";
-$map[$whiteKing] = "K";
-$map[$blackKing] = "k";
-
-$debug = true;
+//Representation of the board
+$board = str_repeat(" ", 64);
+$board[$whiteRook] = "R";
+$board[$whiteKing] = "K";
+$board[$blackKing] = "k";
 
 $history = [];
 
-$toCheck = [[$map, $movingPlayer, $whiteKing, $whiteRook, $blackKing, []]];
-
-$turn = 0;
+$toCheck = [[$board, $movingPlayer, $whiteKing, $whiteRook, $blackKing, []]];
 
 while(count($toCheck)) {
 
     $newCheck = [];
-    error_log("Turn " . ++$turn);
 
-    foreach($toCheck as [$map, $movingPlayer, $whiteKing, $whiteRook, $blackKing, $moves]) {
+    foreach($toCheck as [$board, $movingPlayer, $whiteKing, $whiteRook, $blackKing, $moves]) {
 
-        $history[$movingPlayer][$map] = 1;
+        if(isset($history[$movingPlayer][$board])) continue; //Configuration we have already checked
+        else $history[$movingPlayer][$board] = 1;
 
         $countMoves = count($moves);
-
-        $distanceBlackKing = $distances[$blackKing];
 
         $movesWhiteKing = $movesKing[$whiteKing];
         $movesWhiteRook = $movesRook[$whiteRook];
@@ -185,20 +161,16 @@ while(count($toCheck)) {
         [$blackKingX, $blackKingY] = [$blackKing % 8, intdiv($blackKing, 8)];
         [$whiteKingX, $whiteKingY] = [$whiteKing % 8, intdiv($whiteKing, 8)];
 
-        $test = abs($whiteKingX - $blackKingX) + abs($whiteKingY - $blackKingY);
+        $distanceBetweenKings = abs($whiteKingX - $blackKingX) + abs($whiteKingY - $blackKingY);
 
         $nextMovingPlayer = ($movingPlayer ^ 1);
 
-        if($debug) error_log("WK " . arrayToBoard($whiteKing) . " WR " . arrayToBoard($whiteRook) . " BK " . arrayToBoard($blackKing));
-
+        //It's white turn to play
         if($movingPlayer == 1) {
             //Check if we are in a winningPostion
             if(isset($winPositions[$blackKing][$whiteKing])) {
-                error_log("we are in a winnin position!");
-
+                //Move the rook to checkmate
                 $moves[] = [$whiteRook, $winPositions[$blackKing][$whiteKing]];
-
-                error_log(var_export($moves, true));
 
                 echo implode(" ", array_map(function($move) {
                     return arrayToBoard($move[0]) . arrayToBoard($move[1]);
@@ -207,57 +179,42 @@ while(count($toCheck)) {
                 break 2;
             }
 
-            $map[$whiteKing] = " ";
+            $board[$whiteKing] = " ";
 
             foreach($movesWhiteKing as $indexKing => $filler) {
-                if(isset($movesBlackKing[$indexKing]) || $indexKing == $whiteRook || $indexKing == $blackKing) {
-                    if($debug) error_log("white king can't move to $indexKing " . arrayToBoard($indexKing));
-                    continue;
-                } 
+                //White king can't move where black king can move
+                if(isset($movesBlackKing[$indexKing]) || $indexKing == $whiteRook || $indexKing == $blackKing) continue;
 
                 [$indexX, $indexY] = [$indexKing % 8, intdiv($indexKing, 8)];
 
-                if(1==1 || $test > abs($indexX - $blackKingX) + abs($indexY - $blackKingY)) {
-                    $map2 = $map;
-                    $map2[$indexKing] = "K";
+                //If white king is on the border of the board or is not moving farther from the black king we consider it as a potential move
+                if($distances[$whiteKing] == 0 || $distanceBetweenKings >= abs($indexX - $blackKingX) + abs($indexY - $blackKingY)) {
+                    $board[$indexKing] = "K"; //Update the representation of the board
     
-                    if(isset($history[$nextMovingPlayer][$map2])) {
-                        if($debug) error_log("$nextMovingPlayer $map2 already checked");
-                        continue;
-                    }
+                    $moves[$countMoves] = [$whiteKing, $indexKing]; //The moves we are testing
     
-                    $moves[$countMoves] = [$whiteKing, $indexKing];
+                    $newCheck[] = [$board, $nextMovingPlayer, $indexKing, $whiteRook, $blackKing, $moves];
     
-                    $newCheck[] = [$map2, $nextMovingPlayer, $indexKing, $whiteRook, $blackKing, $moves];
-    
-                    if($debug) error_log("white king can move from " . arrayToBoard($whiteKing) . " to " . arrayToBoard($indexKing));
+                    $board[$indexKing] = " "; //Update the representation of the board
                 }
             }
 
         } else {
-            $map[$blackKing] = " ";
+            $board[$blackKing] = " ";
 
-            //Black king is only allowed to move toward the edge of the map
             foreach($movesBlackKing as $indexKing => $filler) {
-                if(isset($movesWhiteKing[$indexKing]) || $indexKing == $whiteKing || isset($movesWhiteRook[$indexKing]) || $indexKing == $whiteRook) {
-                    if($debug) error_log("black king can't move to $indexKing " . arrayToBoard($indexKing));
-                    continue;
-                }
+                //Black king can't move where white king or white rook can move
+                if(isset($movesWhiteKing[$indexKing]) || $indexKing == $whiteKing || isset($movesWhiteRook[$indexKing]) || $indexKing == $whiteRook) continue;
 
-                if($distances[$indexKing] <= $distanceBlackKing) {
-                    if($debug) error_log("black king can move to $indexKing " . arrayToBoard($indexKing));
-                    
-                    $map2 = $map;
-                    $map2[$indexKing] = "k";
+                //Black king is only allowed to move toward the edge of the map or away from it if it's already on the edge
+                if($distances[$blackKing] == 0 || $distances[$indexKing] < $distances[$blackKing]) {
+                    $board[$indexKing] = "k"; //Update the representation of the board
     
-                    if(isset($history[$nextMovingPlayer][$map2])) {
-                        if($debug) error_log("$nextMovingPlayer $map2 already checked");
-                        continue;
-                    }
+                    $moves[$countMoves] = [$blackKing, $indexKing]; //The moves we are testing
     
-                    $moves[$countMoves] = [$blackKing, $indexKing];
-    
-                    $newCheck[] = [$map2, $nextMovingPlayer, $whiteKing, $whiteRook, $indexKing, $moves];
+                    $newCheck[] = [$board, $nextMovingPlayer, $whiteKing, $whiteRook, $indexKing, $moves];
+
+                    $board[$indexKing] = " "; //Update the representation of the board
                 } 
             }
 
@@ -265,8 +222,6 @@ while(count($toCheck)) {
     }
 
     $toCheck = $newCheck;
-
-    if($turn > 1) break;
 }
 
 error_log(microtime(1) - $start);
