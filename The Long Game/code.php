@@ -49,39 +49,151 @@ foreach($permutations as [$n1, $n2, $n3, $n4]) {
 if(count($solutions) == 0) exit("not possible");
 
 //Remove spaces
-foreach($solutions as $solution) $solutions1[preg_replace("/\s/", "", $solution)] = 1;
+foreach($solutions as $solution) $solutionsTemp[preg_replace("/\s/", "", $solution)] = 1;
 
-foreach($solutions1 as $solution => $filler) {
-    //Only addition & substraction + only multiplication & division
-    if(preg_match("/^[0-9\+\-\(\)]+$/", $solution) || preg_match("/^[0-9\*\/\(\)]+$/", $solution)) {
-        unset($solutions1[$solution]);
+$solutions = $solutionsTemp;
+$solutionsTemp = [];
 
-        $solutions1[preg_replace("/[\(\)]/", "", $solution)] = 1;
+foreach($solutions as $solution => $filler) {
+
+    //Remove unnecessary parentheses:
+    while(true) {
+        //error_log("starting: $solution");
+        $opening = [];
+
+        foreach(str_split($solution) as $i => $c) {
+            if($c === "(") $opening[] = $i;
+            elseif($c === ")") {
+                $begin = array_pop($opening);
+    
+                //error_log("found parant $begin $i");
+    
+                $updated = substr($solution, 0, $begin) . substr($solution, $begin + 1, $i - $begin - 1) . substr($solution, $i + 1);
+    
+                //error_log("updated: $updated");
+    
+                if(eval("return $updated;") == 24) {
+                    //error_log("parant are useless");
+    
+                    $solution = $updated;
+
+                    continue 2;
+                }
+            }
+        }
+
+        break;
     }
+
+    //Rewrite expression with substraction
+    if(preg_match("/(.*\-)\((.*)\)(.*)/", $solution, $matches)) {
+        //error_log(var_export($matches, true));
+
+        $terms = preg_split("/([\+\-])/", $matches[2], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+
+        //error_log(var_export($elements, true));
+
+        foreach($terms as &$term) {
+            $term = strtr($term, ["+" => "-", "-" => "+"]);
+        }
+
+        $solution = $matches[1] . implode("", $terms) . $matches[3];
+    }
+
+    //Rewrite expression with division
+    if(preg_match("/(.*)\/\(([^\/]+)\/([^\/]+)\)(.*)/", $solution, $matches)) {
+        //error_log(var_export($solution, true));
+        //error_log(var_export($matches, true));
+
+        $solution = $matches[1] . "*" . $matches[3] . "/" . $matches[2] . $matches[4];
+
+        //error_log(var_export($solution, true));
+
+        if(eval("return $solution;") != 24) error_log("!!!!!!!!!!!!!!!!");
+    }
+
+    error_log(var_export("solution is $solution", true));
+
+    //Split by addition/substraction
+    $terms = [];
+    $countTerms = 0;
+    $count = 0;
+    $term = "";
+    $prev = "+";
+
+    foreach(str_split($solution . "+") as $c) {
+        if($c === "(") ++$count;
+        elseif($c === ")") --$count;
+        elseif($count == 0 && ($c === "+" || $c === "-")) {
+            $terms[$prev][ctype_digit($term)][] = $term;
+
+            ++$countTerms;
+            $term = "";
+            $prev = $c;
+            continue;
+        }
+        
+        $term .= $c;
+    }
+
+    error_log(var_export($terms, true));
+
+    if($countTerms > 1) {
+        //Start with the additions
+
+        //Sort integers
+        sort($terms["+"][1]);
+        
+        $solution = implode("+", $terms["+"][1]);
+
+        //Substractions
+
+        if(count($terms["-"][1] ?? []) > 0) {
+            //Sort integers
+            sort($terms["-"][1]);
+        
+            $solution .= "-" . implode("-", $terms["-"][1]);
+        }
+
+        //error_log(var_export($addition, true));
+        //error_log(var_export($substraction, true));
+    }
+
+
+
+    //3-a
+    /*
+    if(preg_match("/(.*?)([0-9]+(?:\*(?:[0-9]+|\([^\(\)]+\)))+)(.*)/", $solution, $matches)) {
+        error_log(var_export($matches, true));
+
+        $terms = [];
+        $open = 0;
+
+        for($i = 0; $i < count($matches[2]); ++$i) {
+
+        }
+
+        
+    }
+
+    //3-b
+    if(preg_match("/^([0-9]+|\([^\(\)]+\))([\+\*])([0-9]+|\([^\(\)]+\))$/", $solution, $matches)) {
+        //error_log(var_export($matches, true));
+
+        if(is_int($matches[3]) || eval("return " . $matches[1] . ";") > eval("return " . $matches[3] . ";")) $solution = $matches[3] . $matches[2] . $matches[1];
+
+        error_log("solution is now: $solution");
+    }*/
+
+    $solutionsTemp[$solution] = 1;
 }
 
-do {
-    $changed = false;
+$solutions = $solutionsTemp;
 
-    //Remove unnecessary parentheses
-    foreach($solutions1 as $solution => $filler) {
-        //Multiplication & division inside a parenthese
-        if(preg_match("/(.*)\(((?:[0-9]+|\([^\(\)]+\))\*(?:[0-9]+|\([^\(\)]+\)))\)(.*)/", $solution, $matches)) {
-            unset($solutions1[$solution]);
+error_log(var_export($solutions, true));
 
-            $updated = $matches[1] . $matches[2] . $matches[3];
+echo count($solutions) . PHP_EOL;
 
-            $solutions1[$updated] = 1;
-
-            error_log("here $solution => $updated");
-
-            if(eval("return $solution;") != eval("return $updated;")) error_log("not matching!!!!!!!!!");
-
-            $changed = true;
-        } 
-    }
-} while($changed);
-
-error_log(var_export($solutions1, true));
+foreach($solutions as $solution => $filler) echo $solution . PHP_EOL;
 
 error_log(microtime(1) - $start);
