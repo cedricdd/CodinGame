@@ -2,6 +2,109 @@
 
 const OPERATIONS = ["+", "-", "/", "*"];
 
+function sortExpression(string $expression): string {
+    //error_log(var_export("expression is $expression", true));
+
+    //Split by multiplicate/division
+    $terms = ["*" => ["int" => [], "exp" => []], "/" => ["int" => [], "exp" => []]];
+    $count = 0;
+    $term = "";
+    $prev = "*";
+
+    foreach(str_split($expression . "*") as $c) {
+        if($c === "(") ++$count;
+        elseif($c === ")") --$count;
+        elseif($count == 0 && ($c === "*" || $c === "/")) {
+            if(ctype_digit($term)) $terms[$prev]["int"][] = $term;
+            elseif($term[0] === "(") $terms[$prev]["exp"][] = "(" . sortSolution(substr($term, 1, -1)) . ")";
+            else $terms[$prev]["exp"][] = $term;
+
+            $term = "";
+            $prev = $c;
+            continue;
+        }
+        
+        $term .= $c;
+    }
+
+    //error_log(var_export($terms, true));
+
+    //Sort multiplication integers
+    sort($terms["*"]["int"]);
+    //Sort multiplication expressions
+    usort($terms["*"]["exp"], function($a, $b) {
+        return eval("return $a;") <=> eval("return $b;");
+    });
+    
+    $expression = implode("*", array_merge($terms["*"]["int"], $terms["*"]["exp"]));
+
+    if(count($terms["/"]["int"]) + count($terms["/"]["exp"]) > 0) {
+        //Sort division integers
+        sort($terms["/"]["int"]);
+        //Sort division expressions
+        usort($terms["/"]["exp"], function($a, $b) {
+            return eval("return $a;") <=> eval("return $b;");
+        });
+
+        $expression .= "/" . implode("/", array_merge($terms["/"]["int"], $terms["/"]["exp"]));
+    }
+
+    //error_log(var_export("end expression is $expression", true));
+
+    return $expression;
+}
+
+function sortSolution(string $solution): string {
+    //error_log(var_export("solution is $solution", true));
+
+    //Split by addition/substraction
+    $terms = ["+" => ["int" => [], "exp" => []], "-" => ["int" => [], "exp" => []]];
+    $count = 0;
+    $term = "";
+    $prev = "+";
+
+    foreach(str_split($solution . "+") as $c) {
+        if($c === "(") ++$count;
+        elseif($c === ")") --$count;
+        elseif($count == 0 && ($c === "+" || $c === "-")) {
+            if(ctype_digit($term)) $terms[$prev]["int"][] = $term;
+            else $terms[$prev]["exp"][] = sortExpression($term);
+
+            $term = "";
+            $prev = $c;
+            continue;
+        }
+        
+        $term .= $c;
+    }
+
+    //error_log(var_export($terms, true));
+
+    //Sort addition integers
+    sort($terms["+"]["int"]);
+    //Sort addition expressions
+    usort($terms["+"]["exp"], function($a, $b) {
+        return eval("return $a;") <=> eval("return $b;");
+    });
+    
+    $solution = implode("+", array_merge($terms["+"]["int"], $terms["+"]["exp"]));
+
+    if(count($terms["-"]["int"]) + count($terms["-"]["exp"]) > 0) {
+        //Sort Substraction integers
+        sort($terms["-"]["int"]);
+        //Sort Substraction expressions
+        usort($terms["-"]["exp"], function($a, $b) {
+            return eval("return $a;") <=> eval("return $b;");
+        });
+
+        $solution .= "-" . implode("-", array_merge($terms["-"]["int"], $terms["-"]["exp"]));
+    }
+
+    //error_log(var_export("end solution is $solution", true));
+
+    return $solution;
+}
+
 $start = microtime(1);
 
 $numbers = explode(" ", trim(fgets(STDIN)));
@@ -112,53 +215,8 @@ foreach($solutions as $solution => $filler) {
         if(eval("return $solution;") != 24) error_log("!!!!!!!!!!!!!!!!");
     }
 
-    error_log(var_export("solution is $solution", true));
-
-    //Split by addition/substraction
-    $terms = [];
-    $countTerms = 0;
-    $count = 0;
-    $term = "";
-    $prev = "+";
-
-    foreach(str_split($solution . "+") as $c) {
-        if($c === "(") ++$count;
-        elseif($c === ")") --$count;
-        elseif($count == 0 && ($c === "+" || $c === "-")) {
-            $terms[$prev][ctype_digit($term)][] = $term;
-
-            ++$countTerms;
-            $term = "";
-            $prev = $c;
-            continue;
-        }
-        
-        $term .= $c;
-    }
-
-    error_log(var_export($terms, true));
-
-    if($countTerms > 1) {
-        //Start with the additions
-
-        //Sort integers
-        sort($terms["+"][1]);
-        
-        $solution = implode("+", $terms["+"][1]);
-
-        //Substractions
-
-        if(count($terms["-"][1] ?? []) > 0) {
-            //Sort integers
-            sort($terms["-"][1]);
-        
-            $solution .= "-" . implode("-", $terms["-"][1]);
-        }
-
-        //error_log(var_export($addition, true));
-        //error_log(var_export($substraction, true));
-    }
-
+    
+    $solution = sortSolution($solution);
 
 
     //3-a
