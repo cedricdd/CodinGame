@@ -33,7 +33,11 @@ function sortExpression(string $expression): string {
     sort($terms["*"]["int"]);
     //Sort multiplication expressions
     usort($terms["*"]["exp"], function($a, $b) {
-        return eval("return $a;") <=> eval("return $b;");
+        $valueA = @eval("return $a;");
+        $valueB = @eval("return $b;"); 
+
+        if($valueA == $valueB) return $a <=> $b;
+        else return $valueA <=> $valueB;
     });
     
     $expression = implode("*", array_merge($terms["*"]["int"], $terms["*"]["exp"]));
@@ -84,7 +88,11 @@ function sortSolution(string $solution): string {
     sort($terms["+"]["int"]);
     //Sort addition expressions
     usort($terms["+"]["exp"], function($a, $b) {
-        return eval("return $a;") <=> eval("return $b;");
+        $valueA = @eval("return $a;");
+        $valueB = @eval("return $b;"); 
+
+        if($valueA == $valueB) return $a <=> $b;
+        else return $valueA <=> $valueB;
     });
     
     $solution = implode("+", array_merge($terms["+"]["int"], $terms["+"]["exp"]));
@@ -151,17 +159,18 @@ foreach($permutations as [$n1, $n2, $n3, $n4]) {
 
 if(count($solutions) == 0) exit("not possible");
 
-//Remove spaces
-foreach($solutions as $solution) $solutionsTemp[preg_replace("/\s/", "", $solution)] = 1;
-
-$solutions = $solutionsTemp;
 $solutionsTemp = [];
 
-foreach($solutions as $solution => $filler) {
+foreach($solutions as $solution) {
 
-    //Remove unnecessary parentheses:
-    while(true) {
-        //error_log("starting: $solution");
+    $solution = preg_replace("/\s/", "", $solution); //Remove spaces
+
+    //error_log("start: $solution");
+
+    do {
+        $changeMade = false;
+
+        //Remove unnecessary parentheses:
         $opening = [];
 
         foreach(str_split($solution) as $i => $c) {
@@ -175,78 +184,97 @@ foreach($solutions as $solution => $filler) {
     
                 //error_log("updated: $updated");
     
-                if(eval("return $updated;") == 24) {
-                    //error_log("parant are useless");
+                if(@eval("return $updated;") == 24) {
+                    //error_log("parant are useless $updated");
     
                     $solution = $updated;
 
-                    continue 2;
-                }
+                    $changeMade = true;
+                    break;
+                } //else error_log("keeping: $solution over $updated");
             }
         }
 
-        break;
-    }
+        //error_log("start: $solution");
 
-    //Rewrite expression with substraction
-    if(preg_match("/(.*\-)\((.*)\)(.*)/", $solution, $matches)) {
-        //error_log(var_export($matches, true));
+        if($solution == "48/(2*(4-3))") error_log("!!!!!!!!!!!!!!start: $solution");
 
-        $terms = preg_split("/([\+\-])/", $matches[2], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        //Rewrite expression with substraction
+        if(preg_match("/(.*\-)\((.*)\)((?:\+|\-|\)|$).*)/", $solution, $matches)) {
+            //error_log(var_export($matches, true));
 
-        //error_log(var_export($elements, true));
+            $terms = preg_split("/([\+\-])/", $matches[2], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
-        foreach($terms as &$term) {
-            $term = strtr($term, ["+" => "-", "-" => "+"]);
+            //error_log(var_export($elements, true));
+
+            foreach($terms as &$term) $term = strtr($term, ["+" => "-", "-" => "+"]);
+
+            $solution = $matches[1] . implode("", $terms) . $matches[3];
+
+            $changeMade = true;
         }
 
-        $solution = $matches[1] . implode("", $terms) . $matches[3];
-    }
+        //Rewrite expression with division
 
-    //Rewrite expression with division
-    if(preg_match("/(.*)\/\(([^\/]+)\/([^\/]+)\)(.*)/", $solution, $matches)) {
-        //error_log(var_export($solution, true));
-        //error_log(var_export($matches, true));
+      
+        if(preg_match("/(.*)\/\(([0-9]+|\(.*\))\/([0-9]+|\(.*\))\)(.*)/", $solution, $matches)) {
+            //error_log(var_export($solution, true));
+            //error_log(var_export($matches, true));
 
-        $solution = $matches[1] . "*" . $matches[3] . "/" . $matches[2] . $matches[4];
+            $solution = $matches[1] . "*" . $matches[3] . "/" . $matches[2] . $matches[4];
 
-        //error_log(var_export($solution, true));
+            $changeMade = true;
 
-        if(eval("return $solution;") != 24) error_log("!!!!!!!!!!!!!!!!");
-    }
+            //error_log(var_export($solution, true));
 
+            if(eval("return $solution;") != 24) error_log("!!!!!!!!!!!!!!!!");
+        }
+
+        //A/(B/C/D) => A*C*D/B
+        if(preg_match("/([0-9]+)\/\(([0-9]+)\/([0-9]+)\/([0-9]+)\)/", $solution, $matches)) {
+            //error_log(var_export($solution, true));
+            //error_log(var_export($matches, true));
+
+            $solution = $matches[1] . "*" . $matches[4] . "*" . $matches[3] . "/" . $matches[2];
+
+            $changeMade = true;
+        }
+
+        //A/(B*C) => A/B/C
+        if(preg_match("/(.*[0-9]+)\/\(([0-9]+|\(.*\))\*([0-9]+|\(.*\))\)(.*)/", $solution, $matches)) {
+            //error_log(var_export($solution, true));
+            //error_log(var_export($matches, true));
+
+            $solution = $matches[1] . "/" . $matches[2] . "/" . $matches[3] . $matches[4];
+
+            $changeMade = true;
+        }
+
+        //error_log("$solution");
+
+        $sorted = sortSolution($solution);
+
+        if($sorted != $solution) {
+            $solution = $sorted;
+            $changeMade = true;
+        }
     
-    $solution = sortSolution($solution);
 
 
-    //3-a
-    /*
-    if(preg_match("/(.*?)([0-9]+(?:\*(?:[0-9]+|\([^\(\)]+\)))+)(.*)/", $solution, $matches)) {
-        error_log(var_export($matches, true));
-
-        $terms = [];
-        $open = 0;
-
-        for($i = 0; $i < count($matches[2]); ++$i) {
-
-        }
-
-        
-    }
-
-    //3-b
-    if(preg_match("/^([0-9]+|\([^\(\)]+\))([\+\*])([0-9]+|\([^\(\)]+\))$/", $solution, $matches)) {
-        //error_log(var_export($matches, true));
-
-        if(is_int($matches[3]) || eval("return " . $matches[1] . ";") > eval("return " . $matches[3] . ";")) $solution = $matches[3] . $matches[2] . $matches[1];
-
-        error_log("solution is now: $solution");
-    }*/
+    } while($changeMade);
 
     $solutionsTemp[$solution] = 1;
 }
 
 $solutions = $solutionsTemp;
+
+uksort($solutions, function($a, $b) {
+    $countA = substr_count($a, "(");
+    $countB = substr_count($b, "(");
+
+    if($countA == $countB) return $a <=> $b;
+    else return $countA <=> $countB;
+});
 
 error_log(var_export($solutions, true));
 
