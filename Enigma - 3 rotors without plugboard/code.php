@@ -2,15 +2,11 @@
 
 //Rotate a given rotor $count times
 function rotate(array $rotor, int $count = 1): array {
-    for($i = 0; $i < $count; ++$i) {
-        foreach($rotor as $a => $b) {
-            $rotated[($a + 25) % 26] = ($b + 25) % 26;
-        }
-
-        $rotor = $rotated;
+    foreach($rotor as $a => $b) {
+        $rotated[($a - $count + 26) % 26] = ($b - $count + 26) % 26;
     }
 
-    return $rotor;
+    return $rotated;
 }
 
 for($i = 1; $i <= 3; ++$i) {
