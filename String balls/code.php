@@ -9,23 +9,17 @@ foreach(range("a", "z") as $indexLetter => $letter) {
 }
 
 fscanf(STDIN, "%d", $radius);
-$center = trim(fgets(STDIN));
 
-function solve(string $center, int $index, $radius): int {
-    global $alphabet;
-    static $history = [];
+$dp = array_fill(0, $radius + 1, 0);
+$dp[0] = 1;
 
-    if($index == strlen($center)) return 1;
+foreach(str_split(trim(fgets(STDIN))) as $index => $c) {
 
-    if(isset($history[$index][$radius])) return $history[$index][$radius];
-
-    $history[$index][$radius] = 0;
-
-    for($i = 0; $i <= min($radius, 25); ++$i) {
-        $history[$index][$radius] += $alphabet[$center[$index]][$i] * solve($center, $index + 1, $radius - $i);
+    for($i = $radius; $i > 0; --$i) {
+        for($j = $i - 1; $j >= max(0, $i - 25); --$j) {
+            $dp[$i] += $dp[$j] * $alphabet[$c][$i - $j];
+        }
     }
-
-    return $history[$index][$radius];
 }
 
-echo solve($center, 0, $radius) . PHP_EOL;
+echo array_sum($dp) . PHP_EOL;
