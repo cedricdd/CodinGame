@@ -2,21 +2,19 @@
 
 const DIGITS = 511;
 const SINGLE_DIGIT = [1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64, 8 => 128, 9 => 256];
+const REMOVE_DIGIT = [1 => 510, 2 => 509, 3 => 507, 4 => 503, 5 => 495, 6 => 479, 7 => 447, 8 => 383, 9 => 255];
 
-function findSumPermutations(int $sum, array $cells, array $list, int $used, array &$results) {
-
+function findSumPermutations(int $sum, int $used, array $cells, array &$results): bool {
     global $maskInfo;
 
-    if(count($cells) == 0) {
-        if($sum == 0) {
-            //Add each digits used to the respective cell as a possible digit
-            foreach($list as $index => $digit) $results[$index] |= $digit;
-        }
+    $index = count($cells) - 1;
 
-        return;
+    if($index == -1) {
+        if($sum == 0) return true;
+        else return false;
     }
 
-    $cellIndex = array_key_last($cells);
+    $solutionFound = false;
     $mask = array_pop($cells);
     
     foreach($maskInfo[$mask]["digits"] as $digit => $binary) {
@@ -25,11 +23,17 @@ function findSumPermutations(int $sum, array $cells, array $list, int $used, arr
 
         //If we are not already using this digit
         if(($used & $binary) == 0) {
-            $list[$cellIndex] = $binary;
+            
+            //Check if we can reach the sum is we use this digit for this cell
+            if(findSumPermutations($updatedSum, $used | $binary, $cells, $results)) {
+                $solutionFound = true;
 
-            findSumPermutations($updatedSum, $cells, $list, $used | $binary, $results);
+                $results[$index] |= $binary;
+            }
         }
-    } 
+    }
+
+    return $solutionFound;
 }
 
 //For each possible digit mask we generate the count of digits & the list of digits to speed up the code
@@ -61,8 +65,8 @@ function solve(array $grid, array $cells, array $cellToCages, array $cages) {
         do {
             $digitFound = false;
     
-            foreach($cells as $index => $binary) {
-                switch($binary) {
+            foreach($cells as $index => $filler) {
+                switch($cells[$index]) {
                     case 1:   $value = 1; break;
                     case 2:   $value = 2; break;
                     case 4:   $value = 3; break;
@@ -75,22 +79,27 @@ function solve(array $grid, array $cells, array $cellToCages, array $cages) {
                     case 0: return; //We made an invalid guess
                     default: continue 2;
                 }
-        
+
                 //All other cells of the cages this cell belongs too can't use this value
                 foreach($cellToCages[$index] as $cageIndex => $filler) {
+
                     //This was the last cell in the cage
-                    if(($cages[$cageIndex][0] -= $value) == 0) {
+                    if(count($cages[$cageIndex][1]) == 1) {
+                        if($cages[$cageIndex][0] != $value) return; //We made an invalid guess
+    
                         unset($cages[$cageIndex]);
                         continue;
                     }
-        
+
+                    $cages[$cageIndex][0] -= $value;
+
                     unset($cages[$cageIndex][1][$index]);
         
-                    foreach($cages[$cageIndex][1] as $indexToUpdate => $filler2) {
-                        $cells[$indexToUpdate] &= ~$binary;
+                    foreach($cages[$cageIndex][1] as $indexToUpdate => $filler2) {         
+                        $cells[$indexToUpdate] &= REMOVE_DIGIT[$value];
                     }
                 }
-        
+
                 unset($cells[$index]);
                 unset($cellToCages[$index]);
         
@@ -106,6 +115,7 @@ function solve(array $grid, array $cells, array $cellToCages, array $cages) {
         $posibilitiesReduced = false;
     
         foreach($cages as $index => [$sum, $list]) {
+
             $cellsGrouped = [];
     
             //We group the cells in the cage by the digits they can use
@@ -121,25 +131,30 @@ function solve(array $grid, array $cells, array $cellToCages, array $cages) {
                     }
                 }
             }
-    
-            $possibleDigits = [];
-            $sumDigits = [];
-    
-            foreach($list as $cellIndex => $filler) {
-                $possibleDigits[$cellIndex] = $cells[$cellIndex];
-                $sumDigits[$cellIndex] = 0;
-            }
 
-            findSumPermutations($sum, $possibleDigits, [], 0, $sumDigits);
+            //Computing all the ways to create the sum becomes slower than making guesses when the number of cells increase
+            if(count($list) <= 3) {
+                $possibleDigits = [];
+                $sumDigits = [];
+                $indexInfo = [];
+        
+                foreach($list as $cellIndex => $filler) {
+                    $possibleDigits[$cellIndex] = $cells[$cellIndex];
+                    $sumDigits[] = 0;
+                    $indexInfo[] = $cellIndex;
+                }
     
-            foreach($sumDigits as $cellIndex => $binary) {
-                if($binary == 0) return; //We made an invalid guess
-
-                //We have reduced the # of possible digits for this cell
-                if($cells[$cellIndex] != $binary) {
-                    $cells[$cellIndex] = $binary;
+                findSumPermutations($sum, 0, $possibleDigits, $sumDigits);
     
-                    $posibilitiesReduced = true;
+                foreach($indexInfo as $index => $cellIndex) {
+                    if($sumDigits[$index] == 0) return; //We made an invalid guess
+    
+                    //We have reduced the # of possible digits for this cell
+                    if($cells[$cellIndex] != $sumDigits[$index]) {
+                        $cells[$cellIndex] = $sumDigits[$index];
+        
+                        $posibilitiesReduced = true;
+                    }
                 }
             }
         }
@@ -148,11 +163,11 @@ function solve(array $grid, array $cells, array $cellToCages, array $cages) {
         if($posibilitiesReduced == false) {
             //We are making a guess on the first cell with multiple possibilites
             $cellIndex = array_key_first($cells);
-        
+
             //Test each values for this cell
             foreach($maskInfo[$cells[$cellIndex]]["digits"] as $value => $binary) {
                 $cells[$cellIndex] = $binary;
-        
+
                 solve($grid, $cells, $cellToCages, $cages);
             }
         
@@ -167,7 +182,6 @@ function solve(array $grid, array $cells, array $cellToCages, array $cages) {
 }
 
 $start = microtime(1);
-$test = 0.0;
 
 fscanf(STDIN, "%d %d", $height, $width);
 for ($y = 0; $y < $height; ++$y) {
@@ -190,7 +204,6 @@ $cages = [];
 for($y = 0; $y < $height; ++$y) {
     for($x = 0; $x < $width; ++$x) {
         if(preg_match("/([0-9]*)\\\([0-9]*)/", $grid[$y][$x], $matches)) {
-
             //Sum of the cells below
             if($matches[1] != '') {
                 $cages[$cageIndex][0] = $matches[1];
@@ -206,7 +219,6 @@ for($y = 0; $y < $height; ++$y) {
 
                 ++$cageIndex;
             }
-
             //Sum of the cells to the right
             if($matches[2] != '') {
                 $cages[$cageIndex][0] = $matches[2];
