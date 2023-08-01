@@ -15,21 +15,17 @@ function findSumPermutations(int $sum, int $used, array $cells, array &$results)
     }
 
     $solutionFound = false;
-    $mask = array_pop($cells);
+    $mask = array_pop($cells) & ~$used; //Remove the ones already used
     
     foreach($maskInfo[$mask]["digits"] as $digit => $binary) {
 
         if(($updatedSum = $sum - $digit) < 0) break;
+    
+        //Check if we can reach the sum is we use this digit for this cell
+        if(findSumPermutations($updatedSum, $used | $binary, $cells, $results)) {
+            $solutionFound = true;
 
-        //If we are not already using this digit
-        if(($used & $binary) == 0) {
-            
-            //Check if we can reach the sum is we use this digit for this cell
-            if(findSumPermutations($updatedSum, $used | $binary, $cells, $results)) {
-                $solutionFound = true;
-
-                $results[$index] |= $binary;
-            }
+            $results[$index] |= $binary;
         }
     }
 
