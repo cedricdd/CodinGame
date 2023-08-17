@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/635070e488c7fca8bc1235ccfacdc894fdcc2
+https://www.codingame.com/training/medium/hunger
 
 Goal
 There are n foods in order, given to you in the form of an array. each one has a certain sweetness. 
