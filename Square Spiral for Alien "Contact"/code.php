@@ -34,7 +34,7 @@ switch($instructions[2]) {
 if($instructions[3] != "clockwise") $direction = ($direction + 1) % 4;
 $positionCharacter = ord($instructions[4]) - 65;
 $jumpCharacter = ord($instructions[6]) - ord($instructions[4]);
-$directiontionChanges = -1;
+$directionChanges = -1;
 $length = $size - 1;
 $characterUsage = 0;
 $limitCharacter = $instructions[5];
@@ -62,7 +62,7 @@ while(true) {
     $direction = ($direction + ($instructions[3] == "clockwise" ? 1 : -1) + 4) % 4;
 
     //The length is updating
-    if(++$directiontionChanges && $directiontionChanges % 2 == 0) {
+    if(++$directionChanges && $directionChanges % 2 == 0) {
         //We have reached the center of the spiral
         if(($length -= 2) < 1) {
             $spiral[$y][$x] = $alphabet[$positionCharacter];
