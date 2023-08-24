@@ -4,36 +4,22 @@ fscanf(STDIN, "%d %d", $N, $K);
 
 $icecreams = array_map("intval", explode(" ", trim(fgets(STDIN))));
 
+//Get the truck sizes we can use for each turns
 for($i = 0; $i < $N; ++$i) {
 
-    $list = [];
-    $size = 0;
+    $max = 0;
 
     for($j = $i; $j < $N; ++$j) {
-        $list[] = $icecreams[$j];
-        sort($list);
 
-        ++$size;
-
-        if($size & 1) $median = $list[floor($size / 2)];
-        else $median = round(($list[($size / 2) - 1] + $list[$size / 2]) / 2);
-
-        if($median >= $icecreams[$i]) $medians[$i][$median] = 1;
+        if($icecreams[$j] > $max) {
+            $max = $icecreams[$j];
+            $possibilities[$i][$max] = 1;
+        }
     }
 }
 
-error_log(var_export($medians, true));
-
-exit();
-
-$min = min($icecreams);
-$max = max($icecreams);
-
-error_log("min $min, max $max");
-
-foreach($averages[0] as $value => $filler) $dp[$value][$K] = [0, [-1 => $value]];
-
-$start = microtime(1);
+//Generate the starting truck sizes
+foreach($possibilities[0] as $size => $filler) $dp[$size][$K] = [0, [-1 => $size]];
 
 foreach($icecreams as $i => $icecream) {
     $dp2 = [];
@@ -41,8 +27,8 @@ foreach($icecreams as $i => $icecream) {
     foreach($dp as $size => $list) {
         foreach($list as $left => [$meltage, $listActions]) {
             //We update the truck size
-            if($left > 0 && $size != $icecream) {
-                foreach($averages[$i] as $updatedSize => $filler) {
+            if($i > 0 && $left > 0 && $size != $icecream) {
+                foreach($possibilities[$i] as $updatedSize => $filler) {
                     if($updatedSize == $size) continue;
 
                     $meltageUpdated = $meltage + $updatedSize - $icecream;
@@ -69,23 +55,12 @@ foreach($icecreams as $i => $icecream) {
     }
 
     $dp = $dp2;
-
-    if(1==1 && $i >= 0) {
-        error_log("After $i -- $icecream");
-        foreach($dp as $size => $list) {
-            foreach($list as $left => [$meltage, $listActions]) {
-                error_log("$size $left $meltage " . implode(" - ", $listActions));
-            }
-        }
-    }
-
 }
-
-
 
 $minMeltage = INF;
 $actions = [];
 
+//Find the best solution
 foreach($dp as $size => $list) {
     foreach($list as $left => [$meltage, $listActions]) {
         if($meltage < $minMeltage) {
@@ -95,13 +70,8 @@ foreach($dp as $size => $list) {
     }
 }
 
-error_log(var_export($actions, true));
-
-error_log(microtime(1) - $start);
-
 echo array_pop($actions) . PHP_EOL;
 
-// game loop
 while (TRUE) {
     fscanf(STDIN, "%d %d %d", $T, $U, $sTotal);
 
