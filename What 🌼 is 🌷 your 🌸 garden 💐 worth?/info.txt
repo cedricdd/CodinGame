@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/66048f50f96cbe5607bc664286a06426f55eb
+https://www.codingame.com/training/easy/what-is-your-garden-worth
 
 Goal
 You have planted an emoji garden, but it has some empty spots and some ASCII-weeds growing in it too.
