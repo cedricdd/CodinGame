@@ -1,184 +1,95 @@
 <?php
 
-function getDistanceBetweenCenters(int $r1, int $r2): float {
-    static $history;
+function calculateWidth(array $radii): float {
+    global $distances;
 
-    if(isset($history[$r1][$r2])) return $history[$r1][$r2];
-    if(isset($history[$r2][$r1])) return $history[$r2][$r1];
+    $radii[] = 0; //Add the end of the box
+    $centers = [[0, 0.0]];
 
-    if($r1 == 0) $distance = $r2;
-    elseif($r2 == 0) $distance = $r1;
-    else $distance = sqrt((($r1 + $r2) ** 2) - (abs($r1 - $r2) ** 2));
+    foreach($radii as $radius) {
+        $maxCenter = 0;
 
-    return $history[$r1][$r2] = $history[$r2][$r1] = $distance;
-}
+        //Find the center of the cylinders, check against cylinders already placed to find the farthest position
+        foreach($centers as [$center, $leftRadius]) {
+            $newCenter = $center + $distances[$leftRadius][$radius];
 
-function calculateWidth(array $radii) {
-    global $minWidth, $spaceBelow;
-    static $history;
-
-    $count = count($radii);
-    $width = 0;
-
-    if($count == 1) $width = array_pop($radii) * 2;
-    else {
-
-        for($i = 0; $i <= $count; ++$i) {
-            $width += getDistanceBetweenCenters($radii[$i] ?? 0, $radii[$i + 1] ?? 0);
+            if($newCenter > $maxCenter) $maxCenter = $newCenter;
         }
 
-        /*
-        $indexMax = array_search(max($radii), $radii);
-
-        error_log("starting at $indexMax");
-
-        //To the left
-        $i = $indexMax;
-        $left = $radii[$i - 1] ?? 0;
-        $rightDirect = $rightRemoved = $radii[$i];
-        $distanceRemoved = 0.0;
-
-        do {
-            error_log("i is $i -- left is $left -- rightDirect is $rightDirect -- rightRemoved is $rightRemoved");
-
-            if($left != 0 && $left * 2 <= $spaceBelow[$rightDirect]) {
-                $distanceRemoved += getDistanceBetweenCenters($left, $rightRemoved);
-                $rightRemoved = $radii[$i - 1];
-            } else {
-                $distance = getDistanceBetweenCenters($left, $rightDirect);
-
-                if($distanceRemoved != 0.0) {
-                    $distanceRemoved += getDistanceBetweenCenters($left, $rightRemoved);
-
-                    if($distanceRemoved < $distance) {
-                        $width += $distance;
-                        error_log("removed is lower, using direct $distance");
-                    }
-                    else {
-                        $width += $distanceRemoved;
-                        error_log("removed is bigger, using removed $distanceRemoved");
-                    }
-
-                    $distanceRemoved = 0.0;
-                }
-                else {
-                    $width += $distance;
-                    error_log("adding direct width $distance");
-                }
-
-                $rightDirect = $rightRemoved = $radii[$i];
-            }
-
-            --$i;
-            $left = $radii[$i - 1] ?? 0;
-        } while($i > 0);
-
-        //To the right
-        $i = $indexMax;
-        $leftDirect = $leftRemoved = $radii[$i];
-        $right = $radii[$i + 1] ?? 0;
-        $distanceRemoved = 0.0;
-
-        do {
-            error_log("i is $i -- leftDirect is $leftDirect -- leftRemoved is $leftRemoved -- right is $right");
-
-            if($right != 0 && $right * 2 <= $spaceBelow[$leftDirect]) {
-                $distanceRemoved += getDistanceBetweenCenters($right, $leftRemoved);
-                $leftRemoved = $radii[$i + 1];
-            } else {
-                $distance = getDistanceBetweenCenters($leftDirect, $right);
-
-                if($distanceRemoved != 0.0) {
-                    $distanceRemoved += getDistanceBetweenCenters($leftRemoved, $right);
-
-                    if($distanceRemoved < $distance) {
-                        $width += $distance;
-                        error_log("removed is lower, using direct $distance");
-                    }
-                    else {
-                        $width += $distanceRemoved;
-                        error_log("removed is bigger, using removed $distanceRemoved");
-                    }
-
-                    $distanceRemoved = 0.0;
-                }
-                else {
-                    $width += $distance;
-                    error_log("adding direct width $distance");
-                }
-
-                $leftDirect = $leftRemoved = $radii[$i];
-            }
-
-            ++$i;
-            $right = $radii[$i + 1] ?? 0;
-        } while($i <= $count);
-        */
+        $centers[] = [$maxCenter, $radius];
     }
 
-    //error_log("width is $width");
-
-    if($width < $minWidth) $minWidth = $width;
+    return $maxCenter + $radius;
 }
 
-function generatePermutations(array $sizes, int $index, array $radii = [], string $hash = "0", string $hashRev = "0") {
-    static $history;
+function generatePermutations(array $radii, int $left, array $solution) {
+    global $minWidth;
 
-    if($index == 0) {
-        $hash = $hash . "-0";
-        $hashRev = "0-" . $hashRev;
+    if($left == 0) {
+        //Reverse solution will create the same width so we can ignore them, skip if first element is bigger than last
+        if(reset($solution) <= end($solution)) {
 
-        //error_log("solution $hash - $hashRev");
+            $width = calculateWidth($solution);
 
-        if(isset($history[$hash]) == false && isset($history[$hashRev]) == false) {
-            //error_log(var_export($radii, true));
-
-            calculateWidth($radii);
-
-            $history[$hash] = 1;
-            $history[$hashRev] = 1;
+            if($width < $minWidth) $minWidth = $width;
         }
 
         return;
     }
 
-    foreach($sizes as $i => $size) {
-        unset($sizes[$i]);
+    --$left;
 
-        generatePermutations($sizes, $index - 1, $radii + [$index => $size], $hash . "-" . $size, $size . "-" . $hashRev);
+    foreach($radii as $value => &$occurences) {
+        if($occurences > 0) {
+            --$occurences;
 
-        $sizes[$i] = $size;
+            $updatedSolution = $solution;
+            $updatedSolution[] = $value;
+
+            generatePermutations($radii, $left, $updatedSolution);
+
+            ++$occurences;
+        }
     }
 }
 
 $start = microtime(1);
 
-//$spaceBelow = [0 => INF];
+$numberCount = 0;
 
 fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
     $inputs = explode(" ", trim(fgets(STDIN)));
     $radii = [];
-    $count = array_shift($inputs);
+    $distances[0][0] = 0;
+    $numberCount = array_shift($inputs);
+
+    //Only one cylinder in the box
+    if($numberCount == 1) {
+        echo number_format(array_pop($inputs) * 2, 3, ".", "") . PHP_EOL;
+        continue;
+    }
     
-    for($j = 0; $j < $count; ++$j) {
+    for($j = 0; $j < $numberCount; ++$j) {
         $radius = array_pop($inputs);
 
-        /*
-        if(!isset($spaceBelow[$radius])) {
-            $spaceBelow[$radius] = $radius * sqrt(2) - $radius;
-        }*/
+        //Pre-compute the horizontal distances between cylinders
+        foreach($radii as $r => $filler) {
+            if(!isset($distances[$r][$radius])) {
+                $distances[$r][$radius] = $distances[$radius][$r] = 2.0 * sqrt($radius * $r);
+            }
+        }
 
-        $radii[] = $radius;
+        $distances[$radius][0] = $distances[0][$radius] = $radius; //Distance between center and the box, just the radius
+
+        $radii[$radius] = ($radii[$radius] ?? 0) + 1;
     }
 
     $minWidth = INF;
 
-    generatePermutations($radii, $count);
+    generatePermutations($radii, $numberCount, []);
 
     echo number_format($minWidth, 3, ".", "") . PHP_EOL;
 }
-
-error_log(var_export($spaceBelow, true));
 
 error_log(microtime(1) - $start);
