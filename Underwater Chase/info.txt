@@ -1,0 +1,46 @@
+https://www.codingame.com/contribute/view/62718af188c4e2e33cf13a16f4dbaddf0c0af
+
+Goal
+You are the captain of a submarine and you are chasing another one. 
+Thanks to your high-tech equipment, you and the enemy captain can hear each other giving orders to your crew. Unfortunately, you cannot locate each other. 
+Your goal is to find the enemy.
+
+You are given a north-facing map of the ocean, with sea (marked as .) and land (marked as o), and the orders you can hear from the enemy captain. 
+Each order is a string containing exactly one direction (North, South, East or West, case-insensitive), which is the direction of the sub for 1km (one cell of the map). The sub cannot cross land.
+Given that the sub started and has remained in the map area, you must output all the positions where he could be found after following all the orders.
+
+Example :
+
+o....
+..oo.
+..o..
+..... 
+
+(o is land and . is sea)
+Orders :
+Go North
+Heading east !
+
+The sub may be at any position marked with an X :
+
+o.X..
+.Xoo.
+.Xo.X
+..... 
+
+
+This puzzle is inspired by the board game Captain Sonar.
+
+Input
+Line 1 : 3 space-separated integers w, h and n, respectively the width and height of the map, and the number of orders you can hear.
+h next lines : a string row of length w representing a row of the map. . is sea and o is land.
+n next lines : a string order, an order given by the enemy captain to his crew, containing exactly one direction (case-insensitive).
+
+Output
+Line 1 : An integer, the number of possible enemy positions after following the orders.
+h next lines : a string row of lengthw representing a row of the map, where possible enemy positions are marked with X.
+
+Constraints
+2 ≤ w, h ≤ 30
+1 ≤ n ≤ 50
+There is at least one possible position for the enemy.
