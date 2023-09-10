@@ -1,9 +1,8 @@
-https://www.codingame.com/contribute/view/6674133f705c3c261490c229df230e228a645
+https://www.codingame.com/training/easy/you-are-the-father-maury-povich-style
 
 Goal
 
-~ ~ ~ P o p   C u l t u r e   B a c k g r o u n d ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+~ ~ ~ P o p   C u l t u r e   B a c k g r o u n d ~ ~ ~
 
 Maury Povich hosted a popular talk show in America for decades.
 
@@ -12,7 +11,7 @@ Maury’s staff would swab and paternity-test a sample from each possible man an
 
 (For your amusement only, see banner image and video link far below for clips of that; it isn't needed to solve this puzzle.)
 
-~ ~ ~ B i o l o g y   B a c k g r o u n d ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+~ ~ ~ B i o l o g y   B a c k g r o u n d ~ ~ ~
 
 Every creature has multiple "Pairs of Chromosomes," henceforth called chromPairs.
 
@@ -21,7 +20,7 @@ Mother and Father each contribute 1 chromosome to form the child's chromPair.
 
 In the very simplified world of this puzzle, a chromosome is simply 1 character and a chromPair is simply 2 characters.
 
-~ ~ ~ E x a m p l e ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+~ ~ ~ E x a m p l e ~ ~ ~
 
 The species has 2 chromPairs.
 Mother is: ab cd
@@ -40,15 +39,13 @@ However, their child cannot be:
 
 NOTE: Order in chromPair doesn't matter: aw is exactly equal to wa.
 
-~ ~ ~ Y o u r   T a s k ~ ~ ~ ~ ~ ~ ~ ~ ~ ~~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~
+~ ~ ~ Y o u r   T a s k ~ ~ ~
 
 Given the above rules, help Maury Povich tell each single mother who the actualFather of her child is.
 
 Input
 Line 1:Mother mother's name: some spaces, followed by some number of chromPairs (each separated by a space)
-
 Line 2:Child child's name: some spaces, followed by some number of chromPairs (each separated by a space)
-
 Line 3: An integer, the number of possible fathers (numOfPossibleFathers)
 
 Next numOfPossibleFathers Lines: Possible father's name: some spaces, followed by some number of chromPairs (each separated by a space)
