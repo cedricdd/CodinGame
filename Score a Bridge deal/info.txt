@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/58492ec75efd5ce1ecf1a6f9b48ce377fc618
+https://www.codingame.com/training/easy/score-a-bridge-deal
 
 Goal
 The game of Bridge (https://en.wikipedia.org/wiki/Contract_bridge) is arguably the richest game of cards widely played nowadays. While difficult to master, 
