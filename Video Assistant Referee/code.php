@@ -20,7 +20,7 @@ if(isset($positions["o"])) {
 }
 
 //We are not in a throw-in
-if($ball[0] != 0 && $ball[0] != 50 && $ball[1] != 0 && $ball[1] != 14 && !($ball[0] == 25 && $ball[7])) {
+if($ball[0] != 0 && $ball[0] != 50 && $ball[1] != 0 && $ball[1] != 14 && !($ball[0] == 25 && $ball[1] == 7)) {
 
     //Find the position where the offside starts
     if($attacking == "A") {
