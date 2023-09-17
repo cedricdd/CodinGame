@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/61758710894298bb6f967d53673968f1e7447
+https://www.codingame.com/training/easy/video-assistant-referee
 
 Goal
 In football (Soccer), the offside rule is one of the most contentious and a frequent topic of heated debate among fans. 
