@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/67335da40b3a4dcd0ae19564afdad4eb1b9bd
+https://www.codingame.com/training/easy/popularity-of-each-activity
 
 Goal
 Here is a rectangle (eventArea) divided (in a wonky "Tic-Tac-Toe-style") into 9 smaller rectangles (activityAreas).
