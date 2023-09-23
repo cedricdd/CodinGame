@@ -18,7 +18,7 @@ function generatePossibleCodes(array &$digits, string $permutation = ""): void {
 //Check if the code is valid, all the guesses would produce the same values of bulls & cows
 function checkGuesses($code) {
 
-    global $guesses, $start;
+    global $guesses;
 
     foreach($guesses as [$guess, $bGuess, $cGuess]) {
         $bCode = 0;
@@ -43,6 +43,7 @@ function checkGuesses($code) {
                 if($code[$i] == $guess[($i + $j) % SIZE]) {
                     ++$cCode;
                     $guess[($i + $j) % SIZE] = "C"; //Can only use it once as cow
+                    continue 2;
                 }
             }
         }
@@ -74,4 +75,3 @@ for ($i = 0; $i < $N; $i++) {
 }
 
 generatePossibleCodes($digits);
-?>
