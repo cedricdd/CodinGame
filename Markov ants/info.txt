@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/216638ec81ba9a5dd2105b22ad2de62d3e2df
+https://www.codingame.com/training/medium/markov-ants
 
 Goal
 An ant leaves its anthill in order to forage for food, but it doesn't know where to go, therefore every second it moves randomly step cm directly north, south, east or west with equal probability.
