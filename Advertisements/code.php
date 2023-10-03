@@ -1,75 +1,97 @@
 <?php
 
+$start = microtime(1);
+
 fscanf(STDIN, "%d", $na);
 for ($i = 0; $i < $na; $i++) {
     preg_match("/All (.*): ([0-9]+) for the price of ([0-9]+)/", trim(fgets(STDIN)), $matches);
 
-    $advertisements[$matches[1]][] = [$matches[2], $matches[3]];
+    $advertisements[] = [$matches[1], $matches[2], $matches[3]];
 }
 
-error_log(var_export($advertisements, true));
-
 $total = 0.0;
-$discount = 0.0;
 
 fscanf(STDIN, "%d", $ni);
 for ($i = 0; $i < $ni; $i++) {
     fscanf(STDIN, "%s %s %s %s", $product, $group, $brand, $price);
 
-    if(isset($advertisements[$product]) || isset($advertisements[$group]) || isset($advertisements[$brand])) {
-        $items[] = [$product, $group, $brand, $price];
-    }
-
+    $items[] = [$product, $group, $brand, floatval($price)];
     $total += $price;
 }
 
-error_log(var_export($items, true));
+function solve(array $items, array $advertisements): float {
+    static $history, $test = 0;
 
-while(true) {
-    $discounts = [];
+    //We can't apply any more ads
+    if(count($items) == 0 || count($advertisements) == 0) return 0.0;
 
-    foreach($advertisements as $name => $list) {
-        $itemsFiltered = [];
+    //Check if we already know the result
+    asort($advertisements);
 
-        foreach($list as [$X, $Y]) {
-            foreach($items as $i => [$product, $group, $brand, $price]) {
-                if($product == $name || $group == $name || $brand == $name) {
-                    $itemsFiltered[$i] = $price;
-                }
-            }
+    $hash = implode("-", array_column($advertisements, 0));
     
-            asort($itemsFiltered);
-            $count = count($itemsFiltered);
+    if(isset($history[$hash])) return $history[$hash];
 
-            //error_log(var_export("filtered for $name", true));
-            error_log(var_export($itemsFiltered, true));
+    $result =-INF;
 
-            if($X > $count) continue;
+    //Check all the advertisement left on the items left
+    foreach($advertisements as $indexA => [$name, $X, $Y]) {
 
-            $keys = array_keys($itemsFiltered);
-    
-            if($X > $Y) {
-                $discounts[$name] = [array_sum(array_slice($itemsFiltered, -($X - $Y))), array_merge(array_slice($keys, 0, $Y), array_slice($keys, -($X - $Y)))];
-            } else {
-                $discounts[$name] = [reset($itemsFiltered) * -($Y - $X), array_merge(array_slice($keys, 0, 1), array_slice($keys, -($X - 1)))];
+        $discount = 0.0;
+        $itemsFiltered = $items;
+        $itemsAffected = [];
+
+        //Find the items affected by the current advertisement
+        foreach($itemsFiltered as $indexI => [$product, $group, $brand, $price]) {
+            if($product == $name || $group == $name || $brand == $name) {
+                $itemsAffected[] = [$indexI, $price];
             }
         }
+
+        //Sort by ascending prices
+        usort($itemsAffected, function($a, $b) {
+            return $a[1] <=> $b[1];
+        });
+
+        //Aplly the advertisement as many time as possible
+        while($X <= ($count = count($itemsAffected))) {
+
+            if($X > $Y) {
+                $discount += array_sum(array_column(array_slice($itemsAffected, -($X - $Y)), 1));
+                //Remove the Y cheapest items
+                foreach(array_splice($itemsAffected, 0, $Y, []) as [$index, ]) {
+                    //error_log("unset $index");
+                    unset($itemsFiltered[$index]);
+                }
+                //Remove the X - Y most expansive items
+                foreach(array_splice($itemsAffected, -($X - $Y), $count, []) as [$index, ]) unset($itemsFiltered[$index]);
+            } else {
+                $discount += $itemsAffected[0][1] * -($Y - $X);
+
+                //Remove the cheapest items
+                foreach(array_splice($itemsAffected, 0, 1, []) as [$index, ]) unset($itemsFiltered[$index]);
+
+                if($X > 1) {
+                    //Remove the X - 1 most expansive items
+                    foreach(array_splice($itemsAffected, -($X - 1), $count, []) as [$index, ]) unset($itemsFiltered[$index]);
+                }
+            }
+        }
+
+        unset($advertisements[$indexA]); //We can only apply the advertisement once
+
+        $discount += solve($itemsFiltered, $advertisements); //Try to apply more advertisements
+
+        $advertisements[$indexA] = [$name, $X, $Y]; //Re-add the advertisement for the next recursives
+
+        if($discount > $result) $result = $discount;
     }
 
-    error_log(var_export($discounts, true));
-
-    //error_log("count is " . count($discounts)) . PHP_EOL;
-
-    if(count($discounts) == 0) break;
-
-    usort($discounts, function($a, $b) {
-        return $b[0] <=> $a[0];
-    });
-
-    //error_log(var_export($discounts, true));
-
-    $discount += $discounts[0][0];
-    foreach($discounts[0][1] as $index) unset($items[$index]);
+    return $history[$hash] = $result;
 }
 
+$discount = solve($items, $advertisements);
+
 echo number_format($total - $discount, 2) . PHP_EOL . number_format($discount, 2) . PHP_EOL;
+
+error_log(microtime(1) - $start);
