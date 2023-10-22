@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/724177fee0855ed1e4b328c98ec9c492c70b6
+https://www.codingame.com/training/medium/risk-odds-calculator
 
 Goal
 You've already claimed Africa, and North America is nearly yours. Only Greenland remains between you and total victory. Can you seize this final territory before your enemies retaliate and obliterate you?
