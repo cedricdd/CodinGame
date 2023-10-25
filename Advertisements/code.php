@@ -2,6 +2,22 @@
 
 $start = microtime(1);
 
+function generateSubGroups(int $size, array $items, array $group, array &$results) {
+
+    if(count($group) == $size) {
+        $results[] = $group;
+        return;
+    }
+
+    $productID = array_key_last($items);
+    $product = array_pop($items);
+
+    if($product === null) return;
+
+    generateSubGroups($size, $items, $group, $results); //We don't use that product
+    generateSubGroups($size, $items, $group + [$productID => $product], $results); //We use that product
+}
+
 fscanf(STDIN, "%d", $na);
 for ($i = 0; $i < $na; $i++) {
     preg_match("/All (.*): ([0-9]+) for the price of ([0-9]+)/", trim(fgets(STDIN)), $matches);
@@ -20,77 +36,139 @@ for ($i = 0; $i < $ni; $i++) {
 }
 
 function solve(array $items, array $advertisements): float {
-    static $history, $test = 0;
+    static $history;
 
     //We can't apply any more ads
     if(count($items) == 0 || count($advertisements) == 0) return 0.0;
 
-    //Check if we already know the result
-    asort($advertisements);
+    $hash = implode("-", array_keys($advertisements)) . "|" . implode("-", array_keys($items)); 
 
-    $hash = implode("-", array_column($advertisements, 0));
-    
-    if(isset($history[$hash])) return $history[$hash];
+    //if(isset($history[$hash])) return $history[$hash];
 
-    $result =-INF;
+    $result = -INF;
+
+    //error_log(var_export("calling solve", true));
 
     //Check all the advertisement left on the items left
-    foreach($advertisements as $indexA => [$name, $X, $Y]) {
+    foreach($advertisements as $indexAd => [$name, $X, $Y]) {
 
-        $discount = 0.0;
-        $itemsFiltered = $items;
+        error_log("Working on $name $X $Y");
+
         $itemsAffected = [];
 
         //Find the items affected by the current advertisement
-        foreach($itemsFiltered as $indexI => [$product, $group, $brand, $price]) {
+        foreach($items as $indexItem => [$product, $group, $brand, $price]) {
             if($product == $name || $group == $name || $brand == $name) {
-                $itemsAffected[] = [$indexI, $price];
+                $itemsAffected[$indexItem] = $price;
             }
+        }
+
+        $turns = intdiv(count($itemsAffected), $X);
+
+        //error_log(var_export($turns . " " . count($itemsAffected), true));
+
+        if($turns == 0) {
+            unset($advertisements[$indexAd]);
+
+            continue;
         }
 
         //Sort by ascending prices
-        usort($itemsAffected, function($a, $b) {
-            return $a[1] <=> $b[1];
-        });
+        asort($itemsAffected);
 
-        //Aplly the advertisement as many time as possible
-        while($X <= ($count = count($itemsAffected))) {
+        $checks = [[0.0, $items, $itemsAffected]];
 
-            if($X > $Y) {
-                $discount += array_sum(array_column(array_slice($itemsAffected, -($X - $Y)), 1));
-                //Remove the Y cheapest items
-                foreach(array_splice($itemsAffected, 0, $Y, []) as [$index, ]) {
-                    //error_log("unset $index");
+        //error_log(var_export($turns, true));
+
+        for($i = 0; $i < $turns; ++$i) {
+            $newChecks = [];
+
+            foreach($checks as [$discount, $itemsFiltered, $itemsAffected]) {
+
+                $count = count($itemsAffected);
+
+                if($X > $Y) {
+                    //Remove the X - Y most expansive items
+                    for($j = $X - $Y; $j > 0; --$j) {
+                        $index = array_key_last($itemsAffected);
+                        $price = array_pop($itemsAffected);
+
+                        //error_log("removing $index with $price");
+
+                        unset($itemsFiltered[$index]);
+    
+                        $discount += $price;
+                    }
+    
+                    error_log(var_export($itemsAffected, true));
+    
+                    $results = [];
+    
+                    generateSubGroups($Y, $itemsAffected, [], $results);
+    
+                    //error_log(var_export("we have " . count($results) . " possible results -- $discount", true));
+                    
+                    foreach($results as $removedItems) {
+                        $newChecks[] = [$discount, array_diff_key($itemsFiltered, $removedItems), array_diff_key($itemsAffected, $removedItems)];
+                    } 
+    
+                } else {
+                    exit("!!!!!!!");
+
+                    $index = array_key_first($itemsAffected);
+                    $price = array_shift($itemsAffected);
+
+                    $discount += $price * -($Y - $X);
+    
+                    //Remove the cheapest items
                     unset($itemsFiltered[$index]);
-                }
-                //Remove the X - Y most expansive items
-                foreach(array_splice($itemsAffected, -($X - $Y), $count, []) as [$index, ]) unset($itemsFiltered[$index]);
-            } else {
-                $discount += $itemsAffected[0][1] * -($Y - $X);
+    
+                    if($X > 1) {
+                        //Remove the X - 1 most expansive items
+                        $results = [];
 
-                //Remove the cheapest items
-                foreach(array_splice($itemsAffected, 0, 1, []) as [$index, ]) unset($itemsFiltered[$index]);
+                        generateSubGroups($X - 1, $itemsAffected, [], $results);
 
-                if($X > 1) {
-                    //Remove the X - 1 most expansive items
-                    foreach(array_splice($itemsAffected, -($X - 1), $count, []) as [$index, ]) unset($itemsFiltered[$index]);
+                        //error_log(var_export("we have " . count($results) . " possible results -- $discount", true));
+
+                        //foreach(array_splice($itemsAffected, -($X - 1), $count, []) as [$index, ]) unset($itemsFiltered[$index]);
+
+                        foreach($results as $removedItems) {
+                            $newChecks[] = [$discount, array_diff_key($itemsFiltered, $removedItems), array_diff_key($itemsAffected, $removedItems)];
+                        }
+                    }
                 }
             }
+
+            //error_log(var_export($newChecks, true));
+
+            $checks = $newChecks;
         }
 
-        unset($advertisements[$indexA]); //We can only apply the advertisement once
+        $updatedAdvertisements = $advertisements;
+        unset($updatedAdvertisements[$indexAd]); //We can only apply the advertisement once
 
-        $discount += solve($itemsFiltered, $advertisements); //Try to apply more advertisements
+        error_log(var_export($checks, true));
 
-        $advertisements[$indexA] = [$name, $X, $Y]; //Re-add the advertisement for the next recursives
+        //error_log(var_export("we have " . count($checks) . " possible checks", true));
 
-        if($discount > $result) $result = $discount;
+        foreach($checks as [$discount, $itemsFiltered, ]) {
+            $discount += solve($itemsFiltered, $updatedAdvertisements); //Try to apply more advertisements
+
+            error_log(var_export("having result $discount for $name", true));
+
+            if($discount > $result) $result = $discount;
+        }
     }
 
     return $history[$hash] = $result;
 }
 
 $discount = solve($items, $advertisements);
+
+error_log(var_export("best is $discount", true));
+
+if($discount === -INF) $discount = 0;
 
 echo number_format($total - $discount, 2) . PHP_EOL . number_format($discount, 2) . PHP_EOL;
 
