@@ -37,13 +37,14 @@ for ($i = 0; $i < $ni; $i++) {
 
 function solve(array $items, array $advertisements): float {
     static $history;
+    global $test;
 
     //We can't apply any more ads
     if(count($items) == 0 || count($advertisements) == 0) return 0.0;
 
     $hash = implode("-", array_keys($advertisements)) . "|" . implode("-", array_keys($items)); 
 
-    //if(isset($history[$hash])) return $history[$hash];
+    if(isset($history[$hash])) return $history[$hash];
 
     $result = -INF;
 
@@ -52,7 +53,7 @@ function solve(array $items, array $advertisements): float {
     //Check all the advertisement left on the items left
     foreach($advertisements as $indexAd => [$name, $X, $Y]) {
 
-        error_log("Working on $name $X $Y");
+        //error_log("Working on $name $X $Y");
 
         $itemsAffected = [];
 
@@ -100,21 +101,42 @@ function solve(array $items, array $advertisements): float {
                         $discount += $price;
                     }
     
-                    error_log(var_export($itemsAffected, true));
+                    //error_log(var_export($itemsAffected, true));
     
                     $results = [];
+
+                    $start = microtime(1);
     
                     generateSubGroups($Y, $itemsAffected, [], $results);
+
+                    $test += microtime(1) - $start;
     
                     //error_log(var_export("we have " . count($results) . " possible results -- $discount", true));
+
+                    $duplicates = [];
                     
                     foreach($results as $removedItems) {
-                        $newChecks[] = [$discount, array_diff_key($itemsFiltered, $removedItems), array_diff_key($itemsAffected, $removedItems)];
+                        $itemsFiltered2 = $itemsFiltered;
+                        $itemsAffected2 = $itemsAffected;
+
+                        foreach($removedItems as $indexItem => $filler) {
+                            unset($itemsFiltered2[$indexItem]);
+                            unset($itemsAffected2[$indexItem]);
+                        }
+
+                        $md5 = md5(json_encode(array_values($itemsFiltered2)));
+
+                        if(!isset($duplicates[$md5])) {
+                            $newChecks[] = [$discount, $itemsFiltered2, $itemsAffected2];
+
+                            $duplicates[$md5] = 1;
+                        } else {
+                            //error_log("skipping duplicates");
+                            //error_log(var_export($itemsFiltered, true));
+                        }
                     } 
     
                 } else {
-                    exit("!!!!!!!");
-
                     $index = array_key_first($itemsAffected);
                     $price = array_shift($itemsAffected);
 
@@ -133,8 +155,27 @@ function solve(array $items, array $advertisements): float {
 
                         //foreach(array_splice($itemsAffected, -($X - 1), $count, []) as [$index, ]) unset($itemsFiltered[$index]);
 
+                        $duplicates = [];
+
                         foreach($results as $removedItems) {
-                            $newChecks[] = [$discount, array_diff_key($itemsFiltered, $removedItems), array_diff_key($itemsAffected, $removedItems)];
+                            $itemsFiltered2 = $itemsFiltered;
+                            $itemsAffected2 = $itemsAffected;
+
+                            foreach($removedItems as $indexItem => $filler) {
+                                unset($itemsFiltered2[$indexItem]);
+                                unset($itemsAffected2[$indexItem]);
+                            }
+
+                            $md5 = md5(json_encode(array_values($itemsFiltered2)));
+
+                            if(!isset($duplicates[$md5])) {
+                                $newChecks[] = [$discount, $itemsFiltered2, $itemsAffected2];
+
+                                $duplicates[$md5] = 1;
+                            } else {
+                                //error_log("skipping duplicates");
+                                //error_log(var_export($itemsFiltered, true));
+                            }
                         }
                     }
                 }
@@ -148,14 +189,19 @@ function solve(array $items, array $advertisements): float {
         $updatedAdvertisements = $advertisements;
         unset($updatedAdvertisements[$indexAd]); //We can only apply the advertisement once
 
-        error_log(var_export($checks, true));
+        //error_log(var_export($checks, true));
 
         //error_log(var_export("we have " . count($checks) . " possible checks", true));
 
         foreach($checks as [$discount, $itemsFiltered, ]) {
-            $discount += solve($itemsFiltered, $updatedAdvertisements); //Try to apply more advertisements
 
-            error_log(var_export("having result $discount for $name", true));
+            //error_log(var_export("having result $discount for $name before", true));
+
+            $additionalDiscount = solve($itemsFiltered, $updatedAdvertisements); //Try to apply more advertisements
+
+            if($additionalDiscount !== -INF) $discount += $additionalDiscount;
+
+            //error_log(var_export("having result $discount for $name after", true));
 
             if($discount > $result) $result = $discount;
         }
@@ -173,3 +219,4 @@ if($discount === -INF) $discount = 0;
 echo number_format($total - $discount, 2) . PHP_EOL . number_format($discount, 2) . PHP_EOL;
 
 error_log(microtime(1) - $start);
+error_log($test);
