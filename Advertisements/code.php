@@ -2,221 +2,216 @@
 
 $start = microtime(1);
 
-function generateSubGroups(int $size, array $items, array $group, array &$results) {
+//Generate all the order permutations to check the ads
+function generateAdsPermutations(array $ads, array $permutation): array {
 
-    if(count($group) == $size) {
-        $results[] = $group;
-        return;
+    if(count($ads) == 0) return [$permutation]; //We are using all the ads
+   
+    $results = [];
+
+    foreach($ads as $name => $info) {
+        
+        unset($ads[$name]);
+        $permutation[$name] = $info;
+
+        $results = array_merge($results, generateAdsPermutations($ads, $permutation));
+
+        $ads[$name] = $info;
+        array_pop($permutation);
     }
 
-    $productID = array_key_last($items);
-    $product = array_pop($items);
+    return $results;
+}
 
-    if($product === null) return;
+//Generate all the permutations of $size items
+function generateItemsPermutations(int $size, array $items, array $permutation): array {
 
-    generateSubGroups($size, $items, $group, $results); //We don't use that product
-    generateSubGroups($size, $items, $group + [$productID => $product], $results); //We use that product
+    $countP = count($permutation);
+    $countI = count($items);
+
+    if($countP == $size) return [$permutation];
+    if($countP + $countI < $size) return [];
+
+    $results = [];
+
+    //Get the last items in the array
+    $itemID = array_key_last($items);
+    $itemPrice = array_pop($items);
+
+    //We don't use the item
+    $results = array_merge($results, generateItemsPermutations($size, $items, $permutation));
+
+    $permutation[$itemID] = $itemPrice;
+
+    //We use the item
+    $results = array_merge($results, generateItemsPermutations($size, $items, $permutation));
+
+    return $results;
+}
+
+//Apply a group of advertisments
+function applyAdvertisments(array $adsGroup, array $items, array &$itemsPerAds, float $discount): array {
+    //If we have more than one ad to apply we need to test all the order permutations
+    $adsPermutations = generateAdsPermutations($adsGroup, []);
+
+    $bestDiscount = -INF;
+    $bestItems = [];
+
+    foreach($adsPermutations as $ads) {
+
+        //Applying an ad might produce multiple results
+        $possibilities = [[$discount, $items]];
+
+        foreach($ads as $name => [$X, $Y]) {
+
+            $newPossibilities = [];
+
+            foreach($possibilities as [$discountPermutation, $itemsPermutation]) {
+                //The list of items we haven't used yet that are related to the ad we are currently working on
+                $itemsAd = array_intersect_key($itemsPermutation, $itemsPerAds[$name]);
+
+                $turns = intdiv(count($itemsAd), $X); //Number of time the ad can be applied
+
+                //Not enough items left for this ad, nothing changes
+                if($turns == 0) {
+                    $newPossibilities[] = [$discountPermutation, $itemsPermutation];
+                    continue;
+                }
+
+                //Sort by ascending prices
+                asort($itemsAd);
+
+                if($X > $Y) {
+                    //Remove the X - Y most expansive items $turns times
+                    for($j = ($X - $Y) * $turns; $j > 0; --$j) {
+                        $index = array_key_last($itemsAd);
+                        $price = array_pop($itemsAd);
+    
+                        unset($itemsPermutation[$index]);
+    
+                        $discountPermutation += $price;
+                    }
+
+                    //All the items associated with this ad we have left need to be removed
+                    if(($Y * $turns) == count($itemsAd)) $newPossibilities[] = [$discountPermutation, array_diff_key($itemsPermutation, $itemsAd)];
+                    //We need to test all the possible way of removing ($Y * $turns) items
+                    else {
+                        $itemsRemoved = generateItemsPermutations($Y * $turns, $itemsAd, []);
+
+                        foreach($itemsRemoved as $listItems) $newPossibilities[] = [$discountPermutation, array_diff_key($itemsPermutation, $listItems)];
+                    }
+                } else {
+                    //Remove the cheapest items $turns times
+                    for($j = $turns; $j > 0; --$j) {
+                        $index = array_key_first($itemsAd);
+                        $price = $itemsAd[$index];
+                        unset($itemsAd[$index]); //array_shift would reset all the indexes
+
+                        $discountPermutation -= $price * ($Y - $X);
+        
+                        unset($itemsPermutation[$index]);
+                    }
+
+                    //All the items associated with this ad we have left need to be removed
+                    if(($X - 1) * $turns == count($itemsAd)) $newPossibilities[] = [$discountPermutation, array_diff_key($itemsPermutation, $itemsAd)];
+                    //We need to test all the possible way of removing ($X - 1) * $turns items
+                    else {
+                        $itemsRemoved = generateItemsPermutations(($X - 1) * $turns, $itemsAd, []);
+
+                        foreach($itemsRemoved as $listItems) $newPossibilities[] = [$discountPermutation, array_diff_key($itemsPermutation, $listItems)];
+                    } 
+                }
+            }
+
+            $possibilities = $newPossibilities;
+        }
+
+        //We have applied all the ads in the group, search for the best discount
+        foreach($possibilities as [$discountPermutation, $itemsPermutation]) {
+            if($discountPermutation > $bestDiscount) {
+                $bestDiscount = $discountPermutation;
+                $bestItems = $itemsPermutation;
+            }
+        }
+    }
+
+    return [$bestDiscount, $bestItems];
 }
 
 fscanf(STDIN, "%d", $na);
 for ($i = 0; $i < $na; $i++) {
     preg_match("/All (.*): ([0-9]+) for the price of ([0-9]+)/", trim(fgets(STDIN)), $matches);
 
-    $advertisements[] = [$matches[1], $matches[2], $matches[3]];
+    $advertisements[$matches[1]] = [$matches[2], $matches[3]];
 }
 
+$discount = 0.0;
 $total = 0.0;
+$itemID = 0;
+$adsGroups = [];
+$conflictAds = [];
 
 fscanf(STDIN, "%d", $ni);
 for ($i = 0; $i < $ni; $i++) {
     fscanf(STDIN, "%s %s %s %s", $product, $group, $brand, $price);
 
-    $items[] = [$product, $group, $brand, floatval($price)];
-    $total += $price;
-}
+    $potentialAds = [];
 
-function solve(array $items, array $advertisements): float {
-    static $history;
-    global $test;
-
-    //We can't apply any more ads
-    if(count($items) == 0 || count($advertisements) == 0) return 0.0;
-
-    $hash = implode("-", array_keys($advertisements)) . "|" . implode("-", array_keys($items)); 
-
-    if(isset($history[$hash])) return $history[$hash];
-
-    $result = -INF;
-
-    //error_log(var_export("calling solve", true));
-
-    //Check all the advertisement left on the items left
-    foreach($advertisements as $indexAd => [$name, $X, $Y]) {
-
-        //error_log("Working on $name $X $Y");
-
-        $itemsAffected = [];
-
-        //Find the items affected by the current advertisement
-        foreach($items as $indexItem => [$product, $group, $brand, $price]) {
-            if($product == $name || $group == $name || $brand == $name) {
-                $itemsAffected[$indexItem] = $price;
-            }
-        }
-
-        $turns = intdiv(count($itemsAffected), $X);
-
-        //error_log(var_export($turns . " " . count($itemsAffected), true));
-
-        if($turns == 0) {
-            unset($advertisements[$indexAd]);
-
-            continue;
-        }
-
-        //Sort by ascending prices
-        asort($itemsAffected);
-
-        $checks = [[0.0, $items, $itemsAffected]];
-
-        //error_log(var_export($turns, true));
-
-        for($i = 0; $i < $turns; ++$i) {
-            $newChecks = [];
-
-            foreach($checks as [$discount, $itemsFiltered, $itemsAffected]) {
-
-                $count = count($itemsAffected);
-
-                if($X > $Y) {
-                    //Remove the X - Y most expansive items
-                    for($j = $X - $Y; $j > 0; --$j) {
-                        $index = array_key_last($itemsAffected);
-                        $price = array_pop($itemsAffected);
-
-                        //error_log("removing $index with $price");
-
-                        unset($itemsFiltered[$index]);
-    
-                        $discount += $price;
-                    }
-    
-                    //error_log(var_export($itemsAffected, true));
-    
-                    $results = [];
-
-                    $start = microtime(1);
-    
-                    generateSubGroups($Y, $itemsAffected, [], $results);
-
-                    $test += microtime(1) - $start;
-    
-                    //error_log(var_export("we have " . count($results) . " possible results -- $discount", true));
-
-                    $duplicates = [];
-                    
-                    foreach($results as $removedItems) {
-                        $itemsFiltered2 = $itemsFiltered;
-                        $itemsAffected2 = $itemsAffected;
-
-                        foreach($removedItems as $indexItem => $filler) {
-                            unset($itemsFiltered2[$indexItem]);
-                            unset($itemsAffected2[$indexItem]);
-                        }
-
-                        $md5 = md5(json_encode(array_values($itemsFiltered2)));
-
-                        if(!isset($duplicates[$md5])) {
-                            $newChecks[] = [$discount, $itemsFiltered2, $itemsAffected2];
-
-                            $duplicates[$md5] = 1;
-                        } else {
-                            //error_log("skipping duplicates");
-                            //error_log(var_export($itemsFiltered, true));
-                        }
-                    } 
-    
-                } else {
-                    $index = array_key_first($itemsAffected);
-                    $price = array_shift($itemsAffected);
-
-                    $discount += $price * -($Y - $X);
-    
-                    //Remove the cheapest items
-                    unset($itemsFiltered[$index]);
-    
-                    if($X > 1) {
-                        //Remove the X - 1 most expansive items
-                        $results = [];
-
-                        generateSubGroups($X - 1, $itemsAffected, [], $results);
-
-                        //error_log(var_export("we have " . count($results) . " possible results -- $discount", true));
-
-                        //foreach(array_splice($itemsAffected, -($X - 1), $count, []) as [$index, ]) unset($itemsFiltered[$index]);
-
-                        $duplicates = [];
-
-                        foreach($results as $removedItems) {
-                            $itemsFiltered2 = $itemsFiltered;
-                            $itemsAffected2 = $itemsAffected;
-
-                            foreach($removedItems as $indexItem => $filler) {
-                                unset($itemsFiltered2[$indexItem]);
-                                unset($itemsAffected2[$indexItem]);
-                            }
-
-                            $md5 = md5(json_encode(array_values($itemsFiltered2)));
-
-                            if(!isset($duplicates[$md5])) {
-                                $newChecks[] = [$discount, $itemsFiltered2, $itemsAffected2];
-
-                                $duplicates[$md5] = 1;
-                            } else {
-                                //error_log("skipping duplicates");
-                                //error_log(var_export($itemsFiltered, true));
-                            }
-                        }
-                    }
-                }
-            }
-
-            //error_log(var_export($newChecks, true));
-
-            $checks = $newChecks;
-        }
-
-        $updatedAdvertisements = $advertisements;
-        unset($updatedAdvertisements[$indexAd]); //We can only apply the advertisement once
-
-        //error_log(var_export($checks, true));
-
-        //error_log(var_export("we have " . count($checks) . " possible checks", true));
-
-        foreach($checks as [$discount, $itemsFiltered, ]) {
-
-            //error_log(var_export("having result $discount for $name before", true));
-
-            $additionalDiscount = solve($itemsFiltered, $updatedAdvertisements); //Try to apply more advertisements
-
-            if($additionalDiscount !== -INF) $discount += $additionalDiscount;
-
-            //error_log(var_export("having result $discount for $name after", true));
-
-            if($discount > $result) $result = $discount;
+    //Check if this item could be associated with an ad
+    foreach([$product, $group, $brand] as $name) {
+        if(isset($advertisements[$name])) {
+            $itemsPerAds[$name][$itemID] = 1;
+            $potentialAds[$name] = 1;
         }
     }
 
-    return $history[$hash] = $result;
+    //If this items could be associated with multiple ads these ads are "conflicting"
+    if(count($potentialAds) > 1) {
+
+        foreach($potentialAds as $name => $filler) {
+            foreach($conflictAds as $conflictID => $listAds) {
+                //We already have a conflict group with at least on the ads related to the items, update the group
+                if(isset($listAds[$name])) {
+                    $conflictAds[$conflictID] += $potentialAds;
+                    $potentialAds = null;
+
+                    break 2;
+                }
+            }
+        }
+
+        //Create a new conflict group
+        if($potentialAds !== null) $conflictAds[] = $potentialAds;
+    }
+
+    $items[$itemID++] = floatval($price);
+    $total += $price;
 }
 
-$discount = solve($items, $advertisements);
+foreach($conflictAds as $listAds) {
+    $adsGroup = [];
 
-error_log(var_export("best is $discount", true));
+    //All the ads in a conflict group need to be checked together, checking all the order permutations 
+    foreach($listAds as $name => $filler) {
+        $adsGroup[$name] = $advertisements[$name];
+        
+        unset($advertisements[$name]);
+    }
 
-if($discount === -INF) $discount = 0;
+    $adsGroups[] = $adsGroup;
+}
+
+//The ads that are left can be check independently 
+foreach($advertisements as $name => [$X, $Y]) {
+    if(count($itemsPerAds[$name] ?? []) < $X) continue;
+
+    $adsGroups[] = [$name => [$X, $Y]];
+}
+
+foreach($adsGroups as $adsGroup) {
+    [$discount, $items] = applyAdvertisments($adsGroup, $items, $itemsPerAds, $discount);
+}
 
 echo number_format($total - $discount, 2) . PHP_EOL . number_format($discount, 2) . PHP_EOL;
 
 error_log(microtime(1) - $start);
-error_log($test);
