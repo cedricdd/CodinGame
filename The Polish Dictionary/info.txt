@@ -1,0 +1,39 @@
+https://www.codingame.com/ide/puzzle/the-polish-dictionary
+
+Goal
+You are given a mathematical expression in Reverse Polish Notation and you need to return the equivalent expression in Infix Notation with parentheses correctly placed.
+
+Infix Notation
+Infix notation is the standard for math, operators are inserted between the two operands they work on:
+5 + 3
+
+* and / have precedence over + and -. This can be altered by surrounding certain operations with parentheses so they have to be calculated first:
+5 + 3 * 6 = 5 + 18 = 23  ->  (5 + 3) * 6 = 8 * 6 = 48
+
+Reverse Polish Notation
+In reverse polish notation, the operators are placed after the two operands they work on:
+5 3 +
+
+When we calculate the result, we imagine going through the operators left to right and replacing each one with the result we get if we apply it onto the operands right beside it:
+5 3 + 10 * 8 4 + -
+8 10 * 8 4 + -
+80 8 4 + - 
+80 12 -
+68
+
+In this notation we do not need to worry about operator precedence or parentheses, as the order in which the operators were written dictates the order.
+In this puzzle you also have to worry about "variables", which are just combinations of letters, that are not operators, they have the same role as numbers and should appear in the result in the same way:
+apple 3 *  ->  apple * 3
+
+Input
+Line 1: An integer N for the number of operands and operators in the string.
+Line 2: A string consisting of N operands and operators separated by spaces in reverse polish notation.
+An operator can be either of the following: +, -, *, /.
+An operand can be a number or a variable name
+Output
+Line 1: The resulting infix notation expression with the minimum number of parentheses.
+There should not be a space between the parentheses and their operands
+Constraints
+1 ≤ N ≤ 100
+1 ≤ Length of the operands in characters ≤ 10
+Operands can only be a combination of letters and numbers.
