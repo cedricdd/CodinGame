@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/725163a2d3e4cb1522c12aa2a6211d5d807f7
+https://www.codingame.com/training/medium/coastline
 
 Goal
 Background
@@ -11,7 +11,7 @@ To ease modelling, assume the coast is a straight line and is infinitely long fo
 We are using Cartesian coordinates system, defining the coastline as the x-axis. South of the line is land. North of it is water.
 The islets locations are given by (x,y) coordinates.
 Mobile data transmitters have a fixed effective radius, r. If we use a transmitter as the center to draw a circle with radius r, the area of the circle is the effective data coverage of the transmitter.
-The distance between transmitters is not an issue because they are connected by cables. An islet has to be within the radius r of at least one transmitter to enable connection. 
+The distance between transmitters is not an issue because they are connected by cables. However, an islet has to be within the radius r of at least one transmitter to enable connection. 
 To cover all islets within data range, we would need one or more transmitters to be installed alone the coast.
 
 Problem
