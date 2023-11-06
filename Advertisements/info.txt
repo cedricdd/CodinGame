@@ -1,3 +1,5 @@
+https://www.codingame.com/training/hard/advertisements
+
 Goal
 Higher management of your local supermarket has implemented a variety of advertisements: X for the price of Y, for groups of products, product groups or brands. Nice and all - but as their neighborhood IT specialist it falls to you to upgrade their check-out system. During evaluating their advertisements, it seems some shady deals are going on ('2 apples for the price of 3?!') - but you are only the IT specialist, so you simply follow the assignment to the letter.
 
