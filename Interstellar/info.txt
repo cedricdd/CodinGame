@@ -23,7 +23,7 @@ Prepare for a cosmic challenge, Captain! It's time to navigate through the wormh
 
 Input
 Line 1: A string ship representing the location of the ship in space.
-Line 2: A string wormhole representing the location of the wormhole in space.
+Line 2: Distance between the ship and the wormhole rounded off to two decimal places.
 
 Output
 Line 1: The directional vector to the wormhole from the ship
