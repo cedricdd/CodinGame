@@ -1,6 +1,6 @@
 <?php
 
-function getDirectinalVerctor(array $v1, array $v2): string {
+function getDirectionalVerctor(array $v1, array $v2): string {
     $vector["i"] = $v1["i"] - $v2["i"];
     $vector["j"] = $v1["j"] - $v2["j"];
     $vector["k"] = $v1["k"] - $v2["k"];
@@ -65,5 +65,5 @@ function extractVector(string $input): array {
 $ship = extractVector(trim(fgets(STDIN)));
 $wormhole = extractVector(trim(fgets(STDIN)));
 
-echo "Direction: " . getDirectinalVerctor($wormhole, $ship) . PHP_EOL;
+echo "Direction: " . getDirectionalVerctor($wormhole, $ship) . PHP_EOL;
 echo "Distance: " . number_format(getDistance($wormhole, $ship), 2, ".", "") . PHP_EOL;
