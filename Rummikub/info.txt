@@ -1,0 +1,56 @@
+https://www.codingame.com/ide/demo/10463438cc41d32f2e1b6ccf86ec8b7e614059d
+
+Goal
+In Rummikub, stones numbered 1-13 in four colors can be played on the table in runs (same-colored uninterrupted range of numbers) or sets (same-numbered stones all of a unique color). 
+A valid run or set consists out of at least three stones, and a maximum of four (set) or thirteen (run). All stones are available two times.
+
+You will get a table with valid runs and sets (rows), and one stone (putstone) to put on the table in as little steps as possible. 
+You must output all steps needed to put the stone on the table (becoming part of a valid run or set).
+
+One step can be either TAKE stone rowid, PUT stone rowid or COMBINE rowid_1 rowid_2
+- Each TAKE action must always immediately be followed by a PUT action of the same stone. 
+(While possible in the real game, in this contribution it is not allowed to take a next stone before putting away the already taken stone)
+- After each PUT action, the table should only contain valid runs and/or sets.
+- Your final action is always to put putstone.
+- A COMBINE action can be used to merge two runs into one longer valid run. Order the rowids from the two rows numerically. 
+The new run gets the lowest rowid (rowid_1), the other rowid (rowid_2) becomes unused.
+
+You are allowed to split one valid run into two valid runs by a PUT or TAKE action. For example: a run of seven stones, take the middle stone, splitting the run into two runs of three stones. 
+Or, a run of five stones, PUT an identical middle stone, splitting the run into two runs of three stones each. In case of a split, 
+the new run with the highest numerical stonevalues gets a new rowid (highest current rowid + 1), and the other run keeps the original rowid.
+Visual example: 1 3G 4G 5G 6G 7G with PUT 5G 1 --> 1 3G 4G 5G, 2 5G 6G 7G}}
+
+Runs are always displayed from low to high value. Sets are always displayed in the order B G R Y.
+
+Joker
+In some cases, there can be a Joker (denoted as J) in a run or set. A joker can represent any number and color stone value. 
+So, after a valid TAKE J rowid, the J can be added to any set or run that still has place. 
+A joker is always displayed at the most right place (3R 4R J instead of J 3R 4R), except if it fills a space inside a run (3R J 5R).
+
+Task order
+When different orders of tasks would lead to the same output, follow the following order:
+- Always select the least number of tasks;
+- COMBINE always as early as possible;
+- COMBINE lower-numbered rowids before higher-numbered rowids (COMBINE 1 2 -> COMBINE 1 3)
+- Never use a J if it can also be done without;
+- Use a J as late as possible.
+
+Note
+The real Rummikub allows for more complex actions (multiple TAKE after each other, after a single PUT the runs or sets do not need to be valid yet, as long as more PUTs are coming). 
+To reduce difficulty of this contribution, this is left out (the creator of the contribution was not able to solve this).
+Two important consequences of these rules (hint): 1) It is never possible to create a new set. It is only possible to make a set longer or shorted. 2) 
+It is never possible to create a new run, except if it is created by splitting one big run into multiple smaller valid runs.
+
+Input
+Line 1: string stone: stone to put on the table. A stone is a combination of a numeric value (1-13) and a single letter indicating the color (one of R, G, B or Y) - or J, indicating a joker.
+Line 2: integer nrow: number of rows (sets or runs) on the table
+Next nrow lines: row: the rowid (1-nrow), followed by space separated strings representing stones, that combined form a valid run or set.
+
+Output
+nstep lines: the actions needed to put putstone on the table, in the format: PUT stone rowid
+nrow_new lines: the new rows that combined form the table after putting putstone on the table. 
+The new rows have either their original rowid, or a new rowid (if it was a new row as a result from splitting an original row).
+
+Constraints
+There is always a solution. (WIP; rules on how to select best solution are not yet perfect)
+There is never more than 1 Joker.
