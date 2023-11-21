@@ -77,23 +77,49 @@ while($infoToFind) {
                 if(!isset($block['L']) || $connections[$block['L']] == 0 || !isset($block['R']) || $connections[$block['R']] == 0) {
                     $connections[$block['U']] = 2;
                     $connections[$block['D']] = 2;
+
+                    isset($block['L']) && $connections[$block['L']] = 0;
+                    isset($block['R']) && $connections[$block['R']] = 0;
                 } else {
                     $connections[$block['L']] = 2;
                     $connections[$block['R']] = 2;
+
+                    isset($block['U']) && $connections[$block['U']] = 0;
+                    isset($block['D']) && $connections[$block['D']] = 0;
                 }
 
                 $forced = 2;
                 $possible = 0;
             }
 
-            if($value == 2 && $forced == 1) {
+            if($value == 2 && $forced == 1 && $possible == 2) {
                 foreach($block as $direction => $id) {
                     if($connections[$id] == 2) {
                         switch($direction) {
-                            case 'R': isset($block['L']) && $connections[$block['L']] = 0; break;
-                            case 'L': isset($block['R']) && $connections[$block['R']] = 0; break;
-                            case 'D': isset($block['U']) && $connections[$block['U']] = 0; break;
-                            case 'U': isset($block['D']) && $connections[$block['D']] = 0; break;
+                            case 'R': 
+                                if(isset($block['L']) && $connections[$block['L']]) {
+                                    $connections[$block['L']] = 0;
+                                    $possible--;
+                                }
+                                break;
+                            case 'L': 
+                                if(isset($block['R']) && $connections[$block['R']]) {
+                                    $connections[$block['R']] = 0;
+                                    $possible--;
+                                }
+                                break;
+                            case 'D': 
+                                if(isset($block['U']) && $connections[$block['U']]) {
+                                    $connections[$block['U']] = 0;
+                                    $possible--;
+                                } 
+                                break;
+                            case 'U': 
+                                if(isset($block['D']) && $connections[$block['D']]) {
+                                    $connections[$block['D']] = 0;
+                                    $possible--;
+                                } 
+                                break;
                         }
                     }
                 }
