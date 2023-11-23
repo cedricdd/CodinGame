@@ -2,24 +2,24 @@
 
 $start = microtime(1);
 
-class Stone {
+class Tile {
     public $value;
     public $color;
 
-    public function __construct(string $stone) {
-        preg_match("/([0-9]+)([BGRY])/", $stone, $array);
+    public function __construct(string $tile) {
+        preg_match("/([0-9]+)([BGRY])/", $tile, $array);
 
         $this->value = $array[1];
         $this->color = $array[2];
     }
 
-    public function getStoneName(): string {
+    public function getName(): string {
         return $this->value . $this->color;
     }
 }
 
 abstract class Row {
-    protected $stones;
+    protected $tiles;
     protected $count;
     protected $joker;
     public $display;
@@ -30,15 +30,15 @@ class Set extends Row {
     private $colors;
     private $value;
 
-    public function __construct(array $stones) {
+    public function __construct(array $tiles) {
         $this->type = "set";
         $this->colors = [];
-        $this->count = count($stones);
+        $this->count = count($tiles);
 
-        foreach($stones as $stone) {
-            $this->value = $stone->value;
-            $this->stones[$stone->getStoneName()] = $stone;
-            $this->colors[$stone->color] = 1;
+        foreach($tiles as $tile) {
+            $this->value = $tile->value;
+            $this->tiles[$tile->getName()] = $tile;
+            $this->colors[$tile->color] = 1;
         }
 
         $this->updateDisplay();
@@ -54,31 +54,21 @@ class Set extends Row {
         $this->display = implode(" ", $output);
     }
 
-    public function canInsert(Stone $stone): bool {
-        return !isset($this->colors[$stone->color]) && $stone->value == $this->value;
+    public function canInsert(Tile $tile): bool {
+        return !isset($this->colors[$tile->color]) && $tile->value == $this->value;
     }
 
-    public function insert(Stone $stone) {
-        $this->colors[$stone->color] = 1;
-        $this->stones[$stone->getStoneName()] = $stone;
+    public function couldInsert(Tile $tile): array {
+        return [];
+    }
+
+    public function insert(Tile $tile) {
+        $this->colors[$tile->color] = 1;
+        $this->tiles[$tile->getName()] = $tile;
 
         $this->count++;
 
         $this->updateDisplay();
-    }
-
-    public function remove(Stone $stone) {
-        unset($this->colors[$stone->color]);
-        unset($this->stones[$stone->getStoneName()]);
-
-        $this->count--;
-
-        $this->updateDisplay();
-    }
-
-    public function canTake(): array {
-        if($this->count > 3) return $this->stones;
-        else return [];
     }
 }
 
@@ -87,33 +77,20 @@ class Run extends Row {
     public $max;
     private $color;
 
-    public function __construct(array $stones) {
+    public function __construct(array $tiles) {
         $this->type = "run";
         $this->min = INF;
         $this->max = -INF;
-        $this->count = count($stones);
+        $this->count = count($tiles);
 
-        foreach($stones as $stone) {
-            $this->stones[] = $stone;
-            $this->color = $stone->color;
-            $this->min = min($this->min, $stone->value);
-            $this->max = max($this->max, $stone->value);
+        foreach($tiles as $tile) {
+            $this->tiles[] = $tile;
+            $this->color = $tile->color;
+            $this->min = min($this->min, $tile->value);
+            $this->max = max($this->max, $tile->value);
         }
 
         $this->updateDisplay();
-    }
-
-    public function canInsert(Stone $stone): bool {
-        if($this->color == $stone->color) {
-            //Adding at the start
-            if($this->min - 1 == $stone->value) return true;
-            //Adding at the end
-            if($this->max + 1 == $stone->value) return true;
-            //Adding in the middle and splitting the run
-            if($this->count >= 5 && $stone->value >= $this->min + 2 && $stone->value <= $this->max - 2) return true;
-        } 
-
-        return false;
     }
 
     public function updateDisplay() {
@@ -124,63 +101,77 @@ class Run extends Row {
         $this->display = implode(" ", $output);
     }
 
-    public function insertStart(Stone $stone) {
+    public function canInsert(Tile $tile): bool {
+        if($this->color == $tile->color) {
+            //Adding at the start
+            if($this->min - 1 == $tile->value) return true;
+            //Adding at the end
+            if($this->max + 1 == $tile->value) return true;
+            //Adding in the middle and splitting the run
+            if($this->count >= 5 && $tile->value >= $this->min + 2 && $tile->value <= $this->max - 2) return true;
+        } 
+
+        return false;
+    }
+
+    public function couldInsert(Tile $tile): array {
+        if($this->color != $tile->color) return [];
+
+        $tiles = [];
+
+        if($tile->value < $this->min) {
+            for($i = $this->min - 1; $i > $tile->value; --$i) {
+                $tiles[] = new Tile($i . $tile->color);
+            }
+        } elseif($tile->value > $this->max) {
+            for($i = $this->max + 1; $i < $tile->value; ++$i) {
+                $tiles[] = new Tile($i . $tile->color);
+            }
+        } else {
+            
+        }
+
+        return $tiles;
+    }
+
+    public function insertStart(Tile $tile) {
         $this->count++;
         $this->min--;
 
-        array_unshift($this->stones, $stone);
+        array_unshift($this->tiles, $tile);
 
         $this->updateDisplay();
     }
 
-    public function insertEnd(Stone $stone) {
+    public function insertEnd(Tile $tile) {
         $this->count++;
         $this->max++;
 
-        array_push($this->stones, $stone);
+        array_push($this->tiles, $tile);
 
         $this->updateDisplay();
     }
 
-    public function removeStart(): Stone {
+    public function removeStart(): Tile {
         $this->min++;
         $this->count--;
 
-        $stone = array_shift($this->stones);
+        $tile = array_shift($this->tiles);
 
         $this->updateDisplay();
 
-        return $stone;
+        return $tile;
     }
 
-    public function removeLast(): Stone {
+    public function removeLast(): Tile {
         $this->max--;
         $this->count--;
 
-        $stone = array_pop($this->stones);
+        $tile = array_pop($this->tiles);
 
         $this->updateDisplay();
 
-        return $stone;
-    }
-
-    public function canTake(): array {
-        $stones = [];
-
-        if($this->count > 3) {
-            $stones[] = reset($this->stones);
-            $stones[] = end($this->stones);
-        }
-
-        if($this->count > 6) {
-            foreach($this->stones as $stone) {
-                if($stone->value >= $this->min + 3 && $stone->value <= $this->max - 3) {
-                    $stones[] = $stone;
-                }
-            }
-        }
-
-        return $stones;
+        return $tile;
     }
 }
 
@@ -188,21 +179,23 @@ class Table {
     private $rows;
     private $nextRow;
 
-    public function __construct(array $rows) {
+    public function __construct(array $rows, array &$availableTiles) {
         foreach($rows as $row) {
             $rowID = array_shift($row);
 
             $colors = [];
-            $stones = [];
+            $tiles = [];
 
-            foreach($row as $stoneName) {
-                $stone = new Stone($stoneName);
+            foreach($row as $tileName) {
+                $tile = new Tile($tileName);
 
-                $stones[] = $stone;
-                $colors[$stone->color] = 1;
+                $tiles[] = $tile;
+                $colors[$tile->color] = 1;
+
+                $availableTiles[$tile->color][$tile->value]++;
             }
 
-            $this->rows[$rowID] = count($colors) == 1 ? new Run($stones) : new Set($stones);
+            $this->rows[$rowID] = count($colors) == 1 ? new Run($tiles) : new Set($tiles);
             $this->nextRow = $rowID + 1;
         }
     }
@@ -225,131 +218,78 @@ class Table {
         return $this->rows;
     }
 
-    public function remove(int $rowID, Stone $stone) {
-        $row = $this->rows[$rowID];
-
-        if($row->type == "set") $row->remove($stone);
-        elseif($stone->value == $row->min) $row->removeStart();
-        elseif($stone->value == $row->max) $row->removeLast();
-        //Splitting a run
-        else {
-            $stones = [];
-
-            //Update the old row
-            while($row->max >= $stone->value) $stones[] = $row->removeLast();
-
-            //Don't copy the stone we take to the new run
-            array_pop($stones);
-
-            //Create the new row
-            $this->rows[$this->nextRow++] = new Run($stones);
-        }
-    }
-
-    public function insert(int $rowID, Stone $stone) {
-        $row = $this->rows[$rowID];
-
-        if($row->type == "set") $row->insert($stone);
-        elseif($stone->value == $row->min - 1) $row->insertStart($stone);
-        elseif($stone->value == $row->max + 1) $row->insertEnd($stone);
-        //Splitting a run
-        else {
-            $stones = [$stone];
-
-            //Update the old row
-            while($row->max > $stone->value) $stones[] = $row->removeLast();
-
-            //Create the new row
-            $this->rows[$this->nextRow++] = new Run($stones);
-        }
-    }
-
     public function outputRows() {
         ksort($this->rows);
 
         foreach($this->rows as $id => $row) echo $id . " " . $row->display . PHP_EOL;
     }
+
+    public function insert(int $rowID, Tile $tile) {
+        $row = $this->rows[$rowID];
+
+        if($row->type == "set") $row->insert($tile);
+        elseif($tile->value == $row->min - 1) $row->insertStart($tile);
+        elseif($tile->value == $row->max + 1) $row->insertEnd($tile);
+        //Splitting a run
+        else {
+            $tiles = [$tile];
+
+            //Update the old row
+            while($row->max > $tile->value) $tiles[] = $row->removeLast();
+
+            //Create the new row
+            $this->rows[$this->nextRow++] = new Run($tiles);
+        }
+    }
 }
 
-$stones[] = new Stone(trim(fgets(STDIN)));
-
+$goalTile = new Tile(trim(fgets(STDIN)));
+$availableTiles = [
+    'B' => array_fill(1, 13, 0),
+    'G' => array_fill(1, 13, 0),
+    'R' => array_fill(1, 13, 0),
+    'Y' => array_fill(1, 13, 0),
+];
 
 fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
     $rows[] = explode(" ", trim(fgets(STDIN)));
 }
 
-$table = new Table($rows);
+$table = new Table($rows, $availableTiles);
 
 //error_log(var_export($putstone, true));
 //error_log(var_export($table, true));
 
-$history = [];
-$toCheck = [[$stones, $table, []]];
+function addTile(Table $table, Tile $tile): array {
 
-while(count($toCheck)) {
-    $newCheck = [];
+    //Try to directly add the tile
+    foreach($table->getRows() as $id => $row) {
+        if($row->canInsert($tile)) {
+            error_log("we can add the stone in row $id");
 
-    error_log("we have " . count($toCheck) . " to check");
+            $table->insert($id, $tile);
 
-    foreach($toCheck as [$stones, $table, $actions]) {
-
-        $hash = $table->getHash();
-
-        if(isset($history[$hash])) {
-            error_log("!!!!!!!!!!!!!!!");
-            continue;
-        }
-        $history[$hash] = 1;
-    
-        if(count($stones) > 0) {
-            $stone = array_pop($stones);
-
-            foreach($table->getRows() as $id => $row) {
-                if($row->canInsert($stone)) {
-                    error_log("we can add the stone in row $id");
-
-                    $tableUpdated = clone $table;
-                    $tableUpdated->insert($id, $stone);
-
-                    $actionsUpdated = $actions;
-                    $actionsUpdated[] = "PUT " . $stone->getStoneName() . " " . $id;
-
-                    $newCheck[] = [$stones, $tableUpdated, $actionsUpdated];
-                }
-            }
-
-            $stones[] = $stone;
-        } 
-
-        if(count($stones) == 0) {
-            echo implode("\n", $actions) . PHP_EOL;
-
-            $table->outputRows();
-
-            error_log(microtime(1) - $start);
-            exit();
-        }
-
-        if(count($stones) == 1) {
-            foreach($table->getRows() as $id => $row) {
-                foreach($row->canTake() as $stone) {
-                    error_log("on row $id we can take " . $stone->getStoneName());
-        
-                    $tableUpdated = clone $table;
-                    $tableUpdated->remove($id, $stone);
-        
-                    $actionsUpdated = $actions;
-                    $actionsUpdated[] = "TAKE " . $stone->getStoneName() . " " . $id;
-        
-                    $stones[1] = $stone;
-        
-                    $newCheck[] = [$stones, $tableUpdated, $actionsUpdated];
-                }
-            }
+            return [$table, ["PUT " . $tile->getName() . " " . $id]];
         }
     }
-    //break;
 
-    $toCheck = $newCheck;
+    foreach($table->getRows() as $id => $row) {
+        $tiles = $row->couldInsert($tile);
+
+        if(count($tiles)) {
+            error_log("we could add the stone in row $id");
+            error_log(var_export($tiles, true));
+        }
+    }
+
+    exit("!!!!!!!!!!");
 }
+
+[$table, $actions] = addTile($table, $goalTile);
+
+echo implode("\n", $actions) . PHP_EOL;
+
+$table->outputRows();
+
+error_log(microtime(1) - $start);
