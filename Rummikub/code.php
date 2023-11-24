@@ -100,7 +100,7 @@ class Set extends Row {
 class Run extends Row {
     public $min;
     public $max;
-    private $color;
+    public $color;
 
     public function __construct(array $tiles) {
         $this->type = "run";
@@ -202,6 +202,10 @@ class Run extends Row {
         return $tile;
     }
 
+    public function getTiles(): array {
+        return $this->tiles;
+    }
+
     public function canTake(Tile $tile): bool {
         //If the tile is the first or last
         if($this->count >= 4 && $this->color == $tile->color && ($tile->value == $this->min || $tile->value == $this->max)) return true;
@@ -215,6 +219,12 @@ class Run extends Row {
         if($this->color != $tile->color) return [];
 
         $tiles = [];
+
+        //The tile is currently the min -- it means we currently have 3 tiles otherwise it could have been taken directly, we just need to add one at the end
+        if($tile->value == $this->min && $this->max != 13) $tiles[] = new Tile($this->max + 1 . $this->color);
+
+        //The tile is currently the max -- it means we currently have 3 tiles otherwise it could have been taken directly, we just need to add one at the start
+        if($tile->value == $this->max && $this->min != 1) $tiles[] = new Tile($this->min - 1 . $this->color);
 
         return $tiles;
     }
@@ -249,6 +259,39 @@ class Table {
         foreach ($this->rows as $k => $v) {
             $this->rows[$k] = clone $v;
         }
+    }
+
+    public function combineRows(): array {
+        $actions = [];
+
+        foreach($this->rows as $id => $row) {
+            if($row->type == "set") continue;
+
+            foreach($this->rows as $id2 => $row2) {
+                if($id2 <= $id || $row2->type == "set") continue;
+
+                if($row->color != $row2->color) continue;
+
+                error_log("trying to merge row $id & $id2");
+
+                //Row2 after Row1
+                if($row->max == $row2->min - 1) {
+                    foreach($row2->getTiles() as $tile) $row->insertEnd($tile);
+
+                    unset($this->rows[$id2]);
+                } //Row2 before Row1
+                elseif($row2->max == $row->min - 1) {
+                    foreach(array_reverse($row2->getTiles()) as $tile) $row->insertStart($tile);
+
+                    unset($this->rows[$id2]); 
+                }
+                else continue;
+
+                $actions[] = "COMBINE $id $id2";
+            }
+        }
+
+        return $actions;
     }
 
     public function getHash(): string {
@@ -323,6 +366,8 @@ for ($i = 0; $i < $n; $i++) {
 }
 
 $table = new Table($rows, $availableTiles);
+
+$combineActions = $table->combineRows();
 
 //error_log(var_export($putstone, true));
 //error_log(var_export($table, true));
@@ -477,6 +522,8 @@ function addTile(Table $table, Tile $tile): array {
 
 error_log("We have " . count($series) . " to solve");
 
+if(count($series) == 0) exit();
+
 usort($series, function($a, $b) {   
     $countA = count($a[1]);
     $countB = count($b[1]);
@@ -486,7 +533,7 @@ usort($series, function($a, $b) {
 
 [$table, $actions] = array_pop($series);
 
-echo implode("\n", $actions) . PHP_EOL;
+echo implode("\n", array_merge($combineActions, $actions)) . PHP_EOL;
 
 $table->outputRows();
 
