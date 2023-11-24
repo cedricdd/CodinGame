@@ -70,6 +70,31 @@ class Set extends Row {
 
         $this->updateDisplay();
     }
+
+    public function canTake(Tile $tile): bool {
+        if($this->count == 4 && $this->value == $tile->value) return true;
+
+        return false;
+    }
+
+    public function couldTake(Tile $tile): array {
+        if($this->value == $tile->value && isset($this->colors[$tile->color])) {
+            foreach(['B', 'G', 'R', 'Y'] as $color) {
+                if(!isset($this->colors[$color])) return [new Tile($tile->value . $color)];
+            }
+        }
+
+        return [];
+    }
+
+    public function remove(Tile $tile) {
+        unset($this->colors[$tile->color]);
+        unset($this->tiles[$tile->getName()]);
+
+        $this->count--;
+
+        $this->updateDisplay();
+    }
 }
 
 class Run extends Row {
@@ -128,7 +153,10 @@ class Run extends Row {
                 $tiles[] = new Tile($i . $tile->color);
             }
         } else {
-            
+            if($this->min > $tile->value - 1) $tiles[] = new Tile($tile->value - 1 . $tile->color);
+            if($this->min > $tile->value - 2) $tiles[] = new Tile($tile->value - 2 . $tile->color);
+            if($this->max < $tile->value + 1) $tiles[] = new Tile($tile->value + 1 . $tile->color);
+            if($this->max < $tile->value + 2) $tiles[] = new Tile($tile->value + 2 . $tile->color);
         }
 
         return $tiles;
@@ -172,6 +200,23 @@ class Run extends Row {
         $this->updateDisplay();
 
         return $tile;
+    }
+
+    public function canTake(Tile $tile): bool {
+        //If the tile is the first or last
+        if($this->count >= 4 && $this->color == $tile->color && ($tile->value == $this->min || $tile->value == $this->max)) return true;
+        //If we can take by splitting
+        if($this->count >= 7 && $this->color == $tile->color && $tile->value - 3 >= $this->min && $tile->value + 3 <= $this->max) return true;
+
+        return false;
+    }
+
+    public function couldTake(Tile $tile): array {
+        if($this->color != $tile->color) return [];
+
+        $tiles = [];
+
+        return $tiles;
     }
 }
 
@@ -241,6 +286,27 @@ class Table {
             $this->rows[$this->nextRow++] = new Run($tiles);
         }
     }
+
+    public function remove(int $rowID, Tile $tile) {
+        $row = $this->rows[$rowID];
+
+        if($row->type == "set") $row->remove($tile);
+        elseif($tile->value == $row->min) $row->removeStart();
+        elseif($tile->value == $row->max) $row->removeLast();
+        //Splitting a run
+        else {
+            $tiles = [];
+
+            //Update the old row
+            while($row->max >= $tile->value) $tiles[] = $row->removeLast();
+
+            //Don't copy the stone we take to the new run
+            array_pop($tiles);
+
+            //Create the new row
+            $this->rows[$this->nextRow++] = new Run($tiles);
+        }
+    }  
 }
 
 $goalTile = new Tile(trim(fgets(STDIN)));
@@ -261,16 +327,96 @@ $table = new Table($rows, $availableTiles);
 //error_log(var_export($putstone, true));
 //error_log(var_export($table, true));
 
+function findTile(Table $table, Tile $tile): array {
+    global $availableTiles;
+
+    error_log("We want to find the tile " . $tile->getName());
+
+    //Try to directly take the tile
+    foreach($table->getRows() as $id => $row) {
+
+        error_log("trying to directly get it in row $id");
+
+        if($row->canTake($tile)) {
+            error_log("we can take the tile " . $tile->getName() . " in row $id");
+
+            $table->remove($id, $tile);
+
+            return [true, [[$table, ["TAKE " . $tile->getName() . " " . $id]]]];
+        }
+    }
+
+    foreach($table->getRows() as $id => $row) {
+
+        error_log("checking if we could take in row $id");
+
+        $tiles = $row->couldTake($tile);
+
+        if(count($tiles)) {
+            error_log("we could take the tile in row $id");
+
+            foreach($tiles as $tileToInsert) {
+                if($availableTiles[$tile->color][$tileToInsert->value]) error_log("the tile " . $tileToInsert->getName() . " exist, we can try");
+                else {
+                    error_log("the tile " . $tileToInsert->getName() . " doesn't exist, we can skip");
+
+                    continue 2;
+                }
+            }
+
+            $series = [[$table, []]];
+
+            foreach($tiles as $tileToInsert) {
+                $newSeries = [];
+
+                foreach($series as [$table, $actions]) {
+                    [$success, $series] = findTile($table, $tileToInsert);
+
+                    if($success) {
+                        foreach($series as [$updatedTable, $actionsTile]) {
+
+                            $updatedTable->insert($id, $tileToInsert);
+                            $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
+
+                            $newSeries[] = [$updatedTable, array_merge($actions, $actionsTile)];
+                        }
+                    }
+                }
+
+                $series = $newSeries;
+            }
+
+            if(count($series)) {
+                //We have added all the tiles that were missing, we can add the goal tile
+                foreach($series as [&$table, &$actions]) {
+                    $table->remove($id, $tile);
+                    $actions[] = "TAKE " . $tile->getName() . " " . $id;
+                }
+
+                return [true, $series];
+            }
+        }
+    }
+    
+    return [false, [], []];
+}
+
 function addTile(Table $table, Tile $tile): array {
+    global $availableTiles;
+
+    error_log("We want to add the tile " . $tile->getName());
 
     //Try to directly add the tile
     foreach($table->getRows() as $id => $row) {
+
+        error_log("trying to directly add it in row $id");
+
         if($row->canInsert($tile)) {
-            error_log("we can add the stone in row $id");
+            error_log("we can add the tile in row $id");
 
             $table->insert($id, $tile);
 
-            return [$table, ["PUT " . $tile->getName() . " " . $id]];
+            return [true, [[$table, ["PUT " . $tile->getName() . " " . $id]]]];
         }
     }
 
@@ -278,15 +424,67 @@ function addTile(Table $table, Tile $tile): array {
         $tiles = $row->couldInsert($tile);
 
         if(count($tiles)) {
-            error_log("we could add the stone in row $id");
-            error_log(var_export($tiles, true));
+            error_log("we could add the tile in row $id");
+            //error_log(var_export($tiles, true));
+
+            foreach($tiles as $tileToInsert) {
+                if($availableTiles[$tile->color][$tileToInsert->value]) error_log("the tile " . $tileToInsert->getName() . " exist, we can try");
+                else {
+                    error_log("the tile " . $tileToInsert->getName() . " doesn't exist, we can skip");
+
+                    continue 2;
+                }
+            }
+
+            $series = [[$table, []]];
+
+            foreach($tiles as $tileToInsert) {
+                $newSeries = [];
+
+                foreach($series as [$table, $actions]) {
+                    [$success, $series] = findTile($table, $tileToInsert);
+
+                    if($success) {
+                        foreach($series as [$updatedTable, $actionsTile]) {
+
+                            $updatedTable->insert($id, $tileToInsert);
+                            $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
+
+                            $newSeries[] = [$updatedTable, array_merge($actions, $actionsTile)];
+                        }
+                    }
+                }
+
+                $series = $newSeries;
+            }
+
+            if(count($series)) {
+                //We have added all the tiles that were missing, we can add the goal tile
+                foreach($series as [&$table, &$actions]) {
+                    $table->insert($id, $tile);
+                    $actions[] = "PUT " . $tile->getName() . " " . $id;
+                }
+
+                return [true, $series];
+            }
         }
     }
 
-    exit("!!!!!!!!!!");
+    return [false, [], []];
 }
 
-[$table, $actions] = addTile($table, $goalTile);
+[, $series] = addTile($table, $goalTile);
+
+error_log("We have " . count($series) . " to solve");
+
+usort($series, function($a, $b) {   
+    $countA = count($a[1]);
+    $countB = count($b[1]);
+
+    return $b <=> $a;
+});
+
+[$table, $actions] = array_pop($series);
 
 echo implode("\n", $actions) . PHP_EOL;
 
