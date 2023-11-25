@@ -261,37 +261,54 @@ class Table {
         }
     }
 
-    public function combineRows(): array {
-        $actions = [];
+    public function combine(int $r1, int $r2) {
+        //We always keep the row with the lowest ID
+        if($r1 > $r2) [$r1, $r2] = [$r2, $r1];
 
-        foreach($this->rows as $id => $row) {
-            if($row->type == "set") continue;
+        $row1 = $this->rows[$r1];
+        $row2 = $this->rows[$r2];
 
-            foreach($this->rows as $id2 => $row2) {
-                if($id2 <= $id || $row2->type == "set") continue;
-
-                if($row->color != $row2->color) continue;
-
-                error_log("trying to merge row $id & $id2");
-
-                //Row2 after Row1
-                if($row->max == $row2->min - 1) {
-                    foreach($row2->getTiles() as $tile) $row->insertEnd($tile);
-
-                    unset($this->rows[$id2]);
-                } //Row2 before Row1
-                elseif($row2->max == $row->min - 1) {
-                    foreach(array_reverse($row2->getTiles()) as $tile) $row->insertStart($tile);
-
-                    unset($this->rows[$id2]); 
-                }
-                else continue;
-
-                $actions[] = "COMBINE $id $id2";
-            }
+        //r2 goes at the end of r1
+        if($row1->max == $row2->min - 1) {
+            foreach($row2->getTiles() as $tile) $row1->insertEnd($tile);
+        } //r2 goes at the start of r1
+        else {
+            foreach(array_reverse($row2->getTiles()) as $tile) $row1->insertStart($tile);
         }
 
-        return $actions;
+        unset($this->rows[$r2]);
+    }
+
+    public function tryCombine(Tile $tile): array {
+        foreach($this->rows as $id1 => $row) {
+            if($row->type == "set") continue;
+
+            if($row->color != $tile->color) continue;
+
+            //A combine is possible
+            if($row->min == $tile->value || $row->max == $tile->value) {
+                foreach($this->rows as $id2 => $row2) {
+                    if($row2->type == "set" || $row->color != $row2->color) continue;
+    
+                    error_log("trying to merge row $id1 & $id2");
+
+                    //The tile is at the start, we need to combine at the end
+                    if($row->min == $tile->value && $row2->min == $row->max + 1) {
+                        $this->combine($id1, $id2);
+
+                        return [true, $id1, $id2];
+                    } //The tile is at the end, we need to combine at the start
+                    elseif($row->max == $tile->value && $row2->max == $row->min - 1) {
+                        $this->combine($id1, $id2);
+
+                        return [true, $id1, $id2];
+                    }
+                }
+            }
+
+        }
+
+        return [false, 0, 0];
     }
 
     public function getHash(): string {
@@ -367,7 +384,7 @@ for ($i = 0; $i < $n; $i++) {
 
 $table = new Table($rows, $availableTiles);
 
-$combineActions = $table->combineRows();
+//$combineActions = $table->combineRows();
 
 //error_log(var_export($putstone, true));
 //error_log(var_export($table, true));
@@ -380,7 +397,7 @@ function findTile(Table $table, Tile $tile): array {
     //Try to directly take the tile
     foreach($table->getRows() as $id => $row) {
 
-        error_log("trying to directly get it in row $id");
+        //error_log("trying to directly get it in row $id");
 
         if($row->canTake($tile)) {
             error_log("we can take the tile " . $tile->getName() . " in row $id");
@@ -389,6 +406,15 @@ function findTile(Table $table, Tile $tile): array {
 
             return [true, [[$table, ["TAKE " . $tile->getName() . " " . $id]]]];
         }
+    }
+
+    //Try to take it after a combine
+    [$success, $r1, $r2] = $table->tryCombine($tile);
+
+    if($success) {
+        $table->remove(min($r1, $r2), $tile);
+
+        return [true, [[$table, ["COMBINE " . min($r1, $r2) . " " . max($r1, $r2), "TAKE " . $tile->getName() . " " . min($r1, $r2)]]]];
     }
 
     foreach($table->getRows() as $id => $row) {
@@ -446,26 +472,28 @@ function findTile(Table $table, Tile $tile): array {
     return [false, [], []];
 }
 
-function addTile(Table $table, Tile $tile): array {
+function addTile(Table $tableInitial, Tile $tile): array {
     global $availableTiles;
 
     error_log("We want to add the tile " . $tile->getName());
 
     //Try to directly add the tile
-    foreach($table->getRows() as $id => $row) {
+    foreach($tableInitial->getRows() as $id => $row) {
 
         error_log("trying to directly add it in row $id");
 
         if($row->canInsert($tile)) {
             error_log("we can add the tile in row $id");
 
-            $table->insert($id, $tile);
+            $tableInitial->insert($id, $tile);
 
-            return [true, [[$table, ["PUT " . $tile->getName() . " " . $id]]]];
+            return [true, [[$tableInitial, ["PUT " . $tile->getName() . " " . $id]]]];
         }
     }
 
-    foreach($table->getRows() as $id => $row) {
+    $solvedSeries = [];
+
+    foreach($tableInitial->getRows() as $id => $row) {
         $tiles = $row->couldInsert($tile);
 
         if(count($tiles)) {
@@ -481,7 +509,9 @@ function addTile(Table $table, Tile $tile): array {
                 }
             }
 
-            $series = [[$table, []]];
+            //The quickest way is to use combine, try that first
+
+            $series = [[clone $tableInitial, []]];
 
             foreach($tiles as $tileToInsert) {
                 $newSeries = [];
@@ -490,12 +520,12 @@ function addTile(Table $table, Tile $tile): array {
                     [$success, $series] = findTile($table, $tileToInsert);
 
                     if($success) {
-                        foreach($series as [$updatedTable, $actionsTile]) {
+                        foreach($series as [$tableUpdated, $actionsTile]) {
 
-                            $updatedTable->insert($id, $tileToInsert);
+                            $tableUpdated->insert($id, $tileToInsert);
                             $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
 
-                            $newSeries[] = [$updatedTable, array_merge($actions, $actionsTile)];
+                            $newSeries[] = [$tableUpdated, array_merge($actions, $actionsTile)];
                         }
                     }
                 }
@@ -505,17 +535,18 @@ function addTile(Table $table, Tile $tile): array {
 
             if(count($series)) {
                 //We have added all the tiles that were missing, we can add the goal tile
-                foreach($series as [&$table, &$actions]) {
-                    $table->insert($id, $tile);
+                foreach($series as [$tableUpdated, $actions]) {
+                    $tableUpdated->insert($id, $tile);
                     $actions[] = "PUT " . $tile->getName() . " " . $id;
-                }
 
-                return [true, $series];
+                    $solvedSeries[] = [$tableUpdated, $actions];
+                }
             }
         }
     }
 
-    return [false, [], []];
+    if(count($solvedSeries)) return [true, $solvedSeries];
+    else return [false, []];
 }
 
 [, $series] = addTile($table, $goalTile);
@@ -533,7 +564,7 @@ usort($series, function($a, $b) {
 
 [$table, $actions] = array_pop($series);
 
-echo implode("\n", array_merge($combineActions, $actions)) . PHP_EOL;
+echo implode("\n", $actions) . PHP_EOL;
 
 $table->outputRows();
 
