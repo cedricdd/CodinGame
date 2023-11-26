@@ -434,7 +434,69 @@ function tryCombineTake($tableInitial, $tile): array {
                 $series[] = [$tableCombine, $actions];
             }
         }
-        //TODO combine start & end to take
+        //The tile is inside the run, check if can combine to end up with enough of both side to take by creating a new run
+        if($row->min < $tile->value && $tile->value < $row->max) {
+            error_log("we can try to combine row $rowID -- middle");
+
+            $tableCombine = clone $tableInitial;
+            $actions = [];
+
+            //There isn't enough on the left
+            if($tile->value - $row->min < 3) {
+                error_log("we need to combine on the start");
+
+                $success = false;
+
+                foreach($tableInitial->getRows() as $rowID2 => $row2) {
+                    //It's a set or not the right color
+                    if($row2->type == "set" || $row2->color != $row->color || $row2->max != $row->min -  1) continue;
+
+                    error_log("$rowID2 is good to combine at the start");
+
+                    if($rowID2 < $rowID) [$rowID, $rowID2] = [$rowID2, $rowID];
+
+                    $tableCombine->combine($rowID, $rowID2);
+                    $actions[] = "COMBINE $rowID $rowID2";
+
+                    $success = true;
+
+                    break;
+                }
+
+                if($success == false) continue;
+            }
+
+            //There isn't enough on the right
+            if($row->max - $tile->value < 3) {
+                error_log("we need to combine on the end");
+
+                $success = false;
+
+                foreach($tableInitial->getRows() as $rowID2 => $row2) {
+                    //It's a set or not the right color
+                    if($row2->type == "set" || $row2->color != $row->color || $row2->min != $row->max +  1) continue;
+
+                    error_log("$rowID2 is good to combine at the end");
+
+                    if($rowID2 < $rowID) [$rowID, $rowID2] = [$rowID2, $rowID];
+
+                    $tableCombine->combine($rowID, $rowID2);
+                    $actions[] = "COMBINE $rowID $rowID2";
+
+                    $success = true;
+
+                    break;
+                }
+
+                if($success == false) continue;
+            }
+
+            //We now have enough tiles to be able to remove the tile
+            $tableCombine->remove($rowID, $tile);
+            $actions[] = "TAKE " . $tile->getName() . " " . $rowID;
+
+            $series[] = [$tableCombine, $actions];
+        }
     }
 
     return $series;
