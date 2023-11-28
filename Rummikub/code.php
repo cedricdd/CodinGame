@@ -8,7 +8,7 @@ class Tile {
     public $isJoker;
 
     public function __construct(string $tile, bool $isJoker = false) {
-        preg_match("/([0-9]+)([BGRY])/", $tile, $array);
+        preg_match("/([0-9]{0,2})([BGRYJ])/", $tile, $array);
 
         $this->value = $array[1];
         $this->color = $array[2];
@@ -49,7 +49,10 @@ class Set extends Row {
     }
 
     public function canTake(Tile $tile): bool {
-        if($this->getCount() == 4 && $this->value == $tile->value) return true;
+        //We have the 4 tiles with the right value
+        if($this->getCount() == 4 && $this->value == $tile->value && isset($this->colors[$tile->color])) return true;
+        //We want a Joker
+        if($tile->isJoker && $this->hasJoker && $this->getCount() == 4) return true;
 
         return false;
     }
@@ -123,14 +126,16 @@ class Run extends Row {
         if($this->color == $tile->color) {
             //Adding at the start
             if($this->min - 1 == $tile->value) return true;
+            //We use the joker to extend the start
+            if($this->hasJoker && $tile->value == $this->min - 2) return true;
             //Adding at the end
             if($this->max + 1 == $tile->value) return true;
+            //We use the joker to extend the end
+            if($this->hasJoker && $tile->value == $this->max + 2) return true;
             //Adding in the middle and splitting the run
-            if($this->getCount() >= 5 && $tile->value >= $this->min + 2 && $tile->value <= $this->max - 2) return true;
+            if($tile->value > $this->min && $tile->value < $this->max && (min($tile->value - $this->min, 2) + min($this->max - $tile->value, 2) + ($this->hasJoker ? 1 : 0)) == 4) return true;
             //This tile is currently a joker
             if(isset($this->tiles[$tile->getName()]) && $this->tiles[$tile->getName()]->isJoker) return true;
-            //We use the joker to extend the run
-            if($this->hasJoker && ($tile->value == $this->max + 2 || $tile->value == $this->min - 2)) return true;
         } 
 
         return false;
@@ -141,6 +146,8 @@ class Run extends Row {
         if($this->getCount() >= 4 && $this->color == $tile->color && ($tile->value == $this->min || $tile->value == $this->max)) return true;
         //If we can take by splitting
         if($this->getCount() >= 7 && $this->color == $tile->color && $tile->value - 3 >= $this->min && $tile->value + 3 <= $this->max) return true;
+        //We want a Joker
+        if($tile->isJoker && $this->hasJoker && $this->getCount() > 3) return true;
 
         return false;
     }
@@ -150,19 +157,25 @@ class Run extends Row {
 
         $tiles = [];
 
-        if($tile->value < $this->min) {
-            for($i = $this->min - 1; $i > $tile->value; --$i) {
-                $tiles[] = new Tile($i . $tile->color);
-            }
-        } elseif($tile->value > $this->max) {
-            for($i = $this->max + 1; $i < $tile->value; ++$i) {
-                $tiles[] = new Tile($i . $tile->color);
-            }
-        } else {
-            if($this->min > $tile->value - 1) $tiles[] = new Tile($tile->value - 1 . $tile->color);
-            if($this->min > $tile->value - 2) $tiles[] = new Tile($tile->value - 2 . $tile->color);
-            if($this->max < $tile->value + 1) $tiles[] = new Tile($tile->value + 1 . $tile->color);
-            if($this->max < $tile->value + 2) $tiles[] = new Tile($tile->value + 2 . $tile->color);
+        if($this->hasJoker) {
+            //We can use the joker to extend the start
+            $tiles[] = ["find", new Tile($this->max + 2 . $tile->color)]; 
+            //We can use the joker to extend the end
+            $tiles[] = ["find", new Tile($this->max + 2 . $tile->color)]; 
+        }
+        else $tiles[] = ["find", new Tile("J", true)]; //Adding a Joker can only help
+
+        //We need to add tiles at the start
+        if($tile->value < $this->min) $tiles[] = ["find", new Tile($this->min - 1 . $tile->color)];
+        //We need to add tiles at the end
+        if($tile->value > $this->max) $tiles[] = ["find", new Tile($this->max + 1 . $tile->color)]; 
+        //Tile is already in the run, to add with a split run we need 2 tiles on both side
+        if($tile->value >= 3 && $tile->value <= 11) {
+            if($this->min > $tile->value - 1) $tiles[] = ["find", new Tile($tile->value - 1 . $tile->color)];
+            elseif($this->min > $tile->value - 2) $tiles[] = ["find", new Tile($tile->value - 2 . $tile->color)];
+
+            if($this->max < $tile->value + 1) $tiles[] = ["find", new Tile($tile->value + 1 . $tile->color)];
+            elseif($this->max < $tile->value + 2) $tiles[] = ["find", new Tile($tile->value + 2 . $tile->color)];
         }
 
         return $tiles;
@@ -330,43 +343,59 @@ class Table {
     public function insert(int $rowID, Tile $tile) {
         $row = $this->rows[$rowID];
 
-        if($row->type == "set") $row->insert($tile);
+        if($tile->isJoker) $row->hasJoker = true;
         else {
-            $tiles = $row->getTiles();
-
-            if($tile->value == $row->min - 1) $row->insertStart($tile);
-            elseif($tile->value == $row->max + 1) $row->insertEnd($tile);
-            elseif(isset($tiles[$tile->getName()]) && $tiles[$tile->getName()]->isJoker) {
-                $tiles[$tile->getName()]->isJoker = false;
-                
-                $row->hasJoker = true;
-            }
-            elseif($row->hasJoker && $tile->value == $row->max + 2) {
-                $jokerTile = new Tile($tile->value - 1 . $tile->color, true);
-
-                $row->insertEnd($jokerTile);
-                $row->insertEnd($tile);
-
-                $row->hasJoker = false;
-            }
-            elseif($row->hasJoker && $tile->value == $row->min - 2) {
-                $jokerTile = new Tile($tile->value + 1 . $tile->color, true);
-
-                $row->insertStart($jokerTile);
-                $row->insertStart($tile);
-
-                $row->hasJoker = false;
-            }
-            //Splitting a run
+            if($row->type == "set") $row->insert($tile);
             else {
-                //Update the old row, remove all the tile that will create the new run
-                while($row->max >= $tile->value) $tilesRemoved[] = $row->removeEnd();
+                $tiles = $row->getTiles();
     
-                //Add the tile in the row
-                $row->insertEnd($tile);
+                //Directly insert at the start
+                if($tile->value == $row->min - 1) $row->insertStart($tile);
+                //Directly insert at the end
+                elseif($tile->value == $row->max + 1) $row->insertEnd($tile);
+                //We use the joker to extend the run at the start
+                elseif($row->hasJoker && $tile->value == $row->min - 2) {
+                    $jokerTile = new Tile($tile->value + 1 . $tile->color, true);
+    
+                    $row->insertStart($jokerTile);
+                    $row->insertStart($tile);
+    
+                    $row->hasJoker = false;
+                }
+                //We use the joker to extend the run at the end
+                elseif($row->hasJoker && $tile->value == $row->max + 2) {
+                    $jokerTile = new Tile($tile->value - 1 . $tile->color, true);
+    
+                    $row->insertEnd($jokerTile);
+                    $row->insertEnd($tile);
+    
+                    $row->hasJoker = false;
+                }
+                //Splitting a run
+                elseif($tile->value > $row->min && $tile->value < $row->max && (min($tile->value - $row->min, 2) + min($row->max - $tile->value, 2) + ($row->hasJoker ? 1 : 0)) == 4) {
+                    //Update the old row, remove all the tile that will create the new run
+                    while($row->max >= $tile->value) $tilesRemoved[] = $row->removeEnd();
+                    
+                    //Add the tile in the row
+                    $row->insertEnd($tile);
 
-                //Create the new row
-                $this->rows[$this->nextRow++] = new Run(array_reverse($tilesRemoved), 0);
+                    //Create the new row
+                    $newRow = new Run(array_reverse($tilesRemoved), 0);
+
+                    //Does the joker moves to the new row
+                    if($row->hasJoker && count($tilesRemoved) == 2) {
+                        $row->hasJoker = false;
+                        $newRow->hasJoker = true; 
+                    }
+
+                    $this->rows[$this->nextRow++] = $newRow;
+                }
+                //Tile is replacing a joker in the middle of a run
+                else {
+                    $tiles[$tile->getName()]->isJoker = false;
+                    
+                    $row->hasJoker = true;
+                }
             }
         }
     }
@@ -380,7 +409,8 @@ class Table {
     public function remove(int $rowID, Tile $tile) {
         $row = $this->rows[$rowID];
 
-        if($row->type == "set") $row->remove($tile);
+        if($tile->isJoker) $row->hasJoker = false;
+        elseif($row->type == "set") $row->remove($tile);
         elseif($tile->value == $row->min) $row->removeStart();
         elseif($tile->value == $row->max) $row->removeEnd();
         //Splitting a run
@@ -523,9 +553,10 @@ function findTile(Table $tableInitial, Tile $tile): array {
         if($row->canTake($tile)) {
             error_log("we can take the tile " . $tile->getName() . " in row $id");
 
-            $tableInitial->remove($id, $tile);
+            $tableUpdated = clone $tableInitial;
+            $tableUpdated->remove($id, $tile);
 
-            $solvedSeries[] = [$tableInitial, ["TAKE " . $tile->getName() . " " . $id]];
+            $solvedSeries[] = [$tableUpdated, ["TAKE " . $tile->getName() . " " . $id]];
         }
     }
 
@@ -538,7 +569,7 @@ function findTile(Table $tableInitial, Tile $tile): array {
 
     foreach($tableInitial->getRows() as $id => $row) {
 
-        error_log("checking if we could take " . $tile->getName() . " in row $id");
+        //error_log("checking if we could take " . $tile->getName() . " in row $id");
 
         $takeInfo = $row->couldTake($tile);
 
@@ -554,12 +585,12 @@ function findTile(Table $tableInitial, Tile $tile): array {
                     foreach($series as [$table, $actions]) {
                         $seriesUpdated = findTile($table, $tileToInsert);
                         
-                        foreach($seriesUpdated as [$updatedTable, $actionsTile]) {
+                        foreach($seriesUpdated as [$tableUpdated, $actionsTile]) {
 
-                            $updatedTable->insert($id, $tileToInsert);
+                            $tableUpdated->insert($id, $tileToInsert);
                             $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
 
-                            $newSeries[] = [$updatedTable, array_merge($actions, $actionsTile)];
+                            $newSeries[] = [$tableUpdated, array_merge($actions, $actionsTile)];
                         }
                     }
     
@@ -592,9 +623,9 @@ function findTile(Table $tableInitial, Tile $tile): array {
                 foreach($series as [$tableUpdated, $actions]) {
                     $tableUpdated->remove($id, $tile);
                     $actions[] = "TAKE " . $tile->getName() . " " . $id;
-                }
 
-                $solvedSeries[] = [$tableUpdated, $actions];
+                    $solvedSeries[] = [$tableUpdated, $actions];
+                }
             }
         }
     }
@@ -612,14 +643,15 @@ function addTile(Table $tableInitial, Tile $tile, int $forbidden = 0): array {
     foreach($tableInitial->getRows() as $id => $row) {
         if($id == $forbidden) continue;
 
-        error_log("trying to directly add it in row $id");
+        //error_log("trying to directly add it in row $id");
 
         if($row->canInsert($tile)) {
             error_log("we can add the tile in row $id");
 
-            $tableInitial->insert($id, $tile);
+            $tableUpdated = clone $tableInitial;
+            $tableUpdated->insert($id, $tile);
 
-            $solvedSeries[] = [$tableInitial, ["PUT " . $tile->getName() . " " . $id]];
+            $solvedSeries[] = [$tableUpdated, ["PUT " . $tile->getName() . " " . $id]];
         }
     }
 
@@ -633,39 +665,39 @@ function addTile(Table $tableInitial, Tile $tile, int $forbidden = 0): array {
     foreach($tableInitial->getRows() as $id => $row) {
         if($id == $forbidden) continue;
 
-        $tiles = $row->couldInsert($tile);
+        $series = [[clone $tableInitial, []]];
 
-        if(count($tiles)) {
-            error_log("we could add the tile in row $id");
-            //error_log(var_export($tiles, true));
+        while(count($series)) {
+            [$table, $actions] = array_pop($series);
 
-            $series = [[clone $tableInitial, []]];
+            $rows = $table->getRows();
 
-            foreach($tiles as $tileToInsert) {
-                $newSeries = [];
+            $insertInfo = $rows[$id]->couldInsert($tile);
 
-                foreach($series as [$table, $actions]) {
-                    $seriesUpdated = findTile($table, $tileToInsert);
+            foreach($insertInfo as [$method, $tileInfo]) {
+                error_log("to insert " . $tile->getName() . " we need to $method " . $tileInfo->getName() . " on row $id");
 
+                if($method == "find") { 
+                    $seriesUpdated = findTile($table, $tileInfo);
+                    
                     foreach($seriesUpdated as [$tableUpdated, $actionsTile]) {
+                        $tableUpdated->insert($id, $tileInfo);
 
-                        $tableUpdated->insert($id, $tileToInsert);
-                        $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
+                        $actionsTile = array_merge($actions, $actionsTile);
+                        $actionsTile[] = "PUT " . $tileInfo->getName() . " " . $id;
 
-                        $newSeries[] = [$tableUpdated, array_merge($actions, $actionsTile)];
+                        //We have added all the tiles that were missing, we can add the goal tile
+                        if($tableUpdated->getRows()[$id]->canInsert($tile)) {
+                            error_log("we can now insert " . $tile->getName() . " on row $id");
+
+                            $tableUpdated->insert($id, $tile);
+
+                            $actionsTile[] = "PUT " . $tile->getName() . " " . $id;
+        
+                            $solvedSeries[] = [$tableUpdated, $actionsTile];
+                        }
+                        else $series[] = [$tableUpdated, $actionsTile];
                     }
-                }
-
-                $series = $newSeries;
-            }
-
-            if(count($series)) {
-                //We have added all the tiles that were missing, we can add the goal tile
-                foreach($series as [$tableUpdated, $actions]) {
-                    $tableUpdated->insert($id, $tile);
-                    $actions[] = "PUT " . $tile->getName() . " " . $id;
-
-                    $solvedSeries[] = [$tableUpdated, $actions];
                 }
             }
         }
@@ -681,11 +713,28 @@ error_log("We have " . count($series) . " to solve");
 
 if(count($series) == 0) exit();
 
-usort($series, function($a, $b) {   
-    $countA = count($a[1]);
-    $countB = count($b[1]);
+foreach($series as $i => [$table, $actions]) {
+    $count = 0;
+    $joker = 0;
 
-    return $a <=> $b;
+    //error_log(var_export($actions, true));
+
+    foreach(array_reverse($actions, true) as $j => $action) {
+        ++$count;
+
+        if(preg_match("/TAKE J [0-9]+/", $action)) $joker = $j + 1;
+    }
+
+    array_push($series[$i], $count, $joker);
+}
+
+//error_log(var_export($series, true));
+
+usort($series, function($a, $b) {   
+    if($a[2] == $b[2]) {
+        return $b[3] <=> $a[3]; //Don't use Joker if possible, if it's used it needs to used as early as possible
+    } //In priority we want the least number of actions
+    else return $b[2] <=> $a[2];
 });
 
 [$table, $actions] = array_pop($series);
