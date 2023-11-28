@@ -513,6 +513,8 @@ function tryCombine($tableInitial, $tile, $method): array {
 function findTile(Table $tableInitial, Tile $tile): array {
     error_log("We want to find the tile " . $tile->getName());
 
+    $solvedSeries = [];
+
     //Try to directly take the tile
     foreach($tableInitial->getRows() as $id => $row) {
 
@@ -523,16 +525,16 @@ function findTile(Table $tableInitial, Tile $tile): array {
 
             $tableInitial->remove($id, $tile);
 
-            return [true, [[$tableInitial, ["TAKE " . $tile->getName() . " " . $id]]]];
+            $solvedSeries[] = [$tableInitial, ["TAKE " . $tile->getName() . " " . $id]];
         }
     }
 
+    if(count($solvedSeries)) return $solvedSeries;
+
     //We first try to combine to take
-    $series = tryCombine($tableInitial, $tile, "TAKE");
+    $solvedSeries = tryCombine($tableInitial, $tile, "TAKE");
 
-    if(count($series)) return [true, $series];
-
-    $solvedSeries = [];
+    if(count($solvedSeries)) return $solvedSeries;
 
     foreach($tableInitial->getRows() as $id => $row) {
 
@@ -550,16 +552,14 @@ function findTile(Table $tableInitial, Tile $tile): array {
                     $newSeries = [];
     
                     foreach($series as [$table, $actions]) {
-                        [$success, $series] = findTile($table, $tileToInsert);
+                        $seriesUpdated = findTile($table, $tileToInsert);
                         
-                        if($success) {
-                            foreach($series as [$updatedTable, $actionsTile]) {
-    
-                                $updatedTable->insert($id, $tileToInsert);
-                                $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
-    
-                                $newSeries[] = [$updatedTable, array_merge($actions, $actionsTile)];
-                            }
+                        foreach($seriesUpdated as [$updatedTable, $actionsTile]) {
+
+                            $updatedTable->insert($id, $tileToInsert);
+                            $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
+
+                            $newSeries[] = [$updatedTable, array_merge($actions, $actionsTile)];
                         }
                     }
     
@@ -575,12 +575,10 @@ function findTile(Table $tableInitial, Tile $tile): array {
                         $table->remove($id, $tileToRemove);
                         $actions[] = "TAKE " . $tileToRemove->getName() . " " . $id;
 
-                        [$success, $seriesUpdated] = addTile($table, $tileToRemove, $id);
+                        $seriesUpdated = addTile($table, $tileToRemove, $id);
 
-                        if($success) {
-                            foreach($seriesUpdated as [$tableUpdated, $actionsTile]) {
-                                $newSeries[] = [$tableUpdated, array_merge($actions, $actionsTile)];
-                            }
+                        foreach($seriesUpdated as [$tableUpdated, $actionsTile]) {
+                            $newSeries[] = [$tableUpdated, array_merge($actions, $actionsTile)];
                         }
                     }
     
@@ -601,12 +599,14 @@ function findTile(Table $tableInitial, Tile $tile): array {
         }
     }
     
-    if(count($solvedSeries)) return [true, $solvedSeries];
-    else return [false, []];
+    if(count($solvedSeries)) return $solvedSeries;
+    else return [];
 }
 
 function addTile(Table $tableInitial, Tile $tile, int $forbidden = 0): array {
     error_log("We want to add the tile " . $tile->getName());
+
+    $solvedSeries = [];
 
     //Try to directly add the tile
     foreach($tableInitial->getRows() as $id => $row) {
@@ -619,16 +619,16 @@ function addTile(Table $tableInitial, Tile $tile, int $forbidden = 0): array {
 
             $tableInitial->insert($id, $tile);
 
-            return [true, [[$tableInitial, ["PUT " . $tile->getName() . " " . $id]]]];
+            $solvedSeries[] = [$tableInitial, ["PUT " . $tile->getName() . " " . $id]];
         }
     }
 
+    if(count($solvedSeries)) return $solvedSeries;
+
     //We first try to combine to insert
-    $series = tryCombine($tableInitial, $tile, "PUT");
+    $solvedSeries = tryCombine($tableInitial, $tile, "PUT");
 
-    if(count($series)) return [true, $series];
-
-    $solvedSeries = [];
+    if(count($solvedSeries)) return $solvedSeries;
 
     foreach($tableInitial->getRows() as $id => $row) {
         if($id == $forbidden) continue;
@@ -645,16 +645,14 @@ function addTile(Table $tableInitial, Tile $tile, int $forbidden = 0): array {
                 $newSeries = [];
 
                 foreach($series as [$table, $actions]) {
-                    [$success, $series] = findTile($table, $tileToInsert);
+                    $seriesUpdated = findTile($table, $tileToInsert);
 
-                    if($success) {
-                        foreach($series as [$tableUpdated, $actionsTile]) {
+                    foreach($seriesUpdated as [$tableUpdated, $actionsTile]) {
 
-                            $tableUpdated->insert($id, $tileToInsert);
-                            $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
+                        $tableUpdated->insert($id, $tileToInsert);
+                        $actionsTile[] = "PUT " . $tileToInsert->getName() . " " . $id;
 
-                            $newSeries[] = [$tableUpdated, array_merge($actions, $actionsTile)];
-                        }
+                        $newSeries[] = [$tableUpdated, array_merge($actions, $actionsTile)];
                     }
                 }
 
@@ -673,11 +671,11 @@ function addTile(Table $tableInitial, Tile $tile, int $forbidden = 0): array {
         }
     }
 
-    if(count($solvedSeries)) return [true, $solvedSeries];
-    else return [false, []];
+    if(count($solvedSeries)) return $solvedSeries;
+    else return [];
 }
 
-[, $series] = addTile($table, $goalTile);
+$series = addTile($table, $goalTile);
 
 error_log("We have " . count($series) . " to solve");
 
@@ -693,7 +691,6 @@ usort($series, function($a, $b) {
 [$table, $actions] = array_pop($series);
 
 echo implode("\n", $actions) . PHP_EOL;
-
 $table->outputRows();
 
 error_log(microtime(1) - $start);
