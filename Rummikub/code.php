@@ -139,9 +139,9 @@ class Run extends Row {
 
         if($this->hasJoker) {
             //We can use the joker to extend the start
-            $tiles[] = ["find", new Tile($this->max + 2 . $tile->color)]; 
+            if($tile->value < $this->min) $tiles[$this->min - 2] = ["find", new Tile($this->min - 2 . $tile->color)]; 
             //We can use the joker to extend the end
-            $tiles[] = ["find", new Tile($this->max + 2 . $tile->color)]; 
+            if($tile->value > $this->max) $tiles[$this->max + 2] = ["find", new Tile($this->max + 2 . $tile->color)]; 
         }
         else {
             $hasInsideJoker = false;
@@ -153,20 +153,26 @@ class Run extends Row {
                 }
             }
 
-            if($hasInsideJoker == false) $tiles[] = ["find", new Tile("J", true)]; //Adding a Joker can only help
+            if($hasInsideJoker == false) $tiles[0] = ["find", new Tile("J", true)]; //Adding a Joker can only help
         }
 
         //We need to add tiles at the start
-        if($tile->value < $this->min) $tiles[] = ["find", new Tile($this->min - 1 . $tile->color)];
+        if($tile->value < $this->min) $tiles[$this->min - 1] = ["find", new Tile($this->min - 1 . $tile->color)];
         //We need to add tiles at the end
-        if($tile->value > $this->max) $tiles[] = ["find", new Tile($this->max + 1 . $tile->color)]; 
+        if($tile->value > $this->max) $tiles[$this->max + 1] = ["find", new Tile($this->max + 1 . $tile->color)]; 
         //Tile is already in the run, to add with a split run we need 2 tiles on both side
-        if($tile->value >= 3 && $tile->value <= 11 && $tile->value > $this->min && $tile->value < $this->max) {
-            if($this->min > $tile->value - 1) $tiles[] = ["find", new Tile($tile->value - 1 . $tile->color)];
-            elseif($this->min > $tile->value - 2) $tiles[] = ["find", new Tile($tile->value - 2 . $tile->color)];
+        if($tile->value >= $this->min && $tile->value <= $this->max) {
+            for($i = max(3, $tile->value - ($this->hasJoker ? 2 : 1), $this->min); $i <= min(11, $tile->value + ($this->hasJoker ? 2 : 1), $this->max); ++$i) {
+                error_log("test $i");
+                $left =  min(2, $i - $this->min);
+                $right = min(2, $this->max - $i);
 
-            if($this->max < $tile->value + 1) $tiles[] = ["find", new Tile($tile->value + 1 . $tile->color)];
-            elseif($this->max < $tile->value + 2) $tiles[] = ["find", new Tile($tile->value + 2 . $tile->color)];
+                if($left + $right + ($this->hasJoker ? 1 : 0) >= 4) $tiles[$i] = ["find", new Tile($i . $tile->color)];
+                else {
+                    if($left != 2)  $tiles[$i - $left - 1]  = ["find", new Tile(($i - $left - 1) . $tile->color)];
+                    if($right != 2) $tiles[$i + $right + 1] = ["find", new Tile(($i + $right + 1) . $tile->color)];
+                }
+            }
         }
 
         return $tiles;
@@ -321,8 +327,9 @@ class Table {
         unset($this->rows[$r2]);
     }
 
-    public function getRows(): array {
-        return $this->rows;
+    public function getRows(int $rowID = null) {
+        if($rowID) return $this->rows[$rowID];
+        else return $this->rows;
     }
 
     public function insert(int $rowID, Tile $tile): bool {
@@ -503,105 +510,126 @@ function tryCombine($tableInitial, $tile, $method): array {
         //We can't combine sets
         if($row->type == "set") continue;
 
+        $series = [];
         $tileGoal = $tile;
 
-        //We want to combine to take a joker
+        //We want to combine to take a joker, we never need to combine to put a joker
         if($tile->isJoker) {
-            foreach($row->getTiles() as $runTile) {
-                if($runTile->isJoker) {
-                    $tileGoal = $runTile;
-                    break;
-                }
-            }
-
-            //None of the tile in that run is an "inside" joker
-            if($tileGoal->value == '') continue;
-        } //The run needs to be of the right color and the tile already in the run
-        elseif($row->color != $tile->color || $row->min > $tile->value || $row->max < $tile->value) continue;
-
-        error_log("we can try to combine row $rowID");
-
-        if($method == "PUT") {
-            $needCombineStart = $tileGoal->value - $row->min < 2;
-            $needCombineEnd   = $row->max - $tileGoal->value < 2;
-        } else {
-            if($row->max == $tileGoal->value) {
-                $needCombineStart = true;
-                $needCombineEnd   = false;
-            } elseif($row->min == $tileGoal->value) {
-                $needCombineStart = false;
-                $needCombineEnd   = true;
+            //Row has a joker, if we can't take it directly it means we don't have enough tiles
+            if($row->hasJoker) {
+                //We can potentially combine at the start
+                if($row->min > 3)  $series[] = [clone $tableInitial, [], $rowID, 1, 0];
+                //We can potentially combine at the end
+                if($row->max < 11) $series[] = [clone $tableInitial, [], $rowID, 0, 1];
             } else {
-                $needCombineStart = $tileGoal->value - $row->min < 3;
-                $needCombineEnd   = $row->max - $tileGoal->value < 3;
-            }
-        }
-
-        $series = [[clone $tableInitial, []]];
-
-        //We need to combine at the start
-        if($needCombineStart) {
-            error_log("we need to combine on the start");
-
-            $newSeries = [];
-
-            foreach($series as [$tableCombine, $actions]) {
-                foreach($tableCombine->getRows() as $rowID2 => $row2) {
-                    //It's a set or not the right color
-                    if($row2->type == "set" || $row2->color != $row->color || $row2->max != $row->min -  1) continue;
-    
-                    error_log("$rowID2 is good to combine at the start");
-    
-                    if($rowID2 < $rowID) [$rowID, $rowID2] = [$rowID2, $rowID];
-    
-                    $tableUpdated = clone $tableCombine;
-                    $tableUpdated->combine($rowID, $rowID2);
-
-                    $newSeries[] = [$tableUpdated, array_merge($actions, ["COMBINE $rowID $rowID2"])];
+                //Do we have an inside joker
+                foreach($row->getTiles() as $runTile) {
+                    if($runTile->isJoker) {
+                        $tileGoal = $runTile;
+                        break;
+                    }
                 }
             }
-
-            $series = $newSeries;
-        }
-
-        //We need to combine at the end
-        if($needCombineEnd) {
-            error_log("we need to combine on the end");
-
-            $newSeries = [];
-
-            foreach($series as [$tableCombine, $actions]) {
-                foreach($tableCombine->getRows() as $rowID2 => $row2) {
-                    //It's a set or not the right color
-                    if($row2->type == "set" || $row2->color != $row->color || $row2->min != $row->max +  1) continue;
-
-                    error_log("$rowID2 is good to combine at the end");
-
-                    if($rowID2 < $rowID) [$rowID, $rowID2] = [$rowID2, $rowID];
-
-                    $tableUpdated = clone $tableCombine;
-                    $tableUpdated->combine($rowID, $rowID2);
-                    
-                    $newSeries[] = [$tableUpdated, array_merge($actions, ["COMBINE $rowID $rowID2"])];
-                }
-            }
-
-            $series = $newSeries;
-        }
-
-        foreach($series as [$tableCombine, $actions]) {
-            //Combine was successful, we can now apply the action
+        } 
+        
+        //The run needs to be of the right color
+        if($tileGoal->value != '' && $row->color == $tileGoal->color) {
             if($method == "PUT") {
-                //We now have enough tiles to be able to add the tile and create a new row
-                $tableCombine->insert($rowID, $tile);
-                $actions[] = "PUT " . $tile->getName() . " " . $rowID;
+                if($row->min <= $tileGoal->value && $row->max >= $tileGoal->value) {
+                    $series[] = [clone $tableInitial, [], $rowID, ($tileGoal->value - $row->min < 2), ($row->max - $tileGoal->value < 2)];
+                }
             } else {
-                //We now have enough tiles to be able to remove the tile
-                $tableCombine->remove($rowID, $tile);
-                $actions[] = "TAKE " . $tile->getName() . " " . $rowID;
+                if($row->max == $tileGoal->value) {
+                    $series[] = [clone $tableInitial, [], $rowID, 1, 0];
+                } 
+                if($row->min == $tileGoal->value) {
+                    $series[] = [clone $tableInitial, [], $rowID, 0, 1];
+                } 
+                if($row->min < $tileGoal->value && $row->max > $tileGoal->value) {
+                    $series[] = [clone $tableInitial, [], $rowID, ($tileGoal->value - $row->min < 3), ($row->max - $tileGoal->value < 3)];
+                }
             }
+        }
 
-            $solvedSeries[] = [$tableCombine, $actions];
+        //error_log(var_export($series, true));
+
+        while(count($series)) {
+            [$tableCombine, $actions, $rowID, $start, $end] = array_pop($series);
+
+            error_log("Starting with $rowID $start $end");
+            //error_log(var_export($tableCombine->getRows(), true));
+
+            $row1 = $tableCombine->getRows($rowID);
+
+            foreach($tableCombine->getRows() as $rowID2 => $row2) {
+
+                //It's a set or not the right color
+                if($row2->type == "set" || $row2->color != $row1->color) continue;
+
+                //We need to combine at the start
+                if($start) {
+                    error_log("we need to combine on the start");
+
+                    //It's a set or not the right color
+                    if($row2->max == $row1->min -  1) {
+                        error_log("$rowID2 is good to combine at the start");
+
+                        $rowID1 = $rowID;
+    
+                        //Rows are combine into the row with the lowest ID
+                        if($rowID2 < $rowID1) [$rowID1, $rowID2] = [$rowID2, $rowID1];
+        
+                        $tableUpdated = clone $tableCombine;
+                        $tableUpdated->combine($rowID1, $rowID2);
+    
+                        $actionsUpdated = array_merge($actions, ["COMBINE $rowID1 $rowID2"]);
+
+                        error_log("combining $rowID1 && $rowID2");
+    
+                        if($end) $series[] = [$tableUpdated, $actionsUpdated, $rowID1, 0, 1]; //We still need to combine at the end
+                        else $solvedSeries[] = [$tableUpdated, $actionsUpdated, $rowID1];
+                    }
+                }
+
+                //We need to combine at the end
+                if($end) {
+                    error_log("we need to combine on the end");
+
+                    if($row2->min == $row1->max +  1) {
+                        error_log("$rowID2 is good to combine at the end");
+
+                        $rowID1 = $rowID;
+
+                        //Rows are combine into the row with the lowest ID
+                        if($rowID2 < $rowID1) [$rowID1, $rowID2] = [$rowID2, $rowID1];
+    
+                        $tableUpdated = clone $tableCombine;
+                        $tableUpdated->combine($rowID1, $rowID2);
+    
+                        $actionsUpdated = array_merge($actions, ["COMBINE $rowID1 $rowID2"]);
+
+                        error_log("combining $rowID1 && $rowID2");
+                        
+                        if($start) $series[] = [$tableUpdated, $actionsUpdated, $rowID1, 1, 0]; //We still need to combine at the start
+                        else $solvedSeries[] = [$tableUpdated, $actionsUpdated, $rowID1];
+                    }
+                }
+            }
+        }
+    }
+
+    //error_log(var_export("we have " . count($solvedSeries) . " combine results", true));
+
+    foreach($solvedSeries as [&$tableCombine, &$actions, $rowID]) {
+        //Combine was successful, we can now apply the action
+        if($method == "PUT") {
+            //We now have enough tiles to be able to add the tile and create a new row
+            $tableCombine->insert($rowID, $tile);
+            $actions[] = "PUT " . $tile->getName() . " " . $rowID;
+        } else {
+            //We now have enough tiles to be able to remove the tile
+            $tableCombine->remove($rowID, $tile);
+            $actions[] = "TAKE " . $tile->getName() . " " . $rowID;
         }
     }
 
@@ -728,6 +756,8 @@ function addTile(Table $tableInitial, Tile $tile, int $forbiddenRowID = 0): arra
 
     foreach($tableInitial->getRows() as $rowID => $row) {
         if($rowID == $forbiddenRowID) continue;
+
+        //if($tile->getName() == "8Y" && $rowID != 15) continue;
 
         $series = [[clone $tableInitial, []]];
 
