@@ -1,4 +1,4 @@
-https://www.codingame.com/ide/demo/10463438cc41d32f2e1b6ccf86ec8b7e614059d
+https://www.codingame.com/contribute/view/74892be1111048baad1898b212837b50bbc3b
 
 Goal
 In Rummikub, stones numbered 1-13 in four colors can be played on the table in runs (same-colored uninterrupted range of numbers) or sets (same-numbered stones all of a unique color). 
