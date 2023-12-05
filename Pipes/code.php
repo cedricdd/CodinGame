@@ -1,8 +1,20 @@
 <?php
 
+//Flip an array diagonally 
+function flipDiagonally($arr) {
+    $out = array();
+    foreach ($arr as $key => $subarr) {
+        foreach (str_split($subarr) as $subkey => $subvalue) {
+            $out[$subkey] = ($out[$subkey] ?? "") . $subvalue;
+        }
+    }
+    return $out;
+}
+
 fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
-    $info[] = str_split(trim(fgets(STDIN)));
+    $info[] = trim(fgets(STDIN));
+    $infoToFind[] = str_split($info[$i]);
 }
 
 $connectionID = 0;
@@ -28,22 +40,33 @@ for($y = 0; $y < $n; ++$y) {
 //error_log(var_export($blocks, true));
 
 //Remove 1-1 connections
-for($i = 0; $i < $n; ++$i) {
-    for($j = 0; $j < $n - 1; ++$j) {
-        if($info[$i][$j] == 1 && $info[$i][$j + 1] == 1) {
-            $connections[$blocks[$i][$j]['R']] = 0;
-        }
+for($y = 0; $y < $n; ++$y) {
+    preg_match_all("/1(?=[|]?1)/", $info[$y], $matches, PREG_OFFSET_CAPTURE);
+
+    foreach($matches[0] as [$string, $position]) {
+        do {
+            $connections[$blocks[$y][$position]['R']] = 0;
+            $connections[$blocks[$y][$position + 1]['L']] = 0;
+        } while($info[$y][++$position] != 1);
     }
-    for($j = 0; $j < $n - 1; ++$j) {
-        if($info[$j][$i] == 1 && $info[$j + 1][$i] == 1) {
-            $connections[$blocks[$j][$i]['D']] = 0;
-        }
+}
+
+$flipped = flipDiagonally($info);
+
+error_log(var_export($flipped, true));
+
+for($x = 0; $x < $n; ++$x) {
+    preg_match_all("/1[|]?1/", $flipped[$x], $matches, PREG_OFFSET_CAPTURE);
+
+    foreach($matches[0] as [$string, $position]) {
+        do {
+            $connections[$blocks[$position][$x]['D']] = 0;
+            $connections[$blocks[$position + 1][$x]['U']] = 0;
+        } while($info[++$position][$x] != 1);
     }
 }
 
 //error_log(var_export($connections, true));
-
-$infoToFind = $info;
 
 $temp = 0;
 
