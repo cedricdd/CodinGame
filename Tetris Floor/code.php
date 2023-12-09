@@ -27,36 +27,35 @@ $tetrominoes = [
 ];
 
 $grid = [
-    "......#......#......",
-    "...#.....##.....#...",
-    "..###....##....###..",
-    "...#..#..##..#..#...",
-    "...#..#..##..#..#...",
-    "..###....##....###..",
-    "...#.....##.....#...",
-    "......#......#......",
+    "..........#..........#..........#..........#..........#..........#..........#..........",
+    "..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...",
+    "...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..",
+    "..........#..........#..........#..........#..........#..........#..........#..........",
 ];
 
 echo implode("\n", $grid) . PHP_EOL;
 
-$w = 20;
-$h = 8;
+$w = 87;
+$h = 4;
 
 $availabilities = [
     1000,
-    0,
+    1000,
+    1000,
     0,
     1000,
-    4,
-    4,
-    4,
+    0,
+    1000,
 ];
 
 $prices = [
-    59.4, 0, 0, 10.4,36.9, 84, 89.2
+    24.8, 71.7, 92, 53.6, 18.5, 90.5, 88.4,
 ];
 
-$lowestPrice = min($prices);
+asort($prices);
+
+print_r($prices) . PHP_EOL;
+
 $pieceID = 0;
 $counts = array_fill(0, $w * $h, 0);
 $positions = array_fill(0, $w * $h, []);
@@ -216,7 +215,7 @@ $calls = 0;
 function solve(string $hash, array $pieces, array $positions, array $counts, array $availabilities, int $nbrPieces, array $list, float $price) {
     
     static $history = [];
-    global $piecesType, $prices, $lowestPrice, $bestList, $bestPrice, $calls;
+    global $piecesType, $prices, $bestList, $bestPrice, $calls;
     $debug = false;
     
     if($debug) error_log($hash . " " . implode("-", $list));
@@ -241,6 +240,19 @@ function solve(string $hash, array $pieces, array $positions, array $counts, arr
         return;
     }
     else $history[$hash] = $price;
+    
+    $piecesToAdd = $nbrPieces;
+    $minAdditionalPrice = 0.0;
+    
+    foreach($prices as $i => $v) {
+        $min = ($availabilities[$i] > $piecesToAdd) ? $piecesToAdd : $availabilities[$i];
+    
+        $minAdditionalPrice += $v * $min;
+        
+        if(($piecesToAdd -= $min) == 0) break;
+    }
+    
+    if($price + $minAdditionalPrice > $bestPrice) return;
     
     ++$calls;
     
@@ -271,7 +283,7 @@ function solve(string $hash, array $pieces, array $positions, array $counts, arr
     
         $piecePrice = $prices[$pieceType];
         
-        if($price + $piecePrice + ($nbrPieces - 1 * $lowestPrice) > $bestPrice) continue;
+        if($price + $piecePrice > $bestPrice) continue;
         
         $list[$nbrPieces] = $pieceID;
         
