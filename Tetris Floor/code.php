@@ -27,62 +27,33 @@ $tetrominoes = [
 ];
 
 $grid = [
-    "#........#",
-    ".#......#.",
-    "..#....#..",
-    "...#..#...",
-    "....##....",
-    "....##....",
-    "...#..#...",
-    "..#....#..",
-    ".#......#.",
-    "#........#",
+    "......#......#......",
+    "...#.....##.....#...",
+    "..###....##....###..",
+    "...#..#..##..#..#...",
+    "...#..#..##..#..#...",
+    "..###....##....###..",
+    "...#.....##.....#...",
+    "......#......#......",
 ];
 
-$w = 10;
-$h = 10;
+echo implode("\n", $grid) . PHP_EOL;
 
-$grid = [
-    ".....",
-    ".....",
-    "..#..",
-    ".....",
-    ".....",
-];
-
-$w = 5;
-$h = 5;
-
-/*
-$grid = [
-    "......",
-    "......",
-    "......",
-    "......",
-];
-
-$w = 6;
-$h = 4;
-*/
+$w = 20;
+$h = 8;
 
 $availabilities = [
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
+    1000,
+    0,
+    0,
+    1000,
+    4,
+    4,
+    4,
 ];
 
 $prices = [
-  10.0,
-  10.0,
-  10.0,
-  10.0,
-  10.0,
-  1.0,
-  1.0,
+    59.4, 0, 0, 10.4,36.9, 84, 89.2
 ];
 
 $lowestPrice = min($prices);
@@ -93,6 +64,7 @@ $piecesType = [];
 $nbrPieces = 0;
 $bestPrice = INF;
 $bestList = [];
+$hash = "";
 $output = array_fill(0, $h * 2 + 1, str_repeat(" ", $w * 2 + 1));
 
 for($y = 0; $y < $h * 2 + 1; ++$y) {
@@ -104,7 +76,9 @@ for($y = 0; $y < $h * 2 + 1; ++$y) {
 
 for($y = 0; $y < $h; ++$y) {
     for($x = 0; $x < $w; ++$x) {
-        if($grid[$y][$x] === '#') {
+        $hash .= $grid[$y][$x];
+        
+        if($grid[$y][$x] == '#') {
             $index = $y * $w + $x;
             
             unset($counts[$index]);
@@ -149,7 +123,6 @@ for($y = 0; $y < $h; ++$y) {
 
 $nbrPieces /= 4;
 
-
 foreach($positions as $index => $filler) {
     uksort($positions[$index], function($a, $b) use ($prices, $piecesType) {
         return $prices[intdiv($piecesType[$a], 4)] <=> $prices[intdiv($piecesType[$b], 4)];
@@ -157,34 +130,20 @@ foreach($positions as $index => $filler) {
 }
 
 error_log("we have " . count($pieces) . " pieces for this input");
+error_log("we need to place $nbrPieces pieces");
 
-function generateOutput(array $listPieces) {
+function generateOutput(array $output, array $listPieces) {
     global $pieces, $piecesType, $w, $h;
     
-    $output = array_fill(0, $h, str_repeat("#", $w));
-    
-    foreach($listPieces as $pieceID) {
-        foreach($pieces[$pieceID] as $position) {
-            $x = $position % $w;
-            $y = intdiv($position, $w);
-            
-            $output[$y][$x] = $piecesType[$pieceID];
-        }
-    }
-    
-    echo implode("\n", $output) . PHP_EOL;
-}
-
-function generateOutput2(array $output, array $listPieces) {
-    global $pieces, $piecesType, $w, $h;
+    $quantities = array_fill(0, 7, 0);
     
     foreach($listPieces as $pieceID) {
         $position = reset($pieces[$pieceID]);
+    
+        $quantities[intdiv($piecesType[$pieceID], 4)]++;
         
         $xs = ($position % $w) * 2 + 1;
         $ys = intdiv($position, $w) * 2 + 1;
-        
-        error_log("piece $pieceID is of type " . $piecesType[$pieceID] . " -- start at $xs $ys");
         
         switch($piecesType[$pieceID]) {
             case 0:
@@ -247,19 +206,25 @@ function generateOutput2(array $output, array $listPieces) {
         }
     }
     
+    echo implode(" ", $quantities) . PHP_EOL;
     echo implode("\n", $output) . PHP_EOL;
 }
 
+$calls = 0;
+
 //We are solving by using https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X
-function solve(array $pieces, array $positions, array $counts, array $availabilities, int $nbrPieces, array $list, float $price) {
+function solve(string $hash, array $pieces, array $positions, array $counts, array $availabilities, int $nbrPieces, array $list, float $price) {
     
-    global $piecesType, $prices, $lowestPrice, $bestList, $bestPrice;
+    static $history = [];
+    global $piecesType, $prices, $lowestPrice, $bestList, $bestPrice, $calls;
     $debug = false;
     
-    if($debug) error_log($nbrPieces . " " . implode("-", $list));
+    if($debug) error_log($hash . " " . implode("-", $list));
     
     //The matrix is empty we have found a solution
     if($nbrPieces == 0) {
+        if($bestPrice < $price) return;
+    
         echo "We found a solution!!! $price -- " . PHP_EOL;
         
         //We have a new best price, reset the list of solutions
@@ -270,6 +235,14 @@ function solve(array $pieces, array $positions, array $counts, array $availabili
         
         return;
     }
+    
+    if(isset($history[$hash]) && $history[$hash] <= $price) {
+        //error_log("!!!!!!! history $hash " . $history[$hash] . " -- $price");
+        return;
+    }
+    else $history[$hash] = $price;
+    
+    ++$calls;
     
     //Get the lowest number of 1s in any column and the index of the first column with the lowest number
     $min = INF;
@@ -306,11 +279,14 @@ function solve(array $pieces, array $positions, array $counts, array $availabili
         $positions2 = $positions;
         $counts2 = $counts;
         $pieces2 = $pieces;
+        $hash2 = $hash;
         
         //Foreach columns that have a 1 in the row we are testing we need to remove them
         foreach($pieces2[$pieceID] as $positionID) {
     
             //if($debug) error_log("piece $pieceID is affecting the position $positionID");
+            
+            $hash2[$positionID] = "#";
             
             if(!isset($positions2[$positionID])) continue;
             
@@ -339,19 +315,19 @@ function solve(array $pieces, array $positions, array $counts, array $availabili
             if($debug) error_log("unsetting count $positionID");
         }
         
-        solve($pieces2, $positions2, $counts2, $availabilities, $nbrPieces - 1, $list, $price + $piecePrice);
+        solve($hash2, $pieces2, $positions2, $counts2, $availabilities, $nbrPieces - 1, $list, $price + $piecePrice);
     
         $availabilities[$pieceType]++;
     }
 }
 
-solve($pieces, $positions, $counts, $availabilities, $nbrPieces, [], 0.0);
+solve($hash, $pieces, $positions, $counts, $availabilities, $nbrPieces, [], 0.0);
 
 error_log("we have " . count($bestList) . " solutions with $bestPrice");
 
 foreach($bestList as $list) {
-    //generateOutput($list);
-    generateOutput2($output, $list);
+    generateOutput($output, $list);
 }
 
-error_log(microtime(1) - $start);
+echo("Calls $calls") . PHP_EOL;
+echo(microtime(1) - $start);
