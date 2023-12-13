@@ -1,9 +1,8 @@
 
-
 Goal
 You are working for a construction company, your new task is to optimize the construction of floors by finding the cheapest way to build them. 
 The owner of the only supplier of floor blocks is a big fan of the game Tetris and for this reason all the blocks they produce are shaped like the pieces of the game. 
-The availability & price of each type of block varies with time, you will often be limited and won't have access to every types in order to fill the floor.
+The price of each type of block varies with time but the supplier can provide you as many blocks as you want of each types.
 
 Here's the blocks you can use:
 
@@ -12,52 +11,51 @@ Type 1:   Type 2:   Type 3:   Type 4:   Type 5:   Type 6:   Type 7:
           ##         #        #           #        ##       ##
 
 
+
 The pragmatic in you immediately realize that simply ordering only the cheapest type and breaking them down to 1x1 block would let you fill any kind of floor. 
-The last person who tried that has vanished without a trace, you don't mess with Tetris pieces without consequences. If breaking pieces isn't an option, rotating them is perfectly fine.
+The last person who tried to do that has vanished without a trace, you don't mess with Tetris pieces without consequences. 
+If breaking pieces isn't an option, rotating them is perfectly fine.
 
-Some part of the floor might already be occupied, these are pillars and don't need to be covered but everything else has to be covered, you can't have holes in the floor, clients wouldn't be happy with that.
+Some part of the floor will already be occupied, these are walls, pillars, ... and don't need to be covered but everything else has to be covered, 
+you can't leave holes in the floor, clients wouldn't be happy with that.
 
-In order for the floor to be build as soon as the blocks are received you also need to provide a visual representation of the floor with the different blocks being used.
+In addition to finding the cheapest set of blocks to order you also need to report how many ways exist for that set of blocks to be used to fill the floor.
 
-For example in the case where you can only use 1 block of each type, and the floor to fill is:
+For example with:
+7 7
+6.49 8.69 22.89 35.07 54.23 66.87 79.26
+#######
+#.....#
+#.....#
+#..#..#
+#.....#
+#.....#
+#######
 
-.....#
-......
-......
-......
-.....#
+The cheapest set of blocks is: 4 0 0 2 0 0 0 with a price of 96.1 and there are 6 ways to place the blocks:
+#######   #######   #######   #######   #######   #######
+#----|#   #----|#   #|----#   #|----#   #||+--#   #|----#
+#||-+|#   #|+--|#   #||-+|#   #|+--|#   #|||||#   #|----#
+#||#||#   #||#||#   #||#||#   #||#||#   #||#||#   #+-#-+#
+#|+-||#   #|--+|#   #|+-||#   #|--+|#   #|||||#   #----|#
+#|----#   #|----#   #----|#   #----|#   #--+||#   #----|#
+#######   #######   #######   #######   #######   #######
 
+The set of blocks with the cheapest price will be unique in all the tests.
 
-One of the solution would be:
-
-+-+-+-+-+-+-+
-| |   |   |#|
-+ +-+ +-+ +-+
-|   |   | | |
-+-+ +-+-+ + +
-| | |   | | |
-+ +-+   +-+ +
-|   |   |   |
-+ +-+-+-+-+-+
-| |       |#|
-+-+-+-+-+-+-+
-
-
-In that example there are many ways to place the blocks with the same minimal price, in all the tests there will be only one.
 
 Input
 Line 1: 2 integers, W & H, the width & height of the floor.
-Next H lines: Characters representing the floor, . represent a space to fill & # represent a pillar.
-Next 7 lines: 1 integer & 1 float, Qi & Pi the quantity & price of each type of blocks.
+Line 2: 7 float separated by a space (P1 to P7), the prices of each type of blocks.
+Next H lines: Characters representing the floor, . represent a space to fill & # represent a space already filled.
 
 Output
-Line 1: The price to fill the floor.
+Line 1: The price to fill the floor. (float with 2 decimal precision)
 Line 2: The quantity of each type of blocks needed to fill the floor. Q1 Q2 Q3 Q4 Q5 Q6 Q7
-H * 2 +1 Lines The representation of the floor with the blocks.
+Line 3: Tof ways we can use the set of blocks.
 
 Constraints
-5 <= w <= 50
-5 <= h <= 50
+7 <= w <= 100
+7 <= h <= 100
 
-0 <= Qi <= 1000
 0.0 <= Pi <= 100.0
