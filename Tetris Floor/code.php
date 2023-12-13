@@ -28,22 +28,6 @@ $tetrominoes = [
 
 
 
-$floor = [
-    "#################################################################################################################################################################################",
-    "#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#",
-    "#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#",
-    "#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#",
-    "#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#..........#",
-    "#################################################################################################################################################################################",
-];
-
-$w = 177;
-$h = 6;
-
-$prices = [
-    6.49, 80.69, 42.89, 15.07, 54.23, 96.87, 49.26,
-];
-
 /*
 $floor = [
     "######################",
@@ -76,9 +60,46 @@ $h = 22;
 $prices = [
     54.51, 96.47, 1.32, 8.10, 94.37, 19.01, 83.60,
 ];
+
+"#########################################################################################",
+"#..........#..........#..........#..........#..........#..........#..........#..........#",
+"#..#...#...#...#...#..#..#...#...#...#...#..#..#...#...#...#...#..#..#...#...#...#...#..#",
+"#..#..#....#....#..#..#..#..#....#....#..#..#..#..#....#....#..#..#..#..#....#....#..#..#",
+"#..#...#...#...#...#..#..#...#...#...#...#..#..#...#...#...#...#..#..#...#...#...#...#..#",
+"#..........#..........#..........#..........#..........#..........#..........#..........#",
+"#########################################################################################",
 */
 
+$floor = [
+"############",
+"#..........#",
+"#...#...#..#",
+"#....#..#..#",
+"#...#...#..#",
+"#..........#",
+"############",
+];
+
+$w = 12;
+$h = 7;
+
+$prices = [
+    55.34,
+13.13,
+92.59,
+66.95,
+83.07,
+85.98,
+84.75,
+];
+
+echo implode(" ", $prices) . PHP_EOL;
+
 echo implode("\n", $floor) . PHP_EOL;
+
+$prices = array_map(function($price) {
+    return intval($price * 100);
+}, $prices);
 
 $floor = implode("", $floor);
 
@@ -93,7 +114,7 @@ $output = array_fill(0, $h * 2 + 1, str_repeat(" ", $w * 2 + 1));
 $usage = array_fill(0, 7, 0);
 
 $variations = 1;
-$price = 0.0;
+$price = 0;
 
 $patterns = [
     "#.{" . ($w - 2) . "}#\.#.{" . ($w - 2) . "}#", //A single empty
@@ -124,7 +145,9 @@ for($index = 0; $index < $h * $w; ++$index) {
         unset($counts[$index]);
         unset($positions[$index]);
         
-        //$output[$y * 2 + 1][$x * 2 + 1] = "#";
+        $y = intdiv($index, $w);
+        $x = $index % $w;
+        $output[$y * 2 + 1][$x * 2 + 1] = "#";
         continue;
     }
     
@@ -258,7 +281,7 @@ for($index = 0; $index < $h * $w; ++$index) {
 
     $bestPrice = min(array_keys($solutions));
     
-    error_log("The best price for this block is $bestPrice");
+    error_log("The best price after this block is $bestPrice");
 
     print_r($solutions[$bestPrice]);
     
@@ -276,7 +299,7 @@ for($index = 0; $index < $h * $w; ++$index) {
     foreach($positionsFlood as $index => $filler) $floor[$index] = "#";
 }
 
-echo "The final cost is: $price" . PHP_EOL;
+echo "The final cost is: " . number_format($price / 100, 2, ".", "") . PHP_EOL;
 echo "The usage is: " . implode(" ", $usage) . PHP_EOL;
 echo "The number of variations is: $variations" . PHP_EOL;
 
@@ -362,7 +385,7 @@ function generateOutput(array $output, array $listPieces) {
 }
 
 //We are solving by using https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X
-function solve(string $floor, array $pieces, array $positions, array $counts, array $usage, float $price, array $list = []): array {
+function solve(string $floor, array $pieces, array $positions, array $counts, array $usage, int $price, array $list = []): array {
     
     static $history = [];
     global $piecesType, $prices, $minPrice, $calls, $output, $bestPrice;
@@ -380,7 +403,7 @@ function solve(string $floor, array $pieces, array $positions, array $counts, ar
     
         $bestPrice = min($bestPrice, $price);
         
-        //if($index == 1023.80) generateOutput($output, $list);
+        //if(strval($price) ==  96.1) generateOutput($output, $list);
         
         return [strval($price) => [$hashUsage => 1]];
     }
@@ -390,8 +413,8 @@ function solve(string $floor, array $pieces, array $positions, array $counts, ar
         return $history[$floor][$hashUsage];
     }
 
-    if($price + ($minPrice * $positionsLeft / 4) > $bestPrice) {
-        //error_log("!!!!!!! too expensive " . ($minPrice * $positionsLeft / 4) . " > " . $bestPrice);
+    if($price + ($minPrice * ($positionsLeft / 4)) > $bestPrice) {
+        //error_log("!!!!!!! too expensive " . ($price + $minPrice * $positionsLeft / 4) . " > " . $bestPrice);
         return $results;
     }
     
@@ -410,11 +433,11 @@ function solve(string $floor, array $pieces, array $positions, array $counts, ar
     //The lowest number of 1s is zero => invalid
     if($min == 0) return $results;
     
-    if($debug) error_log("working on $position with $min");
+    //error_log("working on $position with $min");
     
     foreach ($positions[$position] as $pieceID) {
     
-        if($debug) error_log("at $position we can use the piece $pieceID");
+        // error_log("at $position we can use the piece $pieceID");
     
         $pieceType = intdiv($piecesType[$pieceID], 4);
         
@@ -455,13 +478,13 @@ function solve(string $floor, array $pieces, array $positions, array $counts, ar
                     unset($positions2[$positionID2][$pieceID2]); //Remove the row from the position of the 1s in the column
                 }
                 
-                unset($pieces2[$pieceID2]); //Remove the row
+                //unset($pieces2[$pieceID2]); //Remove the row
             }
             
             unset($positions2[$positionID]); //Remove the column
             unset($counts2[$positionID]); //Column has been removed, we also need to remove the count
             
-            if($debug) error_log("unsetting count $positionID");
+            //error_log("unsetting count $positionID");
         }
         
         $solutions = solve($floor2, $pieces2, $positions2, $counts2, $usage, $price + $piecePrice, $list);
