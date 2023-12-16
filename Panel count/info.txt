@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/721532837c92ad4ccbe1683eacbce40ec8e60
+https://www.codingame.com/training/easy/panel-count
 
 Goal
 Goal : count the number of persons matching some formulas.
