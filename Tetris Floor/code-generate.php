@@ -4,7 +4,7 @@
 
 $start = microtime(1);
 
-$tetrominoes = [
+const TETROMINOES = [
     0 => [[0, 0], [1, 0], [2, 0], [3, 0]], //I
     1 => [[0, 0], [0, 1], [0, 2], [0, 3]], //I 180
     4 => [[0, 0], [1, 0], [0, 1], [1, 1]], //O
@@ -27,23 +27,71 @@ $tetrominoes = [
 ];
 
 $floor = [
-"#########################################################################################",
-"#..........#..........#..........#..........#..........#..........#..........#..........#",
-"#..#...#...#...#...#..#..#...#...#...#...#..#..#...#...#...#...#..#..#...#...#...#...#..#",
-"#..#..#....#....#..#..#..#..#....#....#..#..#..#..#....#....#..#..#..#..#....#....#..#..#",
-"#..#...#...#...#...#..#..#...#...#...#...#..#..#...#...#...#...#..#..#...#...#...#...#..#",
-"#..........#..........#..........#..........#..........#..........#..........#..........#",
-"#########################################################################################",
+    "##################################################",
+    "#.....#..#..#....###....##....###....#.....#..#..#",
+    "#..#......#.#.#...#...#.##.#...#...#.#..#......#.#",
+    "#....#.#....#..#..#..#..##..#..#..#..#....#.#....#",
+    "#..##...##..#...#...#...##...#...#...#..##...##..#",
+    "#...#.#..#..##...#.#....###...#.#....#...#.#..#..#",
+    "##....#....###.#..#..#.####.#..#..#.###....#....##",
+    "#..#..#.#...#....#.#...###....#.#...##..#..#.#...#",
+    "#..##...##..#...#...#...##...#...#...#..##...##..#",
+    "#....#.#....#...#.#.#...##...#.#.#...#....#.#....#",
+    "#.#......#..#.#...#...#.##.#...#...#.#.#......#..#",
+    "#..#..#.....#....###....##....###....#..#..#.....#",
+    "##################################################",
+    "#.....#..#..#....###....##....###....#.....#..#..#",
+    "#..#......#.#.#...#...#.##.#...#...#.#..#......#.#",
+    "#....#.#....#..#..#..#..##..#..#..#..#....#.#....#",
+    "#..##...##..#...#...#...##...#...#...#..##...##..#",
+    "#...#.#..#..##...#.#....###...#.#....#...#.#..#..#",
+    "##....#....###.#..#..#.####.#..#..#.###....#....##",
+    "#..#..#.#...#....#.#...###....#.#...##..#..#.#...#",
+    "#..##...##..#...#...#...##...#...#...#..##...##..#",
+    "#....#.#....#...#.#.#...##...#.#.#...#....#.#....#",
+    "#.#......#..#.#...#...#.##.#...#...#.#.#......#..#",
+    "#..#..#.....#....###....##....###....#..#..#.....#",
+    "##################################################",
+    "##################################################",
+    "#.....#..#..#....###....##....###....#.....#..#..#",
+    "#..#......#.#.#...#...#.##.#...#...#.#..#......#.#",
+    "#....#.#....#..#..#..#..##..#..#..#..#....#.#....#",
+    "#..##...##..#...#...#...##...#...#...#..##...##..#",
+    "#...#.#..#..##...#.#....###...#.#....#...#.#..#..#",
+    "##....#....###.#..#..#.####.#..#..#.###....#....##",
+    "#..#..#.#...#....#.#...###....#.#...##..#..#.#...#",
+    "#..##...##..#...#...#...##...#...#...#..##...##..#",
+    "#....#.#....#...#.#.#...##...#.#.#...#....#.#....#",
+    "#.#......#..#.#...#...#.##.#...#...#.#.#......#..#",
+    "#..#..#.....#....###....##....###....#..#..#.....#",
+    "##################################################",
+    "#.....#..#..#....###....##....###....#.....#..#..#",
+    "#..#......#.#.#...#...#.##.#...#...#.#..#......#.#",
+    "#....#.#....#..#..#..#..##..#..#..#..#....#.#....#",
+    "#..##...##..#...#...#...##...#...#...#..##...##..#",
+    "#...#.#..#..##...#.#....###...#.#....#...#.#..#..#",
+    "##....#....###.#..#..#.####.#..#..#.###....#....##",
+    "#..#..#.#...#....#.#...###....#.#...##..#..#.#...#",
+    "#..##...##..#...#...#...##...#...#...#..##...##..#",
+    "#....#.#....#...#.#.#...##...#.#.#...#....#.#....#",
+    "#.#......#..#.#...#...#.##.#...#...#.#.#......#..#",
+    "#..#..#.....#....###....##....###....#..#..#.....#",
+    "##################################################",
 ];
-
-$w = 89;
-$h = 7;
+$w = 50;
+$h = 50;
 
 $prices = [
-    55.34, 13.13, 27.59, 66.95, 83.07, 85.98, 84.75,
+    27.70,
+6.38,
+27.70,
+57.31,
+69.36,
+83.07,
+13.50,
 ];
 
-const USE_OPTIMS = true;
+const USE_OPTIMS = false;
 
 echo implode(" ", $prices) . PHP_EOL;
 echo implode("\n", $floor) . PHP_EOL;
@@ -52,153 +100,167 @@ $prices = array_map(function($price) {
     return intval($price * 100);
 }, $prices);
 
-$floor = implode("", $floor);
 $minPrice = min($prices);
-$pieceID = 0;
-$counts = array_fill(0, $w * $h, 0);
-$positions = array_fill(0, $w * $h, []);
-$piecesType = [];
-$output = array_fill(0, $h * 2 + 1, str_repeat(" ", $w * 2 + 1));
 $usage = array_fill(0, 7, 0);
+$history = [];
 $variations = 1;
 $price = 0;
 
-for($y = 0; $y < $h * 2 + 1; ++$y) {
-    for($x = 0; $x < $w * 2 + 1; ++$x) {
-        if($y % 2 == 0) $output[$y][$x] = ($x % 2 == 0) ? '+' : '-';
-        elseif($x % 2 == 0) $output[$y][$x] = '|';
-    }
-}
-
-for($index = 0; $index < $h * $w; ++$index) {
-
-    if($floor[$index] == '#') {
-        unset($counts[$index]);
-        unset($positions[$index]);
-        
-        $y = intdiv($index, $w);
-        $x = $index % $w;
-        $output[$y * 2 + 1][$x * 2 + 1] = "#";
-        continue;
-    }
+//Each "blocks" of empty spaces completely surrounded by walls is independent and can be solved independently
+for($y = 0; $y < $h; ++$y) {
+    for($x = 0; $x < $w; ++$x) {
+        if($floor[$y][$x] == "#") continue;
     
-    foreach($tetrominoes as $pieceType => $moves) {
+        error_log("We are starting a flood at $x $y");
         
-        $piecePositions = [];
+        //We start flood fill to find all the position we're gonna work on
+        $toExplore = [[$x, $y]];
+        $positions = [];
+        $minX = $minY = INF;
+        $maxX = $maxY = -INF;
         
-        foreach($moves as [$xm, $ym]) {
-            $newIndex = $index + $xm + ($ym * $w);
-            
-            if($floor[$newIndex] !== '.') continue 2;
-            
-            $piecePositions[$newIndex] = $newIndex;
-        }
-        
-        foreach($piecePositions as $indexPosition) {
-           $counts[$indexPosition]++;
-           $positions[$indexPosition][$pieceID] = $pieceID;
-        }
-        
-        $piecesType[$pieceID] = $pieceType;
-        $pieces[$pieceID++] = $piecePositions;
-    }
-}
-
-foreach($positions as $index => $filler) {
-    uksort($positions[$index], function($a, $b) use ($prices, $piecesType) {
-        return $prices[intdiv($piecesType[$a], 4)] <=> $prices[intdiv($piecesType[$b], 4)];
-    });
-}
-
-error_log("we have " . count($pieces) . " pieces for this input");
-
-//Directly set all the positions where we can only use 1 piece
-if(USE_OPTIMS) {
-    while(($index = key($counts)) !== null) {
-        
-        if($counts[$index] == 1) {
-            $pieceID = array_key_first($positions[$index]);
-            
-            $pieceType = intdiv($piecesType[$pieceID], 4);
+        while(count($toExplore)) {
+            [$xp, $yp] = array_pop($toExplore);
     
-            error_log("we need to set position $index with piece ID $pieceID -- type $pieceType");
+            if($floor[$yp][$xp] == "#") continue;
+            else $floor[$yp][$xp] = "#";
             
-            $usage[$pieceType]++;
-            $price += $prices[$pieceType];
+            $minX = min($xp, $minX);
+            $maxX = max($xp, $maxX);
+            $minY = min($yp, $minY);
+            $maxY = max($yp, $maxY);
             
-            foreach($pieces[$pieceID] as $positionID) {
+            $positions[] = [$xp, $yp];
+            
+            //We can move up, down, left & right
+            foreach([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$xm, $ym]) {
+                $toExplore[] = [$xp + $xm, $yp + $ym];
+            }
+        }
+    
+        error_log("we need to fill " . count($positions) . " positions");
+        
+        $sizeY = $maxY - $minY + 3;
+        $sizeX = $maxX - $minX + 3;
+        $blockFloor = array_fill(0, $sizeY, str_repeat("#", $sizeX));
+        
+        foreach($positions as [$xp, $yp]) $blockFloor[$yp - $minY + 1][$xp - $minX + 1] = ".";
+    
+        error_log(implode("\n", $blockFloor));
+        
+        $blockFloor = implode("", $blockFloor);
+        
+        //If we haven't encountered this type of floor yet, we need to solve it
+        if(!isset($history[$blockFloor])) {
+            $pieceID = 0;
+            $counts = [];
+            $pieces = [];
+            $positions = [];
+            $piecesType = [];
+            
+            //Get all the pieces that can start at every positions
+            for($index = 0; $index < $sizeX * $sizeY; ++$index) {
                 
-                $floor[$positionID] = "#";
+                if($blockFloor[$index] == '#') continue;
                 
-                if(!isset($positions[$positionID])) continue;
-                
-                foreach($positions[$positionID] as $pieceID2) {
-                    foreach($pieces[$pieceID2] as $positionID2) {
-                        --$counts[$positionID2];
-                        unset($positions[$positionID2][$pieceID2]);
+                foreach(TETROMINOES as $pieceType => $moves) {
+                    $piecePositions = [];
+                    
+                    //Check if this piece could be added here
+                    foreach($moves as [$xm, $ym]) {
+                        $newIndex = $index + $xm + ($ym * $sizeX);
+                        
+                        if($blockFloor[$newIndex] !== '.') continue 2;
+                        
+                        $piecePositions[$newIndex] = $newIndex;
                     }
+                    
+                    //For each positions this piece would occupy save the info
+                    foreach($piecePositions as $indexPosition) {
+                        $counts[$indexPosition] = ($counts[$indexPosition] ?? 0) + 1;
+                        
+                        $positions[$indexPosition][$pieceID] = $pieceID;
+                    }
+                    
+                    $piecesType[$pieceID] = $pieceType;
+                    $pieces[$pieceID++] = $piecePositions;
                 }
-                
-                unset($positions[$positionID]);
-                unset($counts[$positionID]);
             }
             
-            reset($counts);
-        } else next($counts);
-    }
-}
-
-echo(microtime(1) - $start);
-
-for($index = 0; $index < $h * $w; ++$index) {
-    if($floor[$index] == "#") continue;
-    
-    error_log("We are starting a flood at $index");
-    
-    //We start flood fill to find all the position we're gonna work on
-    $toExplore = [$index];
-    $positionsFlood = [];
-    $countsFlood = [];
-    
-    while(count($toExplore)) {
-        $index = array_pop($toExplore);
+            //For each positions where there's a single possibility directly use the piece
+            if(USE_OPTIMS) {
+                while(($index = key($counts)) !== null) {
         
-        if(isset($positionsFlood[$index])) continue;
-        
-        $positionsFlood[$index] = $positions[$index];
-        $countsFlood[$index] = $counts[$index];
-        
-        foreach([1, -1, $w, -$w] as $move) {
-            if($floor[$index + $move] != '.') continue;
+                    if($counts[$index] == 1) {
+                        $pieceID = array_key_first($positions[$index]);
             
-            $toExplore[] = $index + $move;
+                        $pieceType = intdiv($piecesType[$pieceID], 4);
+    
+                        error_log("we need to set position $index with piece ID $pieceID -- type $pieceType");
+            
+                        $usage[$pieceType]++;
+                        $price += $prices[$pieceType];
+            
+                        //Work on all the positions of the piece
+                        foreach($pieces[$pieceID] as $positionID) {
+                
+                            $blockFloor[$positionID] = "#";
+                
+                            if(!isset($positions[$positionID])) continue;
+                
+                            //Any pieces that was using this position can no longer be used
+                            foreach($positions[$positionID] as $pieceID2) {
+                                foreach($pieces[$pieceID2] as $positionID2) {
+                                    --$counts[$positionID2];
+                                    unset($positions[$positionID2][$pieceID2]);
+                                }
+                            }
+                
+                            unset($positions[$positionID]);
+                            unset($counts[$positionID]);
+                        }
+            
+                        reset($counts); //We restart from the start, adding a piece might create more position with a single possibility
+                    } else next($counts);
+                }
+            }
+            
+            //When we work on a position we want to try the cheapest piece first
+            foreach($positions as $index => $filler) {
+                uksort($positions[$index], function($a, $b) use ($prices, $piecesType) {
+                    return $prices[intdiv($piecesType[$a], 4)] <=> $prices[intdiv($piecesType[$b], 4)];
+                });
+            }
+    
+            error_log("we have " . count($pieces) . " pieces for this input");
+            
+            $bestPrice = INF; //Best price for the current block
+            
+            $solutions = solve($blockFloor, $positions, $counts, array_fill(0, 7, 0), 0.0);
+            
+            $bestPrice = min(array_keys($solutions));
+    
+            error_log("The best price after this block is $bestPrice");
+    
+            print_r($solutions[$bestPrice]);
+    
+            if(count($solutions[$bestPrice]) > 1) {
+                error_log("There are multiple solutions for this flood, no need to continue");
+        
+                print_r($solutions[$bestPrice]);
+                exit();
+            }
+            
+            $history[$blockFloor] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
         }
+        
+        //Update the global results
+        foreach(explode("-", $history[$blockFloor][1]) as $i => $v) $usage[$i] += $v;
+        $variations *= $history[$blockFloor][2];
+        $price += $history[$blockFloor][0];
+    
+        echo(microtime(1) - $start) . PHP_EOL;
     }
-    
-    error_log("we need to fill " . count($positionsFlood) . " positions");
-
-    $bestPrice = INF;
-
-    $solutions = solve($floor, $positionsFlood, $countsFlood, $usage, $price);
-
-    $bestPrice = min(array_keys($solutions));
-    
-    error_log("The best price after this block is $bestPrice");
-
-    print_r($solutions[$bestPrice]);
-    
-    if(count($solutions[$bestPrice]) > 1) {
-        error_log("There are multiple solutions for this flood, no need to continue");
-
-        print_r($solutions[$bestPrice]);
-        exit();
-    }
-    
-    $usage = explode("-", array_key_first($solutions[$bestPrice]));
-    $variations *= reset($solutions[$bestPrice]);
-    $price = $bestPrice;
-    
-    foreach($positionsFlood as $index => $filler) $floor[$index] = "#";
 }
 
 echo "The final cost is: " . number_format($price / 100, 2, ".", "") . PHP_EOL;
