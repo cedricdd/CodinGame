@@ -113,130 +113,147 @@ $prices = array_map(function($price) {
     return intval($price * 100);
 }, $prices);
 
-$floor = "";
-for ($i = 0; $i < $h; $i++) $floor .= trim(fgets(STDIN));
 
+for ($i = 0; $i < $h; $i++) $floor[] = trim(fgets(STDIN));
 
 $minPrice = min($prices);
-$pieceID = 0;
-$counts = array_fill(0, $w * $h, 0);
-$positions = array_fill(0, $w * $h, []);
-$piecesType = [];
-$output = array_fill(0, $h * 2 + 1, str_repeat(" ", $w * 2 + 1));
 $usage = array_fill(0, 7, 0);
+$history = [];
 $variations = 1;
 $price = 0;
 
-//Get all the pieces that can start at every positions
-for($index = 0; $index < $h * $w; ++$index) {
-
-    if($floor[$index] == '#') {
-        unset($counts[$index]);
-        unset($positions[$index]);
-        continue;
-    }
+//Each "blocks" of empty spaces completely surrounded by walls is independent and can be solved independently
+for($y = 0; $y < $h; ++$y) {
+    for($x = 0; $x < $w; ++$x) {
+        if($floor[$y][$x] == "#") continue;
     
-    foreach(TETROMINOES as $pieceType => $moves) {       
-        $piecePositions = [];
+        //We start flood fill to find all the position we're gonna work on
+        $toExplore = [[$x, $y]];
+        $positions = [];
+        $minX = $minY = INF;
+        $maxX = $maxY = -INF;
         
-        //Check if this piece could be added here
-        foreach($moves as [$xm, $ym]) {
-            $newIndex = $index + $xm + ($ym * $w);
+        while(count($toExplore)) {
+            [$x, $y] = array_pop($toExplore);
             
-            if($floor[$newIndex] !== '.') continue 2;
+            $floor[$y][$x] = "#";
+
+            $minX = min($x, $minX);
+            $maxX = max($x, $maxX);
+            $minY = min($y, $minY);
+            $maxY = max($y, $maxY);
             
-            $piecePositions[$newIndex] = $newIndex;
+            $positions[] = [$x, $y];
+            
+            //We can move up, down, left & right
+            foreach([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$xm, $ym]) {
+                if($floor[$y + $ym][$x + $xm] != '.') continue;
+                
+                $toExplore[] = [$x + $xm, $y + $ym];
+            }
         }
 
-        //For each positions this piece would occupy save the info
-        foreach($piecePositions as $indexPosition) {
-           $counts[$indexPosition]++;
-           
-           $positions[$indexPosition][$pieceID] = $pieceID;
-        }
-        
-        $piecesType[$pieceID] = $pieceType;
-        $pieces[$pieceID++] = $piecePositions;
-    }
-}
+        //We 
+        $sizeY = $maxY - $minY + 3;
+        $sizeX = $maxX - $minX + 3;
+        $blockFloor = array_fill(0, $sizeY, str_repeat("#", $sizeX));
 
-//When we work on a position we want to try the cheapest piece first
-foreach($positions as $index => $filler) {
-    uksort($positions[$index], function($a, $b) use ($prices, $piecesType) {
-        return $prices[intdiv($piecesType[$a], 4)] <=> $prices[intdiv($piecesType[$b], 4)];
-    });
-}
+        foreach($positions as [$x, $y]) $blockFloor[$y - $minY + 1][$x - $minX + 1] = ".";
 
-//For each positions where there's a single possibility directly use the piece
-while(($index = key($counts)) !== null) {
-        
-    if($counts[$index] == 1) {
-        $pieceID = array_key_first($positions[$index]);
-        
-        $pieceType = intdiv($piecesType[$pieceID], 4);
+        $blockFloor = implode("", $blockFloor);
 
-        $usage[$pieceType]++;
-        $price += $prices[$pieceType];
-        
-        //Work on all the positions of the piece
-        foreach($pieces[$pieceID] as $positionID) {
-            
-            $floor[$positionID] = "#";
-            
-            if(!isset($positions[$positionID])) continue;
-            
-            //Any pieces that was using this position can no longer be used
-            foreach($positions[$positionID] as $pieceID2) {
-                foreach($pieces[$pieceID2] as $positionID2) { 
-                    --$counts[$positionID2];
-                    unset($positions[$positionID2][$pieceID2]);
+        //If we haven't encountered this type of floor yet, we need to solve it
+        if(!isset($history[$blockFloor])) {
+            $pieceID = 0;
+            $counts = [];
+            $pieces = [];
+            $positions = [];
+            $piecesType = [];
+    
+            //Get all the pieces that can start at every positions
+            for($index = 0; $index < $sizeX * $sizeY; ++$index) {
+    
+                if($blockFloor[$index] == '#') continue;
+    
+                foreach(TETROMINOES as $pieceType => $moves) {       
+                    $piecePositions = [];
+                    
+                    //Check if this piece could be added here
+                    foreach($moves as [$xm, $ym]) {
+                        $newIndex = $index + $xm + ($ym * $sizeX);
+                        
+                        if($blockFloor[$newIndex] !== '.') continue 2;
+                        
+                        $piecePositions[$newIndex] = $newIndex;
+                    }
+    
+                    //For each positions this piece would occupy save the info
+                    foreach($piecePositions as $indexPosition) {
+                        $counts[$indexPosition] = ($counts[$indexPosition] ?? 0) + 1;
+                        
+                        $positions[$indexPosition][$pieceID] = $pieceID;
+                    }
+                    
+                    $piecesType[$pieceID] = $pieceType;
+                    $pieces[$pieceID++] = $piecePositions;
                 }
             }
-            
-            unset($positions[$positionID]);
-            unset($counts[$positionID]);
-        }
+    
+            //For each positions where there's a single possibility directly use the piece
+            while(($index = key($counts)) !== null) {
+                    
+                if($counts[$index] == 1) {
+                    $pieceID = array_key_first($positions[$index]);
+                    
+                    $pieceType = intdiv($piecesType[$pieceID], 4);
+    
+                    $usage[$pieceType]++;
+                    $price += $prices[$pieceType];
+                    
+                    //Work on all the positions of the piece
+                    foreach($pieces[$pieceID] as $positionID) {
+                        
+                        $blockFloor[$positionID] = "#";
+                        
+                        if(!isset($positions[$positionID])) continue;
+                        
+                        //Any pieces that was using this position can no longer be used
+                        foreach($positions[$positionID] as $pieceID2) {
+                            foreach($pieces[$pieceID2] as $positionID2) { 
+                                --$counts[$positionID2];
+                                unset($positions[$positionID2][$pieceID2]);
+                            }
+                        }
+                        
+                        unset($positions[$positionID]);
+                        unset($counts[$positionID]);
+                    }
+                    
+                    reset($counts); //We restart from the start, adding a piece might create more position with a single possibility
+                } else next($counts);
+            }
+    
+            //When we work on a position we want to try the cheapest piece first
+            foreach($positions as $index => $filler) {
+                uksort($positions[$index], function($a, $b) use ($prices, $piecesType) {
+                    return $prices[intdiv($piecesType[$a], 4)] <=> $prices[intdiv($piecesType[$b], 4)];
+                });
+            }
+    
+            $bestPrice = INF; //Best price for the current block
+    
+            $solutions = solve($blockFloor, $positions, $counts, array_fill(0, 7, 0), 0.0);
         
-        reset($counts); //We restart from the start, adding a piece might create more position with a single possibility
-    } else next($counts);
-}
+            $bestPrice = min(array_keys($solutions));
+    
+            $history[$blockFloor] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
+        }
 
-//Each "blocks" of empty spaces completely surrounded by walls is independent and can be solved independently
-for($index = 0; $index < $h * $w; ++$index) {
-    if($floor[$index] == "#") continue;
-    
-    //We start flood fill to find all the position we're gonna work on
-    $toExplore = [$index];
-    $positionsFlood = [];
-    $countsFlood = [];
-    
-    while(count($toExplore)) {
-        $index = array_pop($toExplore);
-        
-        if(isset($positionsFlood[$index])) continue;
-        
-        $positionsFlood[$index] = $positions[$index];
-        $countsFlood[$index] = $counts[$index];
-        
-        //We can move up, down, left & right
-        foreach([1, -1, $w, -$w] as $move) {
-            if($floor[$index + $move] != '.') continue;
-            
-            $toExplore[] = $index + $move;
-        }
+        //Update the global results
+        foreach(explode("-", $history[$blockFloor][1]) as $i => $v) $usage[$i] += $v;
+        $variations *= $history[$blockFloor][2];
+        $price += $history[$blockFloor][0];
     }
-    
-    $bestPrice = INF; //Best price for the current block
-
-    $solutions = solve($floor, $positionsFlood, $countsFlood, $usage, $price);
-
-    $bestPrice = min(array_keys($solutions));
-    
-    $usage = explode("-", array_key_first($solutions[$bestPrice]));
-    $variations *= reset($solutions[$bestPrice]);
-    $price = $bestPrice;
-    
-    foreach($positionsFlood as $index => $filler) $floor[$index] = "#"; //Mark all the positions that have been solved
 }
 
 echo number_format($price / 100, 2, ".", "") . PHP_EOL;
