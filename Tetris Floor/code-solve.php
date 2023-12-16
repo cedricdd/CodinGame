@@ -22,6 +22,24 @@ const TETROMINOES = [
     25 => [[0, 0], [0, 1], [1, 1], [1, 2]], //S 90
 ];
 
+//Function to rotate 90° to the left
+function rotateLeft(array &$floor) {
+    $rotated = [];
+    
+    $h = count($floor);
+    $w = strlen($floor[0]);
+    
+    for($x = 0; $x < $w; ++$x) {
+        $line = "";
+    
+        for($y = $h - 1; $y >= 0; --$y) $line .= $floor[$y][$x];
+        
+        $rotated[] = $line;
+    }
+    
+    $floor = $rotated;
+}
+
 function solve(string $floor, array $positions, array $counts, array $usage, int $price): array {
     
     static $history = [];
@@ -126,7 +144,7 @@ $price = 0;
 for($y = 0; $y < $h; ++$y) {
     for($x = 0; $x < $w; ++$x) {
         if($floor[$y][$x] == "#") continue;
-    
+
         //We start flood fill to find all the position we're gonna work on
         $toExplore = [[$x, $y]];
         $positions = [];
@@ -134,46 +152,44 @@ for($y = 0; $y < $h; ++$y) {
         $maxX = $maxY = -INF;
         
         while(count($toExplore)) {
-            [$x, $y] = array_pop($toExplore);
+            [$xp, $yp] = array_pop($toExplore);
             
-            $floor[$y][$x] = "#";
+            if($floor[$yp][$xp] == "#") continue;
+            else $floor[$yp][$xp] = "#";
 
-            $minX = min($x, $minX);
-            $maxX = max($x, $maxX);
-            $minY = min($y, $minY);
-            $maxY = max($y, $maxY);
+            $minX = min($xp, $minX);
+            $maxX = max($xp, $maxX);
+            $minY = min($yp, $minY);
+            $maxY = max($yp, $maxY);
             
-            $positions[] = [$x, $y];
+            $positions[] = [$xp, $yp];
             
             //We can move up, down, left & right
-            foreach([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$xm, $ym]) {
-                if($floor[$y + $ym][$x + $xm] != '.') continue;
-                
-                $toExplore[] = [$x + $xm, $y + $ym];
-            }
+            foreach([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$xm, $ym]) $toExplore[] = [$xp + $xm, $yp + $ym];
         }
 
-        //We 
         $sizeY = $maxY - $minY + 3;
         $sizeX = $maxX - $minX + 3;
         $blockFloor = array_fill(0, $sizeY, str_repeat("#", $sizeX));
 
-        foreach($positions as [$x, $y]) $blockFloor[$y - $minY + 1][$x - $minX + 1] = ".";
+        foreach($positions as [$xp, $yp]) $blockFloor[$yp - $minY + 1][$xp - $minX + 1] = ".";
 
-        $blockFloor = implode("", $blockFloor);
+        $blockFloorInline = implode("", $blockFloor);
 
         //If we haven't encountered this type of floor yet, we need to solve it
-        if(!isset($history[$blockFloor])) {
+        if(!isset($history[$blockFloorInline])) {
             $pieceID = 0;
             $counts = [];
             $pieces = [];
             $positions = [];
             $piecesType = [];
+            $blockUsage = array_fill(0, 7, 0);
+            $blockPrice = 0;
     
             //Get all the pieces that can start at every positions
             for($index = 0; $index < $sizeX * $sizeY; ++$index) {
     
-                if($blockFloor[$index] == '#') continue;
+                if($blockFloorInline[$index] == '#') continue;
     
                 foreach(TETROMINOES as $pieceType => $moves) {       
                     $piecePositions = [];
@@ -182,7 +198,7 @@ for($y = 0; $y < $h; ++$y) {
                     foreach($moves as [$xm, $ym]) {
                         $newIndex = $index + $xm + ($ym * $sizeX);
                         
-                        if($blockFloor[$newIndex] !== '.') continue 2;
+                        if($blockFloorInline[$newIndex] !== '.') continue 2;
                         
                         $piecePositions[$newIndex] = $newIndex;
                     }
@@ -207,13 +223,13 @@ for($y = 0; $y < $h; ++$y) {
                     
                     $pieceType = intdiv($piecesType[$pieceID], 4);
     
-                    $usage[$pieceType]++;
-                    $price += $prices[$pieceType];
+                    $blockUsage[$pieceType]++;
+                    $blockPrice += $prices[$pieceType];
                     
                     //Work on all the positions of the piece
                     foreach($pieces[$pieceID] as $positionID) {
                         
-                        $blockFloor[$positionID] = "#";
+                        $blockFloorInline[$positionID] = "#";
                         
                         if(!isset($positions[$positionID])) continue;
                         
@@ -242,17 +258,24 @@ for($y = 0; $y < $h; ++$y) {
     
             $bestPrice = INF; //Best price for the current block
     
-            $solutions = solve($blockFloor, $positions, $counts, array_fill(0, 7, 0), 0.0);
+            $solutions = solve($blockFloorInline, $positions, $counts, $blockUsage, $blockPrice);
         
             $bestPrice = min(array_keys($solutions));
     
-            $history[$blockFloor] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
-        }
+            //Teris pieces can be rotated so any rotation of the "block" will produce the same results
+            for($i = 0; $i < 4; ++$i) {
+                rotateLeft($blockFloor);
+    
+                $history[implode("", $blockFloor)] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
+            }
+
+            $blockFloorInline = implode("", $blockFloor);
+        } 
 
         //Update the global results
-        foreach(explode("-", $history[$blockFloor][1]) as $i => $v) $usage[$i] += $v;
-        $variations *= $history[$blockFloor][2];
-        $price += $history[$blockFloor][0];
+        foreach(explode("-", $history[$blockFloorInline][1]) as $i => $v) $usage[$i] += $v;
+        $variations *= $history[$blockFloorInline][2];
+        $price += $history[$blockFloorInline][0];
     }
 }
 
