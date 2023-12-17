@@ -17,6 +17,6 @@ fscanf(STDIN, "%d", $n);
 
 solve($n, $n, "");
 
-arsort($solutions);
+arsort($solutions,  SORT_NATURAL);
 
 echo implode(PHP_EOL, array_map('trim', $solutions)) . PHP_EOL;
