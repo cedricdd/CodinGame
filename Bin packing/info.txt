@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/780607cc083f1138d130bbf040e86689d3b0e
+https://www.codingame.com/training/medium/bin-packing
 
 Goal
 There is an array of items of various weights.
