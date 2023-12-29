@@ -1,64 +1,35 @@
 <?php
 
-//https://www.geeksforgeeks.org/longest-subarray-with-sum-greater-than-equal-to-zero/
-
 fscanf(STDIN, "%d %d %d", $n, $a, $b);
 
 $s = microtime(1);
 
-error_log("A $a -- B $b");
-
-$total = 0;
+$score = 0;
+$start = 0;
+$end = 0;
+$first = [];
 
 foreach(explode(" ", trim(fgets(STDIN))) as $i => $temp) {
-    if($temp >= $a && $temp <= $b) $temps[$i] = 1;
-    else $temps[$i] = -1;
+    $score += ($temp >= $a && $temp <= $b) ? 1 : -1;
 
-    $sum[$i] = $total += $temps[$i];
-}
+    //If the score is positive at any single time it means that every days from the start up to the current day is part of the best solution
+    if($score > 0) {
+        $start = 0;
+        $end = $i;
+    }
+    else {
+        //If this is the first time we reach this score we save it
+        if(!isset($first[$score])) $first[$score] = $i;
 
-error_log(var_export(count($temps), true));
-//error_log(var_export($temps, true));
-//error_log(var_export($sum, true));
-
-$queue = new SplPriorityQueue();
-$queue->insert([0, $n - 1, $n, $sum], $n);
-
-$history = [];
-$checks = 0;
-
-while(!$queue->isEmpty()) {
-    [$start, $end, $size, $list] = $queue->extract();
-
-    //error_log("S $start, E $end");
-    //error_log(var_export($list, true));
-
-    if(isset($history[$start][$end])) continue;
-    else $history[$start][$end] = 1;
-
-    error_log(++$checks);
-
-    if(end($list) > 0) {
-        $solution = ($start + 1) . " " . ($end + 1);
-
-        break;
-    } else {
-        $size--;
-
-        $new = $list;
-        array_pop($new);
-
-        $queue->insert([$start, $end - 1, $size, $new], $size);
-
-        $new = [];
-        for($i = 1; $i <= $size; ++$i) {
-            $new[] = $list[$i] - $temps[$start];
+        //If previously we had reached (score - 1) we know that the interval between the day we were at (score - 1) and the current day is positive,
+        //we check if this interval is bigger than our current best one.
+        if(isset($first[$score - 1]) && ($i - $first[$score - 1]) > ($end - $start)) {
+            $end = $i;
+            $start = $first[$score - 1] + 1; //We can't use the day saved, all the day saved are bad days, if we use it the interval will have a sum of 0
         }
-
-        $queue->insert([$start + 1, $end, $size, $new], $size);
     }
 }
 
-echo $solution . PHP_EOL;
+echo ($start + 1) . " " . ($end + 1) . PHP_EOL;
 
 error_log(microtime(1) - $s);
