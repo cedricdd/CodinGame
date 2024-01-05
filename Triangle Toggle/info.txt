@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/787863963f81379ccafa3f29e2b62ec2de19a
+https://www.codingame.com/training/easy/triangle-toggle
 
 Goal
 Create a rectangular grid of * such that the top left point is always 0,0 (and coordinates increase along the X-axis and the Y-axis); and the height and width are HI and WI.
