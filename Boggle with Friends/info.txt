@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/781604a419e74b98e02db65d51cd19d298a82
+https://www.codingame.com/training/medium/boggle-with-friends
 
 Goal
 ~ ~ ~ ~ ~ Background and Your Task ~ ~ ~ ~ ~
