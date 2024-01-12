@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/74694a7eecc1100bdbb21d0d2b14ca2fa2e39
+https://www.codingame.com/training/easy/odd-quad-out
 
 Goal
 Overview: Which of the 4 quadrant-values is different than the others?
@@ -17,7 +17,6 @@ The other three quads will have the standardValue.
 
 Note:
 The oddValue might be larger or smaller than the standardValue
-
 -----------------------
 |          |          |
 |  Quad-1  |  Quad-2  |
