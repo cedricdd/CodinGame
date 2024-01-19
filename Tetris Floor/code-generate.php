@@ -97,7 +97,7 @@ echo implode(" ", $prices) . PHP_EOL;
 echo implode("\n", $floor) . PHP_EOL;
 
 $prices = array_map(function($price) {
-    return intval($price * 100);
+    return str_replace(".", "", $price);
 }, $prices);
 
 $minPrice = min($prices);
