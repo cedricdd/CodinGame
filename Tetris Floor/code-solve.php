@@ -128,7 +128,7 @@ $prices = explode(" ", trim(fgets(STDIN)));
 
 //Make things easier, convert prices to int
 $prices = array_map(function($price) {
-    return intval($price * 100);
+    return str_replace(".", "", $price);
 }, $prices);
 
 
