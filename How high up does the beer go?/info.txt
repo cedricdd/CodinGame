@@ -1,0 +1,61 @@
+https://www.codingame.com/contribute/view/827466cd78c1920b0f6976b3104c010ed9f2b
+
+Goal
+
+===== Summary and your task =====
+You will be given 3 measurements (in centimeters) of a drinking-glass, sitting on a bar:
+• its bottomRadius
+• its topRadius = the radius of the lip (this is always larger than bottomRadius)
+• its height, glassHeight
+
+And you will be given a volume of beer beerVol in cubic-centimeters (also known as milliliters) that's been poured into the drinking-glass.
+
+How high up (beerHeight) in the drinking-glass does the beer go ?
+
+
+===== Geometry background: frustum =====
+
+The above-described drinking-glass (upside down) in geometry is called a frustum.
+
+Wikipedia describes it this way:
+"A cone with a region including its apex cut off by a plane is called a truncated cone; if the truncation plane is parallel to the cone's base, it is called a frustum."
+
+This formula will be needed:
+V = (1/3) * π * h * (r² + r * R + R²)
+But remember the radius of the top of the drinking-glass isn't the radius of the top of the beer.
+
+To better understand frustum geometry, you can experiment with:
+https://www.omnicalculator.com/math/truncated-cone-volume
+https://rechneronline.de/pi/truncated-cone.php
+
+
+===== Oh, tricky =====
+
+Be warned:
+This is not as simple as plugging numbers into a formula.
+There are 4 elements, and you'd need to know 3 of them to analytically solve for the other, but you only know 2 ☹️
+These elements are:
+• volume of the beer beerVol
+• bottom radius of the glass bottomRadius
+• height of the beer (unknown)
+• radius of the drinking-glass at the spot where the top of the beer is (unknown)
+
+You cannot solve analytically, but you can solve iteratively.
+
+
+===== Notes, sources =====
+
+• Beer foam doesn't matter. Think of it as water instead if you prefer
+• Source: https://en.wikipedia.org/wiki/Cone#
+
+Input
+Line 1: 4 floats separated by a space: bottomRadius topRadius glassHeight beerVol
+
+Output
+Line 1: A float, beerHeight rounded and displayed to the nearest tenth
+Height is measured perpendicular to the bar
+
+Constraints
+0 < beerHeight < glassHeight < 50
+0 < bottomRadius < topRadius < 50
+0 < beerVol < 5000
