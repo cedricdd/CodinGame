@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/79182d49d41a4512a966f68695f00f0c9b811
+https://www.codingame.com/training/medium/decimal-numbers-to-floating-numbers
 
 Goal
 You may wonder how a computer is storing decimal numbers ? Not so trivial, let's have a look !
