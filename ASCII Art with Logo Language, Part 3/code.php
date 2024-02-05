@@ -50,8 +50,6 @@ class Logo {
 
     //Turle is moving
     public function move(int $turns) {
-        error_log("Turle is at " . $this->coordinates[0] . " " . $this->coordinates[1] . " " . $this->pen);
-
         [$x, $y] = $this->coordinates;
         $radiant = deg2rad($this->angle);
         [$x1, $y1] = [$x + round(($turns - 1) * cos($radiant), 0, PHP_ROUND_HALF_UP), $y + round(($turns - 1) * sin($radiant), 0, PHP_ROUND_HALF_UP)];
@@ -68,18 +66,13 @@ class Logo {
             $sy = ($y0 < $y1) ? 1 : -1;
             $error = $dx + $dy;
 
-            error_log("angle " . $this->angle . " x0 $x0 y0 $y0 -- x1 $x1 y1 $y1");
-            
             while (true) {
-                error_log("$x0 $y0");
                 $this->grid[$y0][$x0] = $this->symbols["characters"][$this->symbols["index"]];
                 $this->symbols["index"] = ($this->symbols["index"] + 1) % strlen($this->symbols["characters"]);
 
                 if ($x0 == $x1 && $y0 == $y1) break;
 
                 $e2 = 2 * $error;
-
-                error_log("e2 $e2 -- dy $dy dx $dx error $error");
 
                 if ($e2 >= $dy) {
                     if ($x0 == $x1) break;
@@ -95,8 +88,6 @@ class Logo {
         }
 
         $this->coordinates = [$x + round($turns * cos($radiant), 0, PHP_ROUND_HALF_UP), $y + round($turns * sin($radiant), 0, PHP_ROUND_HALF_UP)];
-
-        error_log("Turle is at " . $this->coordinates[0] . " " . $this->coordinates[1]);
     }
 
     //Set background of the logo
@@ -113,20 +104,12 @@ class Logo {
     public function setSymbols(string $value) {
         $this->symbols["characters"] = $value;
         $this->symbols["index"] = 0;
+
+        error_log("Symbol is now $value");
     }
 }
 
-function setVariable(string $name, string $expression) {
-    global $variables;
-
-    $variables[$name] = getExpressionValue($expression);
-
-    //error_log("$name is now: " . $variables[$name]);
-}
-
-function getExpressionValue(string $expression): int {
-    global $variables;
-
+function getExpressionValue(string $expression, array $variables): float {
     //error_log("Expression is: $expression");
 
     //Replace all the variables
@@ -141,9 +124,19 @@ function getExpressionValue(string $expression): int {
     return eval("return $expression;");
 }
 
-function parse(string $input): void {
+function runProcedure(string $name, float $value, array $variables) {
+    global $procedures;
 
-    global $logo;
+    error_log(var_export($variables, true));
+
+    [$param, $procedure] = $procedures[$name];
+    $variables[$param] = $value;
+
+    parse($procedure, $variables);
+}
+
+function parse(string $input, array &$variables) {
+    global $logo, $procedures;
 
     $input = trim($input);
     if(empty($input)) return;
@@ -168,31 +161,54 @@ function parse(string $input): void {
 
                     error_log($command);
 
-                    if(strcasecmp($cmd, "RT") == 0) $logo->changeAngle(getExpressionValue(substr($command, 3)) * -1); //Turning right
-                    elseif(strcasecmp($cmd, "LT") == 0) $logo->changeAngle(getExpressionValue(substr($command, 3))); //Turning left
+                    if(strcasecmp($cmd, "RT") == 0) $logo->changeAngle(getExpressionValue(substr($command, 3), $variables) * -1); //Turning right
+                    elseif(strcasecmp($cmd, "LT") == 0) $logo->changeAngle(getExpressionValue(substr($command, 3), $variables)); //Turning left
                     elseif(strcasecmp($cmd, "SE") == 0) $logo->setSymbols(substr($command, 6)); //Changes the symbols printed
-                    elseif(strcasecmp($cmd, "FD") == 0) $logo->move(getExpressionValue(substr($command, 3))); //Turtle is moving
+                    elseif(strcasecmp($cmd, "FD") == 0) $logo->move(getExpressionValue(substr($command, 3), $variables)); //Turtle is moving
                     elseif(strcasecmp($cmd, "MK") == 0) {
                         [$name, $expression] = explode(" ", substr($command, 4));
-                        setVariable($name, $expression);
+
+                        $variables[$name] = getExpressionValue($expression, $variables);
                     } elseif(strcasecmp($cmd, "RP") == 0) {
                         preg_match("/^RP (.+)\s\[(.*)\]$/i", $command, $matches);
 
                         //error_log(var_export($matches));
 
-                        $count = getExpressionValue($matches[1]);
+                        $count = getExpressionValue($matches[1], $variables);
 
                         for($i = 0; $i < $count; ++$i) {
                             parse($matches[2]);
                         }
-                    } else {
-                        error_log("$index undefined command: " . $command);
-                        exit();
+                    } elseif(strcasecmp($cmd, "IF") == 0) {
+                        preg_match("/(.*) ([<=>]+) (.*) \[(.*)\]/", substr($command, 3), $matches);
+
+                        if($matches[2] == "=") $matches[2] = "==";
+
+                        $check = getExpressionValue($matches[1], $variables) . $matches[2] . getExpressionValue($matches[3], $variables);
+
+                        error_log("Checking $check");
+
+                        if(eval("return (" . $check . ") ? 1 : 0;")) {
+                            if(strcasecmp($matches[4], "stop") == 0) return;
+                            else parse($matches[4], $variables);
+                        }
+                    } //It's a procedure
+                    else {
+                        [$name, $expression] = explode(" ", $command);
+
+                        if(!isset($procedures[$name])) {
+                            error_log("$index undefined command: " . $command);
+                            exit();
+                        }
+
+                        $value = getExpressionValue($expression, $variables);
+
+                        error_log("Calling procedure $name with $value");
+                        runProcedure($name, $value, $variables);
                     }
 
                     /*
-                    if(strcasecmp($cmd, "RT") == 0) $logo->changeDirection(intdiv(intval(substr($command, 3)), ANGLE)); //Turning right
-                    
+
                     elseif(strcasecmp($cmd, "PU") == 0) $logo->setPen(0); //PENUP
                     elseif(strcasecmp($cmd, "PD") == 0) $logo->setPen(1); //PENDOWN
                     
@@ -217,7 +233,27 @@ $variables = [];
 
 fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
-    $command .= parse(trim(fgets(STDIN)));
+    $input = trim(fgets(STDIN));
+
+    if($input[-1] != ";") $input .= ";"; //Make sure it ends with ";"
+
+    $command .= $input;
 }
 
+//Extract all the procedures
+preg_match_all("/TO .*END;/iU", $command, $procedureMatches);
+
+foreach($procedureMatches[0] as $procedure) {
+    error_log("Procedure: " . substr($procedure, 3, -4));
+
+    preg_match("/^([a-zA-Z_]+) :([a-zA-Z_]+);(.*)$/", substr($procedure, 3, -4), $matches);
+
+    $procedures[$matches[1]] = [$matches[2], $matches[3]];
+
+    $command = str_replace($procedure, "", $command);
+}
+
+error_log(var_export($procedures, true));
+
+parse($command, $variables);
 $logo->draw();
