@@ -1,0 +1,19 @@
+https://www.codingame.com/training/easy/cheap-choices
+
+Goal
+You're the owner of a small business with c amount of clothing items in your inventory, and p customers enter the store during the week.
+Each item has a CATEGORY, SIZE, and PRICE.
+There is only one of each item and each item can only be used for one order.
+Each customer requests a certain CATEGORY of item in their SIZE, and takes the cheapest option if multiple are available. Each customer only has one order.
+
+Input
+Line 1: An integer c for the amount of clothing items.
+Line 2: An integer p for the amount of customers.
+Next c lines: A string item containing the CATEGORY, SIZE, and PRICE of an item separated by a space.
+Next p lines: A string order containing the CATEGORY and SIZE of item that they order separated by a space.
+
+Output
+p lines: In the order of their requests, the PRICE of the item sold to the customer, or NONE if no item matched their order.
+
+Constraints
+p > 0
