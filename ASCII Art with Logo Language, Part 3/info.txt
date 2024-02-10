@@ -39,8 +39,8 @@ It is not possible to use a parameter with the same name of a variable. Inside a
 For example
 
 to spiral :size
-   if  :size > 30 [stop]
-   fd :size rt 15
+   if :size > 30 [stop]
+   fd :size; rt 15
    spiral :size *1.02
 end
 
@@ -56,14 +56,15 @@ y1 = y0+round(steps*sin(angle))
 plotLine(x0,y0,x1,y1)
 
 
-Please note that the Turtle leaves a symbol in the starting position each time it moves with pen down, but not in the final position.
+Please note that the rounding to use is 'ROUND_HALF_EVEN' and the precision is set to 5 digits.
+Also note that the Turtle leaves a symbol in the starting position each time it moves with pen down, but not in the final position.
 
 Additional notes:
 Semi-colons ; are used to separate instructions in a line of instructions. It may also be optionally used at the end of a line of instructions. Command keyword or a procedure name and its arguments/parameters are always separated by one or more space characters.
 A variable name is always followed by ;, [, ], a newline, an end-of-line, or one or more space characters. Other than the above, all other space characters are optional.
 A command keyword may be used as a procedure name or a variable name.
 All turtle steps will be drawn using the current PU/PD and SETPC settings.
-As is part two, Turtle starts heading North, with the pen down and the initial symbol set to #.
+As is part two, Turtle starts with an angle of 90 degree (heading North), with the pen down and the initial symbol set to #.
 
 References:
 Part 1 https://www.codingame.com/training/medium/ascii-art-with-logo-language
@@ -73,6 +74,7 @@ https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 in particular see note 2 Zingl, Alois
 
 https://en.wikipedia.org/wiki/UCBLogo
+
 Input
 Line 1: An integer N, indicating the program's number of lines.
 Next N lines: lines of text with Logo instructions.
