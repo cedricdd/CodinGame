@@ -42,9 +42,14 @@ class Logo {
     }
 
     //Turle is moving
-    public function move(int $turns) {
+    public function move(float $turns) {
         [$x, $y] = $this->coordinates;
         $radiant = deg2rad($this->angle);
+
+        //error_log($this->angle);
+        //error_log(cos($radiant) . " " . sin($radiant));
+        //error_log((cos($radiant) * 4) . " " . (sin($radiant) * 4));
+        //error_log(round(($turns - 1) * cos($radiant), 0, PHP_ROUND_HALF_EVEN) . " " . (sin($radiant) * 4));
 
         //Pen is down, add symbol
         if($this->pen) {
@@ -53,7 +58,7 @@ class Logo {
             [$x0, $y0] = [$x, $y];
 
             //Turtle doesn't leaves a symbols at the final position, we need to add them for $turns - 1
-            [$x1, $y1] = [$x + round(($turns - 1) * cos($radiant), 0, PHP_ROUND_HALF_UP), $y + round(($turns - 1) * sin($radiant), 0, PHP_ROUND_HALF_UP)];
+            [$x1, $y1] = [$x + round(($turns - 1) * cos($radiant), 0, PHP_ROUND_HALF_EVEN), $y + round(($turns - 1) * sin($radiant), 0, PHP_ROUND_HALF_EVEN)];
 
             //https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
             $dx = abs($x1 - $x0);
@@ -91,8 +96,8 @@ class Logo {
 
         //Update the final coordinate of the turtle
         $this->coordinates = [
-            intval($x + round($turns * cos($radiant), 0, PHP_ROUND_HALF_UP)), 
-            intval($y + round($turns * sin($radiant), 0, PHP_ROUND_HALF_UP))
+            intval($x + round($turns * cos($radiant), 0, PHP_ROUND_HALF_EVEN)), 
+            intval($y + round($turns * sin($radiant), 0, PHP_ROUND_HALF_EVEN))
         ];
     }
 
