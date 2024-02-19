@@ -168,6 +168,7 @@ for($y = 0; $y < $h; ++$y) {
             foreach([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$xm, $ym]) $toExplore[] = [$xp + $xm, $yp + $ym];
         }
 
+        $countPositions = count($positions);
         $sizeY = $maxY - $minY + 3;
         $sizeX = $maxX - $minX + 3;
         $blockFloor = array_fill(0, $sizeY, str_repeat("#", $sizeX));
@@ -225,6 +226,7 @@ for($y = 0; $y < $h; ++$y) {
     
                     $blockUsage[$pieceType]++;
                     $blockPrice += $prices[$pieceType];
+                    $countPositions -= 4;
                     
                     //Work on all the positions of the piece
                     foreach($pieces[$pieceID] as $positionID) {
@@ -248,6 +250,8 @@ for($y = 0; $y < $h; ++$y) {
                     reset($counts); //We restart from the start, adding a piece might create more position with a single possibility
                 } else next($counts);
             }
+
+            if($countPositions == 0) continue; //Every position has already been covered 
     
             //When we work on a position we want to try the cheapest piece first
             foreach($positions as $index => $filler) {
