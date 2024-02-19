@@ -168,7 +168,6 @@ for($y = 0; $y < $h; ++$y) {
             foreach([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$xm, $ym]) $toExplore[] = [$xp + $xm, $yp + $ym];
         }
 
-        $countPositions = count($positions);
         $sizeY = $maxY - $minY + 3;
         $sizeX = $maxX - $minX + 3;
         $blockFloor = array_fill(0, $sizeY, str_repeat("#", $sizeX));
@@ -204,7 +203,7 @@ for($y = 0; $y < $h; ++$y) {
                         $piecePositions[$newIndex] = $newIndex;
                     }
     
-                    //For each positions this piece would occupy save the info
+                    //For each position this piece would occupy save the info
                     foreach($piecePositions as $indexPosition) {
                         $counts[$indexPosition] = ($counts[$indexPosition] ?? 0) + 1;
                         
@@ -216,7 +215,7 @@ for($y = 0; $y < $h; ++$y) {
                 }
             }
     
-            //For each positions where there's a single possibility directly use the piece
+            //For each position where there's a single possibility directly use the piece
             while(($index = key($counts)) !== null) {
                     
                 if($counts[$index] == 1) {
@@ -226,7 +225,6 @@ for($y = 0; $y < $h; ++$y) {
     
                     $blockUsage[$pieceType]++;
                     $blockPrice += $prices[$pieceType];
-                    $countPositions -= 4;
                     
                     //Work on all the positions of the piece
                     foreach($pieces[$pieceID] as $positionID) {
@@ -251,8 +249,6 @@ for($y = 0; $y < $h; ++$y) {
                 } else next($counts);
             }
 
-            if($countPositions == 0) continue; //Every position has already been covered 
-    
             //When we work on a position we want to try the cheapest piece first
             foreach($positions as $index => $filler) {
                 uksort($positions[$index], function($a, $b) use ($prices, $piecesType) {
