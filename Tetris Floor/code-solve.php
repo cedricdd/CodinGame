@@ -23,7 +23,7 @@ const TETROMINOES = [
 ];
 
 //Function to rotate 90° to the left
-function rotateLeft(array &$floor) {
+function rotateLeft(array $floor) {
     $rotated = [];
     
     $h = count($floor);
@@ -37,7 +37,7 @@ function rotateLeft(array &$floor) {
         $rotated[] = $line;
     }
     
-    $floor = $rotated;
+    return $rotated;
 }
 
 function solve(string $floor, array $positions, array $counts, array $usage, int $price): array {
@@ -276,7 +276,14 @@ for($y = 0; $y < $h; ++$y) {
         
             $bestPrice = min(array_keys($solutions));
 
-            $history[$blockFloorString] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
+            //Tetris pieces can be rotated so any rotation of the "block" will produce the same results
+            for($i = 0; $i < 4; ++$i) {
+                $history[$blockFloorString] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
+                
+                $blockFloorArray = str_split($blockFloorString, ($i & 1) ? $sizeY : $sizeX);
+                
+                $blockFloorString = implode("", rotateLeft($blockFloorArray));
+            }
         } 
 
         //Update the global results
