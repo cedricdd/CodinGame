@@ -4,6 +4,24 @@
 
 $start = microtime(1);
 
+//Function to rotate 90° to the left
+function rotateLeft(array $floor): array {
+    $rotated = [];
+    
+    $h = count($floor);
+    $w = strlen($floor[0]);
+    
+    for($x = 0; $x < $w; ++$x) {
+        $line = "";
+        
+        for($y = $h - 1; $y >= 0; --$y) $line .= $floor[$y][$x];
+        
+        $rotated[] = $line;
+    }
+    
+    return $rotated;
+}
+
 const TETROMINOES = [
     0 => [[0, 0], [1, 0], [2, 0], [3, 0]], //I
     1 => [[0, 0], [0, 1], [0, 2], [0, 3]], //I 180
@@ -26,36 +44,51 @@ const TETROMINOES = [
     25 => [[0, 0], [0, 1], [1, 1], [1, 2]], //S 90
 ];
 
-
-
 $floor = [
-    "##################################################",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#...#...#...#...##...#...#...#...#...#...#...#...#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "##################################################",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#...#...#...#...##...#...#...#...#...#...#...#...#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "#.......#.......##.......#.......#.......#.......#",
-    "##################################################",
+    "#####################################################################################",
+    "#.............#.............#.............#.............##...........###...........##",
+    "#..#########..#..#########..#..#########..#..#######....##...#####...##...#######...#",
+    "#..##.###.##..#..#########..#..##.###.##..#..##....##...##...#####..###..###...###..#",
+    "#..##.###.##..#..##.........#..##.###.##..#..##....###..###..#####..###..##.....##..#",
+    "##....###....##..#######....##....###....##..##....###..###..#####..###..###.......##",
+    "##....###....##..#######....##....###....##..#######....###..#####..####..#######..##",
+    "###...###...###..##.........###...###...###..##....##...###..#####..####........##..#",
+    "##....###....##..#########..##....###....##..###...##...###..#####...##..##.....##..#",
+    "##....###....##..#########..##....###....##..###...##...##...#####...##..#########..#",
+    "#..##.....##..#.............#..##.....##..#.............##...........###...........##",
+    "#####################################################################################",
 ];
 
-$w = 50;
-$h = 17;
+$w = 85;
+$h = 12;
 
 $prices = [
-    21.26, 50.21, 30.59, 84.03, 12.38, 66.47, 3.17,
+    73.99, '60.00', 64.82, 30.82, 34.79, 61.75, 15.99,
 ];
 
+/*
+$floor = [
+    "#############",
+    "#...........#",
+    "#...#####...#",
+    "#...#####..##",
+    "##..#####..##",
+    "##..#####..##",
+    "##..#####..##",
+    "##..#####..##",
+    "##..#####...#",
+    "#...#####...#",
+    "#...........#",
+    "#############",
+];
 
+$w = 13;
+$h = 12;
+
+$prices = [
+    73.99, '60.00', 64.82, 30.82, 34.79, 61.75, 15.99,
+];
+*/
 
 echo implode(" ", $prices) . PHP_EOL;
 echo implode("\n", $floor) . PHP_EOL;
@@ -66,50 +99,57 @@ $prices = array_map(function($price) {
     return str_replace(".", "", strval($price));
 }, $prices);
 
+//Get all the pieces that can start at every positions
+function getPossiblePieces(array $floor, int $w, int $h): array {
+    $pieceID = 0;
+    $counts = [];
+    $pieces = [];
+    $positions = [];
+    $piecesType = [];
+    
+    
+    for($y = 0; $y < $h; ++$y) {
+        for($x = 0; $x < $w; ++$x) {
+            if($floor[$y][$x] == '#') continue;
+            
+            foreach(TETROMINOES as $pieceType => $moves) {
+                $piecePositions = [];
+                
+                //Check if this piece could be added here
+                foreach($moves as [$xm, $ym]) {
+                    if($floor[$y + $ym][$x + $xm] !== '.') continue 2;
+                    
+                    $newIndex = (($y + $ym) * $w) + $x + $xm;
+                    
+                    $piecePositions[$newIndex] = $newIndex;
+                }
+                
+                //For each position this piece would occupy save the info
+                foreach($piecePositions as $indexPosition) {
+                    $counts[$indexPosition] = ($counts[$indexPosition] ?? 0) + 1;
+                    
+                    $positions[$indexPosition][$pieceID] = $pieceID;
+                }
+                
+                $piecesType[$pieceID] = $pieceType;
+                $pieces[$pieceID++] = $piecePositions;
+            }
+        }
+    }
+    
+    return [$pieces, $positions, $counts, $piecesType];
+}
+
 $minPrice = min($prices);
 $usage = array_fill(0, 7, 0);
 $history = [];
 $variations = 1;
 $price = 0;
 
-$pieceID = 0;
-$counts = [];
-$pieces = [];
-$positions = [];
-$piecesType = [];
-
-//Get all the pieces that can start at every positions
-for($y = 0; $y < $h; ++$y) {
-    for($x = 0; $x < $w; ++$x) {
-        if($floor[$y][$x] == '#') continue;
-    
-        foreach(TETROMINOES as $pieceType => $moves) {
-            $piecePositions = [];
-        
-            //Check if this piece could be added here
-            foreach($moves as [$xm, $ym]) {
-                if($floor[$y + $ym][$x + $xm] !== '.') continue 2;
-                
-                $newIndex = (($y + $ym) * $w) + $x + $xm;
-            
-                $piecePositions[$newIndex] = $newIndex;
-            }
-        
-            //For each position this piece would occupy save the info
-            foreach($piecePositions as $indexPosition) {
-                $counts[$indexPosition] = ($counts[$indexPosition] ?? 0) + 1;
-            
-                $positions[$indexPosition][$pieceID] = $pieceID;
-            }
-        
-            $piecesType[$pieceID] = $pieceType;
-            $pieces[$pieceID++] = $piecePositions;
-        }
-    }
-}
-
 //For each position where there's a single possibility directly use the piece
 if(USE_OPTIMS) {
+    [$pieces, $positions, $counts, $piecesType] = getPossiblePieces($floor, $w, $h);
+    
     do {
         $pieceAdded = false;
         
@@ -118,14 +158,14 @@ if(USE_OPTIMS) {
                 if(!isset($positions[$index])) continue;
                 
                 $pieceID = array_key_first($positions[$index]);
-        
+                
                 $pieceType = intdiv($piecesType[$pieceID], 4);
-        
+                
                 error_log("We need to set position $index with piece ID $pieceID -- type $pieceType");
-        
+                
                 $usage[$pieceType]++;
                 $price += $prices[$pieceType];
-        
+                
                 //Work on all the positions of the piece
                 foreach($pieces[$pieceID] as $positionID) {
                     
@@ -138,11 +178,11 @@ if(USE_OPTIMS) {
                             unset($positions[$positionID2][$pieceID2]);
                         }
                     }
-            
+                    
                     unset($positions[$positionID]);
                     unset($counts[$positionID]);
                 }
-    
+                
                 $pieceAdded = true;
             }
         }
@@ -155,6 +195,8 @@ echo implode("\n", $floor) . PHP_EOL;
 for($y = 0; $y < $h; ++$y) {
     for($x = 0; $x < $w; ++$x) {
         if($floor[$y][$x] == "#") continue;
+    
+        //if($x != 58 || $y != 1) continue;
         
         error_log("We are starting a flood at $x $y");
         
@@ -182,8 +224,6 @@ for($y = 0; $y < $h; ++$y) {
             $index = $yp * $w + $xp;
     
             $positionsInfo[] = [$xp, $yp];
-            $positionsBlock[$index] = $positions[$index];
-            $countsBlock[$index] = $counts[$index];
             
             //We can move up, down, left & right
             foreach([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$xm, $ym]) {
@@ -191,7 +231,7 @@ for($y = 0; $y < $h; ++$y) {
             }
         }
         
-        $countPositions = count($positionsBlock);
+        $countPositions = count($positionsInfo);
         
         error_log("we need to fill $countPositions positions");
     
@@ -200,33 +240,38 @@ for($y = 0; $y < $h; ++$y) {
             exit();
         }
         
-        //We generate a string representing the "block" to compare it with previously solved "blocks"
+        //We generate the "block" we're going to solve
         $sizeY = $maxY - $minY + 3;
         $sizeX = $maxX - $minX + 3;
-        $blockFloorString = str_repeat("#", $sizeX * $sizeY);
+        $blockFloor = array_fill(0, $sizeY, str_repeat('#', $sizeX));
         
         foreach($positionsInfo as [$xp, $yp]) {
-            $blockFloorString[(($yp - $minY + 1) * $sizeX) + ($xp - $minX + 1)] = ".";
+            $blockFloor[$yp - $minY + 1][$xp - $minX + 1] = ".";
         }
+        
+        $blockFloorString = implode("", $blockFloor);
         
         //If we haven't encountered this type of floor yet, we need to solve it
         if(!isset($history[$blockFloorString])) {
-            print_r(str_split($blockFloorString, $sizeX));
+    
+            [$piecesBlock, $positionsBlock, $countsBlock, $piecesTypeBlock] = getPossiblePieces($blockFloor, $sizeX, $sizeY);
             
             //When we work on a position we want to try the cheapest piece first
             foreach($positionsBlock as $index => $filler) {
-                uksort($positionsBlock[$index], function($a, $b) use ($prices, $piecesType) {
-                    $priceA = $prices[intdiv($piecesType[$a], 4)];
-                    $priceB = $prices[intdiv($piecesType[$b], 4)];
+                uksort($positionsBlock[$index], function($a, $b) use ($prices, $piecesTypeBlock) {
+                    $priceA = $prices[intdiv($piecesTypeBlock[$a], 4)];
+                    $priceB = $prices[intdiv($piecesTypeBlock[$b], 4)];
                     
                     if($priceA == $priceB) return $a <=> $b;
                     else return $priceA <=> $priceB;
                 });
             }
+    
+            print_r(str_split($blockFloorString, $sizeX));
             
             $bestPrice = INF; //Best price for the current block
             
-            $solutions = solve($blockFloorString, $positionsBlock, $countsBlock, array_fill(0, 7, 0), 0.0);
+            $solutions = solve($piecesBlock, $piecesTypeBlock, $blockFloorString, $positionsBlock, $countsBlock, array_fill(0, 7, 0), 0.0);
             
             $bestPrice = min(array_keys($solutions));
             
@@ -240,8 +285,15 @@ for($y = 0; $y < $h; ++$y) {
                 print_r($solutions[$bestPrice]);
                 exit();
             }
-            
-            $history[$blockFloorString] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
+    
+            //Tetris pieces can be rotated so any rotation of the "block" will produce the same results
+            for($i = 0; $i < 4; ++$i) {
+                $history[$blockFloorString] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
+                
+                $blockFloorArray = str_split($blockFloorString, ($i & 1) ? $sizeY : $sizeX);
+                
+                $blockFloorString = implode("", rotateLeft($blockFloorArray));
+            }
         }
         
         //Update the global results
@@ -273,7 +325,6 @@ function generateOutput(array $listPieces) {
     
     $quantities = array_fill(0, 7, 0);
     
-    
     foreach($listPieces as $pieceID => $filler) {
         $position = reset($pieces[$pieceID]);
         
@@ -282,7 +333,7 @@ function generateOutput(array $listPieces) {
         $xs = ($position % $w) * 2 + 1;
         $ys = intdiv($position, $w) * 2 + 1;
         
-        error_log("$xs $ys " . $piecesType[$pieceID]);
+        //error_log("$xs $ys " . $piecesType[$pieceID]);
         
         switch($piecesType[$pieceID]) {
             case 0:
@@ -350,10 +401,10 @@ function generateOutput(array $listPieces) {
 }
 
 //We are solving by using https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X
-function solve(string $floor, array $positions, array $counts, array $usage, int $price, array $list = []): array {
-    
+function solve(array &$pieces, array &$piecesType, string $floor, array $positions, array $counts, array $usage, int $price, array $list = []): array {
+   
     static $history = [];
-    global $pieces, $piecesType, $prices, $minPrice, $bestPrice;
+    global $prices, $minPrice, $bestPrice;
     
     $results = [];
     $hashUsage = implode("-", $usage);
@@ -363,7 +414,7 @@ function solve(string $floor, array $positions, array $counts, array $usage, int
     if($positionsLeft == 0) {
         $bestPrice = min($bestPrice, $price);
         
-//        if($price == 20764) generateOutput($list);
+        //if($price == 55610) generateOutput($list);
         
         return [strval($price) => [$hashUsage => 1]];
     }
@@ -418,7 +469,7 @@ function solve(string $floor, array $positions, array $counts, array $usage, int
             unset($counts2[$positionID]);
         }
         
-        $solutions = solve($floor2, $positions2, $counts2, $usage, $price + $prices[$pieceType], $list);
+        $solutions = solve($pieces, $piecesType, $floor2, $positions2, $counts2, $usage, $price + $prices[$pieceType], $list);
         
         foreach($solutions as $priceSolution => $listSolutions) {
             foreach ($listSolutions as $index => $count) {
