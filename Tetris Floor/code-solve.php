@@ -285,11 +285,9 @@ for($y = 0; $y < $h; ++$y) {
 
             //Tetris pieces can be rotated so any rotation of the "block" will produce the same results
             for($i = 0; $i < 4; ++$i) {
-                $history[$blockFloorString] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
+                $blockFloor = rotateLeft($blockFloor);
                 
-                $blockFloorArray = str_split($blockFloorString, ($i & 1) ? $sizeY : $sizeX);
-                
-                $blockFloorString = implode("", rotateLeft($blockFloorArray));
+                $history[implode("", $blockFloor)] = [$bestPrice, array_key_first($solutions[$bestPrice]), reset($solutions[$bestPrice])];
             }
         } 
 
