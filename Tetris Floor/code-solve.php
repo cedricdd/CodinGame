@@ -40,10 +40,51 @@ function rotateLeft(array $floor) {
     return $rotated;
 }
 
-function solve(string $floor, array $positions, array $counts, array $usage, int $price): array {
+//Get all the pieces that can start at every positions
+function getPossiblePieces(array $floor, int $w, int $h): array {
+    $pieceID = 0;
+    $counts = [];
+    $pieces = [];
+    $positions = [];
+    $piecesType = [];
+    
+    
+    for($y = 0; $y < $h; ++$y) {
+        for($x = 0; $x < $w; ++$x) {
+            if($floor[$y][$x] == '#') continue;
+            
+            foreach(TETROMINOES as $pieceType => $moves) {
+                $piecePositions = [];
+                
+                //Check if this piece could be added here
+                foreach($moves as [$xm, $ym]) {
+                    if($floor[$y + $ym][$x + $xm] !== '.') continue 2;
+                    
+                    $newIndex = (($y + $ym) * $w) + $x + $xm;
+                    
+                    $piecePositions[$newIndex] = $newIndex;
+                }
+                
+                //For each position this piece would occupy save the info
+                foreach($piecePositions as $indexPosition) {
+                    $counts[$indexPosition] = ($counts[$indexPosition] ?? 0) + 1;
+                    
+                    $positions[$indexPosition][$pieceID] = $pieceID;
+                }
+                
+                $piecesType[$pieceID] = $pieceType;
+                $pieces[$pieceID++] = $piecePositions;
+            }
+        }
+    }
+    
+    return [$pieces, $piecesType, $positions, $counts];
+}
+
+function solve(array &$pieces, array &$piecesType, string $floor, array $positions, array $counts, array $usage, int $price): array {
     
     static $history = [];
-    global $pieces, $piecesType, $prices, $minPrice, $bestPrice;
+    global $prices, $minPrice, $bestPrice;
 
     $results = [];
     $hashUsage = implode("-", $usage);
@@ -105,7 +146,7 @@ function solve(string $floor, array $positions, array $counts, array $usage, int
             unset($counts2[$positionID]); 
         }
         
-        $solutions = solve($floor2, $positions2, $counts2, $usage, $price + $prices[$pieceType]);
+        $solutions = solve($pieces, $piecesType, $floor2, $positions2, $counts2, $usage, $price + $prices[$pieceType]);
         
         foreach($solutions as $priceSolution => $listSolutions) {
             foreach ($listSolutions as $index => $count) {
@@ -136,45 +177,11 @@ for ($i = 0; $i < $h; $i++) $floor[] = trim(fgets(STDIN));
 
 $minPrice = min($prices);
 $usage = array_fill(0, 7, 0);
-$history = [];
 $variations = 1;
 $price = 0;
 
-$pieceID = 0;
-$counts = [];
-$pieces = [];
-$positions = [];
-$piecesType = [];
 
-//Get all the pieces that can start at every positions
-for($y = 0; $y < $h; ++$y) {
-    for($x = 0; $x < $w; ++$x) {
-        if($floor[$y][$x] == '#') continue;
-    
-        foreach(TETROMINOES as $pieceType => $moves) {
-            $piecePositions = [];
-        
-            //Check if this piece could be added here
-            foreach($moves as [$xm, $ym]) {
-                if($floor[$y + $ym][$x + $xm] !== '.') continue 2;
-                
-                $newIndex = (($y + $ym) * $w) + $x + $xm;
-            
-                $piecePositions[$newIndex] = $newIndex;
-            }
-        
-            //For each position this piece would occupy save the info
-            foreach($piecePositions as $indexPosition) {
-                $counts[$indexPosition] = ($counts[$indexPosition] ?? 0) + 1;
-            
-                $positions[$indexPosition][$pieceID] = $pieceID;
-            }
-        
-            $piecesType[$pieceID] = $pieceType;
-            $pieces[$pieceID++] = $piecePositions;
-        }
-    }
-}
+[$pieces, $piecesType, $positions, $counts] = getPossiblePieces($floor, $w, $h);
 
 //For each position where there's a single possibility directly use the piece
 do {
@@ -239,11 +246,7 @@ for($y = 0; $y < $h; ++$y) {
             $minY = min($yp, $minY);
             $maxY = max($yp, $maxY);
             
-            $index = $yp * $w + $xp;
-    
             $positionsInfo[] = [$xp, $yp];
-            $positionsBlock[$index] = $positions[$index];
-            $countsBlock[$index] = $counts[$index];
             
             //We can move up, down, left & right
             foreach([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$xm, $ym]) {
@@ -251,17 +254,21 @@ for($y = 0; $y < $h; ++$y) {
             }
         }
 
-       //We generate a string representing the "block" to compare it with previously solved "blocks"
-       $sizeY = $maxY - $minY + 3;
-       $sizeX = $maxX - $minX + 3;
-       $blockFloorString = str_repeat("#", $sizeX * $sizeY);
-       
-       foreach($positionsInfo as [$xp, $yp]) {
-           $blockFloorString[(($yp - $minY + 1) * $sizeX) + ($xp - $minX + 1)] = ".";
-       }
+        //We generate the "block" we're going to solve
+        $sizeY = $maxY - $minY + 3;
+        $sizeX = $maxX - $minX + 3;
+        $blockFloor = array_fill(0, $sizeY, str_repeat('#', $sizeX));
+        
+        foreach($positionsInfo as [$xp, $yp]) {
+            $blockFloor[$yp - $minY + 1][$xp - $minX + 1] = ".";
+        }
+
+        $blockFloorString = implode("", $blockFloor);
 
         //If we haven't encountered this type of floor yet, we need to solve it
         if(!isset($history[$blockFloorString])) {
+
+            [$piecesBlock, $piecesTypeBlock, $positionsBlock, $countsBlock] = getPossiblePieces($blockFloor, $sizeX, $sizeY);
 
             //When we work on a position we want to try the cheapest piece first
             foreach($positionsBlock as $index => $filler) {
@@ -272,7 +279,7 @@ for($y = 0; $y < $h; ++$y) {
     
             $bestPrice = INF; //Best price for the current block
     
-            $solutions = solve($blockFloorString, $positionsBlock, $countsBlock, [0, 0, 0, 0, 0, 0, 0], 0.0);
+            $solutions = solve($piecesBlock, $piecesTypeBlock, $blockFloorString, $positionsBlock, $countsBlock, [0, 0, 0, 0, 0, 0, 0], 0.0);
         
             $bestPrice = min(array_keys($solutions));
 
