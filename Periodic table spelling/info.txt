@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/83901eda9eb9da7be93993c6a49b21a246814
+https://www.codingame.com/training/easy/periodic-table-spelling
 
 Goal
 Your goal is to find all the ways you can write a word using only elements of the periodic table.
