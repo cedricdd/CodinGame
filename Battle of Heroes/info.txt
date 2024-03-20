@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/82449af3dd1296551bb10a2522c0ad1ec17c6
+https://www.codingame.com/training/easy/battle-of-heroes
 
 Goal
 Imagine yourself on a battlefield like in the good-old times when you played Heroes of Might and Magic (HoMM).
