@@ -21,8 +21,8 @@ function getWordHorizontal(int $x, int $y): array {
             switch($emptyBoard[$y][$x + $i]) {
                 case 'l': $score += $points[$board[$y][$x + $i]]; break;
                 case 'L': $score += $points[$board[$y][$x + $i]] * 2; break;
-                case 'w': $factor = 2; break;
-                case 'W': $factor = 3; break;
+                case 'w': $factor *= 2; break;
+                case 'W': $factor *= 3; break;
             }
         }
 
@@ -53,8 +53,8 @@ function getWordVertical(int $x, int $y): array {
             switch($emptyBoard[$y + $i][$x]) {
                 case 'l': $score += $points[$board[$y + $i][$x]]; break;
                 case 'L': $score += $points[$board[$y + $i][$x]] * 2; break;
-                case 'w': $factor = 2; break;
-                case 'W': $factor = 3; break;
+                case 'w': $factor *= 2; break;
+                case 'W': $factor *= 3; break;
             }
         }
 
