@@ -879,7 +879,7 @@ foreach($actions as $index => $action) {
             $a2 = explode(" ", $actions[$indexCombine - 2]);
             $a3 = explode(" ", $actions[$indexCombine - 1]);
             
-            if($a1[1] != $a2[1] && $a1[1] != $a2[2] && $a1[2] != $a3[1] && $a1[2] != $a3[2]) {
+            if($a1[1] != $a2[2] && $a1[2] != $a2[2] && $a1[2] != $a3[2] && $a1[2] != $a3[2]) {
                 unset($actions[$indexCombine]);
                 $indexCombine -= 2;
                 array_splice($actions, $indexCombine, 0, $action);
