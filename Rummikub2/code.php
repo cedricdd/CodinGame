@@ -532,6 +532,8 @@ class Table {
 function addTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
     $solvedSeries = [];
 
+    error_log("Trying to add " . $tile->getName());
+
     //Try to directly add the tile
     foreach($tableInitial->getRows() as $rowID => $row) {
         if(isset($forbiddenRows[$rowID])) continue;
@@ -559,6 +561,9 @@ function addTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
             $rows = $table->getRows();
 
             foreach($rows[$rowID]->couldInsert($tile) as [$method, $tileInfo]) {
+
+                error_log($rowID . " -- " . $method . " -- " . $tileInfo->getName());
+
                 if($method == "find") { 
                     $seriesUpdated = findTile($table, $tileInfo, $forbiddenRows + [$rowID => 1]);
 
@@ -607,6 +612,8 @@ function addTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
 function findTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
     $solvedSeries = [];
 
+    error_log("Looking for " . $tile->getName());
+
     //Try to directly take the tile
     foreach($tableInitial->getRows() as $rowID => $row) {
         if(isset($forbiddenRows[$rowID])) continue;
@@ -634,6 +641,9 @@ function findTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array 
             $rows = $table->getRows();
 
             foreach($rows[$rowID]->couldTake($tile) as [$method, $tileInfo]) {
+
+                error_log("find $rowID -- $method -- " . $tileInfo->getName());
+
                 if($method == "find") { 
                     $seriesUpdated = findTile($table, $tileInfo, $forbiddenRows + [$rowID => 1]);
                     
@@ -739,24 +749,63 @@ function tryCombine($tableInitial, $tile, $method, $forbiddenRows): array {
 
             $row1 = $tableCombine->getRows($rowID);
 
+            error_log("We want to combine row $rowID -- $start -- $end");
+
             foreach($tableCombine->getRows() as $rowID2 => $row2) {
+
+                error_log("Trying with $rowID2");
+
                 //It's a set or not the right color
                 if($row2->type == "set" || $row2->color != $row1->color || isset($forbiddenRows[$rowID2])) continue;
 
                 //We need to combine at the start
-                if($start && $row2->max == $row1->min -  1) {
-                    $rowID1 = $rowID;
+                if($start) {
+                    //We can directly combine
+                    if($row2->max == $row1->min -  1) {
+                        error_log("we can combine $rowID and $rowID2");
+                        $rowID1 = $rowID;
 
-                    //Rows are combine into the row with the lowest ID
-                    if($rowID2 < $rowID1) [$rowID1, $rowID2] = [$rowID2, $rowID1];
+                        //Rows are combine into the row with the lowest ID
+                        if($rowID2 < $rowID1) [$rowID1, $rowID2] = [$rowID2, $rowID1];
+        
+                        $tableUpdated = clone $tableCombine;
+                        $tableUpdated->combine($rowID1, $rowID2);
     
-                    $tableUpdated = clone $tableCombine;
-                    $tableUpdated->combine($rowID1, $rowID2);
+                        $actionsUpdated = array_merge($actions, ["COMBINE $rowID1 $rowID2"]);
+    
+                        if($end) $series[] = [$tableUpdated, $actionsUpdated, $rowID1, 0, 1]; //We still need to combine at the end
+                        else $solvedSeries[] = [$tableUpdated, $actionsUpdated, $rowID1];
+                    }
 
-                    $actionsUpdated = array_merge($actions, ["COMBINE $rowID1 $rowID2"]);
+                    //We could combine after removing some tiles (we need at least 3 tiles left)
+                    if($row2->max > $row1->min - 1 && $row1->min - $row2->min >= 3) {
+                        
+                        $series2 = [[clone $tableCombine, $actions]];
 
-                    if($end) $series[] = [$tableUpdated, $actionsUpdated, $rowID1, 0, 1]; //We still need to combine at the end
-                    else $solvedSeries[] = [$tableUpdated, $actionsUpdated, $rowID1];
+                        while(count($series2)) {
+                            [$table2, $actions2] = array_pop($series2);
+
+                            $tileInfo = new Tile($row2->max . $row2->color);
+
+                            error_log(var_export($tileInfo, true));
+                            error_log(var_export($forbiddenRows, true));
+
+                            $seriesUpdated = addTile($table2, $tileInfo, $forbiddenRows); //TODO update forbidden rows
+
+                            error_log("count is " . count($seriesUpdated));
+
+                            foreach($seriesUpdated as [$tableUpdated, $actionsTile]) {
+                                //Something went wrong, most likely the row doesn't exist anymore
+                                if($tableUpdated->remove($rowID2, $tileInfo) == false) continue;
+
+                                $actionsTile = array_merge($actions2, ["TAKE " . $tileInfo->getName() . " " . $rowID2], $actionsTile);
+
+                                error_log(var_export($actionsTile, true));
+
+                                $series[] = [$tableUpdated, $actionsTile, $rowID, 1, $end];
+                            }
+                        }
+                    }
                 }
 
                 //We need to combine at the end
@@ -828,6 +877,30 @@ usort($solutions, function($a, $b) {
 });
 
 [$table, $actions] = array_pop($solutions);
+
+//error_log(var_export($actions, true));
+
+/*
+foreach($actions as $index => $action) {
+    $action = explode(" ", $action);
+    //Check if we can move the combine earlier
+    if($action[0] == "COMBINE") {
+        for($i = $index - 1; $i >= 0; --$i) {
+            $prevAction = explode(" ", $actions[$i]);
+
+            if($prevAction[1] != $action[1] && $prevAction[1] != $action[2] && $prevAction[2] != $action[1] && $prevAction[2] != $action[2]) {
+                error_log("combine $index can go before $i");
+
+                unset($actions[$index]);
+                $index = $i;
+                array_splice($actions, $i, 0, implode(" ", $action));
+            }
+        }
+    }
+}*/
+
+//error_log(var_export($actions, true));
+
 
 echo implode("\n", $actions) . PHP_EOL;
 $table->outputRows();
