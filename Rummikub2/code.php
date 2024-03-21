@@ -532,8 +532,6 @@ class Table {
 function addTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
     $solvedSeries = [];
 
-    error_log("Trying to add " . $tile->getName());
-
     //Try to directly add the tile
     foreach($tableInitial->getRows() as $rowID => $row) {
         if(isset($forbiddenRows[$rowID])) continue;
@@ -561,8 +559,6 @@ function addTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
             $rows = $table->getRows();
 
             foreach($rows[$rowID]->couldInsert($tile) as [$method, $tileInfo]) {
-
-                error_log($rowID . " -- " . $method . " -- " . $tileInfo->getName());
 
                 if($method == "find") { 
                     $seriesUpdated = findTile($table, $tileInfo, $forbiddenRows + [$rowID => 1]);
@@ -612,8 +608,6 @@ function addTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
 function findTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
     $solvedSeries = [];
 
-    error_log("Looking for " . $tile->getName());
-
     //Try to directly take the tile
     foreach($tableInitial->getRows() as $rowID => $row) {
         if(isset($forbiddenRows[$rowID])) continue;
@@ -641,8 +635,6 @@ function findTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array 
             $rows = $table->getRows();
 
             foreach($rows[$rowID]->couldTake($tile) as [$method, $tileInfo]) {
-
-                error_log("find $rowID -- $method -- " . $tileInfo->getName());
 
                 if($method == "find") { 
                     $seriesUpdated = findTile($table, $tileInfo, $forbiddenRows + [$rowID => 1]);
@@ -749,11 +741,7 @@ function tryCombine($tableInitial, $tile, $method, $forbiddenRows): array {
 
             $row1 = $tableCombine->getRows($rowID);
 
-            error_log("We want to combine row $rowID -- $start -- $end");
-
             foreach($tableCombine->getRows() as $rowID2 => $row2) {
-
-                error_log("Trying with $rowID2");
 
                 //It's a set or not the right color
                 if($row2->type == "set" || $row2->color != $row1->color || isset($forbiddenRows[$rowID2])) continue;
@@ -762,7 +750,6 @@ function tryCombine($tableInitial, $tile, $method, $forbiddenRows): array {
                 if($start) {
                     //We can directly combine
                     if($row2->max == $row1->min -  1) {
-                        error_log("we can combine $rowID and $rowID2");
                         $rowID1 = $rowID;
 
                         //Rows are combine into the row with the lowest ID
@@ -777,6 +764,7 @@ function tryCombine($tableInitial, $tile, $method, $forbiddenRows): array {
                         else $solvedSeries[] = [$tableUpdated, $actionsUpdated, $rowID1];
                     }
 
+                    /*
                     //We could combine after removing some tiles (we need at least 3 tiles left)
                     if($row2->max > $row1->min - 1 && $row1->min - $row2->min >= 3) {
                         
@@ -805,7 +793,7 @@ function tryCombine($tableInitial, $tile, $method, $forbiddenRows): array {
                                 $series[] = [$tableUpdated, $actionsTile, $rowID, 1, $end];
                             }
                         }
-                    }
+                    }*/
                 }
 
                 //We need to combine at the end
@@ -878,29 +866,27 @@ usort($solutions, function($a, $b) {
 
 [$table, $actions] = array_pop($solutions);
 
-//error_log(var_export($actions, true));
-
-/*
 foreach($actions as $index => $action) {
-    $action = explode(" ", $action);
+    $a1 = explode(" ", $action);
     //Check if we can move the combine earlier
-    if($action[0] == "COMBINE") {
-        for($i = $index - 1; $i >= 0; --$i) {
-            $prevAction = explode(" ", $actions[$i]);
+    if($a1[0] == "COMBINE") {
+        $indexCombine = $index;
 
-            if($prevAction[1] != $action[1] && $prevAction[1] != $action[2] && $prevAction[2] != $action[1] && $prevAction[2] != $action[2]) {
-                error_log("combine $index can go before $i");
+        while($indexCombine > 0) {
+            if(strpos($actions[$indexCombine - 1], "COMBINE") !== false) break;
 
-                unset($actions[$index]);
-                $index = $i;
-                array_splice($actions, $i, 0, implode(" ", $action));
-            }
-        }
+            //Check if we can move the combine before the TAKE/PUT
+            $a2 = explode(" ", $actions[$indexCombine - 2]);
+            $a3 = explode(" ", $actions[$indexCombine - 1]);
+            
+            if($a1[1] != $a2[1] && $a1[1] != $a2[2] && $a1[2] != $a3[1] && $a1[2] != $a3[2]) {
+                unset($actions[$indexCombine]);
+                $indexCombine -= 2;
+                array_splice($actions, $indexCombine, 0, $action);
+            } else break;
+        }   
     }
-}*/
-
-//error_log(var_export($actions, true));
-
+}
 
 echo implode("\n", $actions) . PHP_EOL;
 $table->outputRows();
