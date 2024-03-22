@@ -541,12 +541,10 @@ function addTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array {
         if($tableUpdated->insert($rowID, $tile)) $solvedSeries[] = [$tableUpdated, ["PUT " . $tile->getName() . " " . $rowID]];
     }
 
-    if(count($solvedSeries)) return $solvedSeries; //We have solutions where we can directly add the tile
-
     //We first try to combine to insert
-    $solvedSeries = tryCombine($tableInitial, $tile, "PUT", $forbiddenRows);
+    $solvedSeries = array_merge($solvedSeries, tryCombine($tableInitial, $tile, "PUT", $forbiddenRows));
 
-    if(count($solvedSeries)) return $solvedSeries; //We have solutions where we can add after combining
+    if(count($solvedSeries)) return $solvedSeries;
 
     foreach($tableInitial->getRows() as $rowID => $row) {
         if(isset($forbiddenRows[$rowID])) continue;
@@ -617,12 +615,10 @@ function findTile(Table $tableInitial, Tile $tile, array $forbiddenRows): array 
         if($tableUpdated->remove($rowID, $tile)) $solvedSeries[] = [$tableUpdated, ["TAKE " . $tile->getName() . " " . $rowID]];
     }
 
-    if(count($solvedSeries)) return $solvedSeries; //We have solutions where we can directly take the tile
-
     //We first try to combine to take
-    $solvedSeries = tryCombine($tableInitial, $tile, "TAKE", $forbiddenRows);
+    $solvedSeries = array_merge($solvedSeries, tryCombine($tableInitial, $tile, "TAKE", $forbiddenRows));
 
-    if(count($solvedSeries)) return $solvedSeries; //We have solutions where we can take after combining
+    if(count($solvedSeries)) return $solvedSeries;
 
     foreach($tableInitial->getRows() as $rowID => $row) {
         if(isset($forbiddenRows[$rowID])) continue;
@@ -764,7 +760,6 @@ function tryCombine($tableInitial, $tile, $method, $forbiddenRows): array {
                         else $solvedSeries[] = [$tableUpdated, $actionsUpdated, $rowID1];
                     }
 
-                    /*
                     //We could combine after removing some tiles (we need at least 3 tiles left)
                     if($row2->max > $row1->min - 1 && $row1->min - $row2->min >= 3) {
                         
@@ -774,9 +769,6 @@ function tryCombine($tableInitial, $tile, $method, $forbiddenRows): array {
                             [$table2, $actions2] = array_pop($series2);
 
                             $tileInfo = new Tile($row2->max . $row2->color);
-
-                            error_log(var_export($tileInfo, true));
-                            error_log(var_export($forbiddenRows, true));
 
                             $seriesUpdated = addTile($table2, $tileInfo, $forbiddenRows); //TODO update forbidden rows
 
@@ -793,7 +785,7 @@ function tryCombine($tableInitial, $tile, $method, $forbiddenRows): array {
                                 $series[] = [$tableUpdated, $actionsTile, $rowID, 1, $end];
                             }
                         }
-                    }*/
+                    }
                 }
 
                 //We need to combine at the end
@@ -842,6 +834,8 @@ $table = new Table($rows);
 
 $solutions = addTile($table, $goalTile, []);
 
+error_log("Found " . count($solutions) . " solutions");
+
 //Generate info to sort the solutions
 foreach($solutions as $i => [$table, $actions]) {
     $count = 0;
@@ -854,9 +848,11 @@ foreach($solutions as $i => [$table, $actions]) {
     }
 
     array_push($solutions[$i], $count, $joker);
+
+    error_log(implode("-", $actions));
 }
 
-//Sort the soluvtions
+//Sort the solutions
 usort($solutions, function($a, $b) {   
     if($a[2] == $b[2]) {
         return $b[3] <=> $a[3]; //Don't use Joker if possible, if it's used it needs to used as early as possible
