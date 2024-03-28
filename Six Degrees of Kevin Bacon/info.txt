@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/82284b43f2707615565e26602495bc836f26d
+https://www.codingame.com/training/easy/six-degrees-of-kevin-bacon
 
 Goal
 Six Degrees of Kevin Bacon is a pop-culture game in which an arbitrarily chosen actor is repeatedly connected to another actor via a movie that both actors have appeared in together, repeating this process to try to find the shortest path that ultimately leads to the prolific American actor Kevin Bacon.
