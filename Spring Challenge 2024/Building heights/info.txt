@@ -1,0 +1,38 @@
+Today marks the beginning of a new exciting project in your career as a pixel artist: you're starting your most ambitious artwork ever! It will consist of a huge digital mural representing a futuristic city.
+ 
+The first draft of your pixel art consists of a general outline of buildings and the skyline of your virtual universe. In order to make sure that its appearance is realistic, you would like to measure the height of every building in the skyline.
+ 
+Your code will receive an array of pixel representations of several buildings from top to bottom, where each floor is represented by a * character.
+Your objective is to return an array containing the size of each building.
+ 
+Let's consider the following testcase:
+
+[
+    "*****    ",
+    "**       ",
+    "***    ",
+    "*****     ",
+    "*  "
+]
+
+Here, the first building is 5 floors tall, the second building is 2 floors tall, and so on. Your code should return the following list:
+
+[5, 2, 3, 5, 1]
+
+ 
+It is guaranteed that each string will always be of the same format: at most 50 asterisks (the building) followed by at most 50 spaces (the sky).
+
+Function
+Implement the function buildingHeights.
+
+Parameters
+$n (int): The number of buildings
+$buildingMap ((string)[]): Representation of the n buildings
+
+Return value
+$output ((int)[]): The height of each building.
+
+Constraints
+1 <= $n <= 30
+Available RAM: 512MB
+Timeout: 6 seconds
