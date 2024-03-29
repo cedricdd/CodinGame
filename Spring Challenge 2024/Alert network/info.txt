@@ -1,0 +1,43 @@
+The Pixelians are very thankful that you created an efficient pattern generator for them, this should give them some more time to consolidate their protections against the Void.
+ 
+The next defensive layer to be built is an alert system to inform the Pixelian village of upcoming Void attacks. You have noticed that the attacks come in waves that destroy all pixels of a certain color. This means that if a blue pixel is destroyed, it should send an alert to all other blue pixels, but not the other colors as they are safe.
+ 
+The communications engineer has started writing an algorithm to determine the total length of wire needed to deploy the complete alerting system:
+
+Input: a list of pixels
+Output: the total length of cable needed (modulo 10^9+7)
+
+result = 0
+for each currentPixel in pixels {
+    for each otherPixel in pixels {
+        // compute path length between the pixels.
+        // Cable can only be deployed horizontally or vertically between neighboring pixels.
+        shortestPathLength = bfsDistance(pixels, currentPixel, otherPixel)
+        result += shortestPathLength
+
+        if currentPixel.color != otherPixel.color {
+            // This cable is not needed, remove it
+            result -= shortestPathLength
+        }
+    }
+}
+return result % 1000000007
+
+This algorithm returns the correct answer, but is too slow to work on the full image which can contain up to 100 000 pixels. Can you build a more efficient algorithm?
+ 
+For example, the image ["ABC", "CBC"] needs 14 units of cable length to build the full network
+
+Function
+Implement the function getCableLength.
+
+Parameters
+$nRows (int): The height of the image.
+$nCols (int): The width of the image.
+$image ((string)[]): Pixels of the image, given row by row from top to bottom. All pixel colors are alphanumeric.
+
+Return value
+$cableLength (int): The total length of wire needed to deploy the network (modulo 10^9+7)
+
+Constraints
+Available RAM: 512MB
+Timeout: 6 seconds
