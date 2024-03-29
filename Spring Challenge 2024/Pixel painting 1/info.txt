@@ -1,0 +1,33 @@
+Objective
+Paint the correct drawing given the input commands.
+
+The next morning, you return to your pixel art project, only to discover that the file has been modified!
+
+You're very confused, but with the absolute certainty that nobody else had access to your computer and after running all antivirus scans on the market, you decide to pick up your phone. "How hard is it to build image processing software that doesn't corrupt my files overnight???", you calmly ask the customer service representative. But when asked to describe the issue precisely, you take another look at the image and realize something very peculiar: your artwork seems to be evolving on its own!
+
+In a way that appears to mimic an early form of intelligent life, the pixel structure moves in an organized manner, building and evolving a structure on its own.
+
+As a software engineer, you find the evolution pattern extremely interesting, and try to reproduce it locally to better understand what's going on. It seems like the image doesn't evolve entirely at once, the movement is always limited to a small square of pixels. Several actions happen very quickly, but they appear to always be one of the following two types:
+
+    Either an entire column fills up with black pixels, you denote this action "C <colNumber>".
+    Or an entire row gets deleted and fills up with white pixels, you denote this action "R <rowNumber>".
+
+Starting from a blank N x N canvas, implement a program that simulates the behavior of your pixel city, based on the given sequence of actions.
+
+A white pixel is represented by a . character and a black pixel is represented by a # character. Rows are numbered from 0 (top) to N-1 (bottom), and columns are also numbered from 0 (left) to N-1 (right).
+  
+Input before the first turn
+The first line provided to your program after starting contains the integer N, the size of the canvas in your simulation.
+
+Input for each turn
+On each turn, you will receive a line containing a command containing two space-separated values type and coord.
+
+    .type is a single character, either C or R, which indicates if the command paints a column in black or paints a row in white.
+    .coord is an integer, the number of the row or column affected by the operation.
+
+Output for each turn
+After applying the modification to your simulated canvas, print its content as N lines each containing N characters representing the pixels of the updated image. Note that you need to print the image after each new command is received.
+
+Constraints
+1 <= N <= 10
+Your program will receive at most 100 instructions.
