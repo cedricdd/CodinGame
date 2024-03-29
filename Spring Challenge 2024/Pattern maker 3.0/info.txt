@@ -1,0 +1,47 @@
+Painting rows and columns sure has been a nice way to create pixel patterns to defend against the Void, but you have probably noticed that some shapes are actually impossible to recreate using these elementary tools.
+ 
+The Chief Scientist of the Pixelian tribe has been working hard, and she made a breakthrough on a tool which can paint individual pixels! This piece of equipment can target any pixel on the canvas, and flip its color from white to black or from black to white.
+ 
+There are still some technical details to figure out: in addition to flipping the color of the desired pixel, this technology will also apply the same effect to the four neighboring pixels above, below, left and right (if they exist, i.e. not beyond the edge of the image). But there is no time to work on R&D right now, you need to build a final layer of defenses quickly before you go fight the Void!
+ 
+Starting from a white rectangular canvas, what is the shortest sequence of commands that reproduces the desired image? Your answer should be a list of the targeted pixel coordinates [ [row1, column1], [row2, column2], [row3, column3], ...] sorted by ascending row number then by ascending column number.
+ 
+For example, let's consider the following image of size 3x3:
+Statement imageThis image can also be represented in the same format as used in previous exercises:
+
+["###", ".##", "###"]
+
+In order to reproduce this image, the shortest possible sequence of actions has 3 activations of the pixel tool. First, let's start with a white 3x3 image:
+Statement image
+ 
+Now, let's perform action [0,0] to switch the top-left pixel and its two neighbors:
+Statement image
+ 
+Then, we use the tool on pixel [1,2]:
+Statement image
+ 
+Finally, we use it on the bottom-left pixel [2,0]. Notice how the pixel at position [1,0] is flipped from black to white in this step:
+Statement image
+ 
+The desired pattern has successfully been recreated using these 3 actions. The solution is:
+
+[[0,0], [1,2], [2,0]]
+
+It is guaranteed that each pattern will consist consists of at most 500 pixels, and that it will only admit a single shortest solution.
+
+
+
+Function
+Implement the function createPattern.
+
+Parameters
+$nRows (int): The number of rows in the target pattern.
+$nCols (int): The number of columns in the target pattern.
+$targetPattern ((string)[]): The target pattern, row by row from left to right.
+
+Return value
+$output (((int)[])[]): The shortest possible list of pixel coordinates to activate in order to reproduce the target pattern.
+
+Constraints
+Available RAM: 512MB
+Timeout: 6 seconds
