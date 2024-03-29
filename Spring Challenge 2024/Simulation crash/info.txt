@@ -1,0 +1,33 @@
+You're finally there. The Void stands in front of you, ready to destroy the rest of your precious artwork and eliminate the Pixelians.
+ 
+Specific patterns only managed to slow down the Void and couldn't destroy it, but you know there is one more thing you can use to corrupt the void and cause it to destroy itself.
+ 
+In order to save disk space, the image is stored in a compressed format that leverages Huffman tables: some sequences of pixels that repeat often in the image can be summarized with short bit codes (up to 32 bits per code). All the compressed codes are then concatenated into the file.
+ 
+For example, let's say the code representing 8 consecutive black pixels is compressed as "010" and the code for 15 green pixels is "11". If our image contains a pattern of 24 black pixels followed by 30 green pixels, we could compress it very efficiently into the sequence "0100100101111".
+ 
+Huffman tables need to respect one essential property to make sure that a given bit sequence can be decoded uniquely: no code can contain another code as its prefix. For example, if the table contains three codes "01", "101" and "011", the sequence "01101" is ambiguous since it can either be decoded as "01/101" or "011/01".
+ 
+You know that the Void destroys pixels by directly manipulating the file, and you have noticed that some of its edits are actually affecting the Huffman table, which can sometimes make it invalid. That's your opportunity to cause a crash! By creating an ambiguous sequence among the bits of the file, the Void would have its memory corrupted and get its process destroyed in the process.
+ 
+Given the list of binary codes in the modified Huffman table, return the shortest possible valid sequence that admits multiple decodings.
+
+    If several such sequences exist, return the smallest one in lexicographic order.
+    If no such sequences exist, return "X".
+
+It is guaranteed that all input codes are distinct.
+
+
+Function
+Implement the function crashDecode.
+
+Parameters
+$codes ((string)[]): The list of binary codes in the table
+
+Return value
+$ambiguousSequence (string): The shortest and smallest possible ambiguous sequence. If no such sequence exists, return "X"
+
+Constraints
+length($codes) <= 1,000
+Available RAM: 512MB
+Timeout: 6 seconds
