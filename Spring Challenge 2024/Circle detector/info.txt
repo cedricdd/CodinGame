@@ -1,0 +1,60 @@
+After spending hours analyzing the pixels in your image, you realize something very peculiar about the shapes that appeared in the artwork: a perfect circle will sometimes appear among the chaos, and you feel a strange attraction to these circles. They feel like an invitation to dive inside the image and join another dimension!
+ 
+If you manage to find a way to detect the circles before they disappear, you should be able to jump inside and be transported among the pixels to figure out what's going on inside.
+ 
+You need to write a function that detects the center coordinate of the largest circle that appears in the image. Here's what you know about them:
+
+    The center is located exactly on a pixel contained within the image.
+    The circle has an integer radius R.
+    All pixels with a distance in [R, R+1[ from the center are contained within the image and are the same color.
+
+The image will be provided as a list of nRows strings with length nCols each, representing the rows of pixels from top to bottom. Each pixel is a single alphanumeric character representing its color.
+ 
+Your code needs to return a list containing exactly 3 integer values [r, c, R] representing the largest circle found within the image:
+
+    r is the vertical coordinate of the circle's center.
+    c is the horizontal coordinate of the circle's center.
+    R is the radius of the circle.
+
+The top-left pixel has coordinates (0,0).
+ 
+For example, let's take the following image:
+
+[
+  "bbCCCCC3cC3c",
+  "1CAABBBC3c3c",
+  "aCAAbbbC312A",
+  "aCCBbabCB111",
+  "3CBBbbbC2C12",
+  "CCBAca3C2a1C",
+  "2ACCCCCaaaaa",
+  "b33ccccccccc"
+]
+
+ 
+This image contains a circle of radius 3, centered on the pixel located at row 3, column 4 (shown here with a green border). Pixels forming the circle are the ones having Euclidean distance between 3 (included) and 4 (excluded), shown here with a yellow border. This is the largest circle in the image (there is also one circle with radius 1 and many circles with radius 0).
+Statement image
+In this case, your code should return the following answer, in the format:
+
+[3, 4, 3]
+
+ 
+It is guaranteed that there will only be a single largest circle within the image.
+
+
+Function
+Implement the function findLargestCircle.
+
+Parameters
+$nRows (int): The height of the image.
+$nCols (int): The width of the image.
+$image ((string)[]): Pixels of the image, given row by row from top to bottom.
+
+Return value
+$largestCircle ((int)[]): The parameters of the largest circle [centerRow, centerCol, radius].
+
+Constraints
+3 <= $nRows <= 100
+3 <= $nCols <= 100
+Available RAM: 512MB
+Timeout: 6 seconds
