@@ -1,0 +1,43 @@
+Objective
+Create a sequence of commands that paints the desired image.
+ 
+
+It worked, you've managed to enter your own pixel artwork!
+
+Without even giving you a second to breathe and adapt to your new digital body, a creature comes running towards you. "You need to help us!", she begs. After discussing with her tribe and listening to their story, you understand that all images are actually inhabited by Pixelians, that usually manage to stay well hidden under the pixels and remain undetected by humans.
+
+However, the gigantic size of your project gave birth to a strange creature they call the Void. The Void destroys every pixel in its path, and nothing appears to be able to stop it. The Pixelians realized that some pixel patterns are more robust against it, and without any other solution to protect their own existence they decided to break their golden rule and change your image. All the activity you observed on your art was more than a sign of life, it was actually Pixelians building defenses!
+
+There is still work to be done. These patterns are a good start slow down the infection, but you will eventually need to find a way to destroy the Void for good if you want to save your artwork and the Pixelians that live in its file. For now, let's focus on finding the optimal pattern to slow down the attack.
+
+As you correctly observed earlier, Pixelians can edit small parts of the image by either painting a column in black or a row in white. The leader of pixel defenses has a few patterns he'd like to try, but he can't manage to build them. Can you help him?
+
+You need to create a sequence of instructions that recreates the desired pattern. The allowed operations are the same as problem 2:
+
+    Fill a column with black pixels, you denote this action "C <colNumber>".
+    Fill a row with white pixels, you denote this action "R <rowNumber>".
+
+Starting from a blank $n x $n canvas, create a sequence of commands that produce the provided image.
+
+A white pixel is represented by a . character and a black pixel is represented by a # character. Rows are numbered from 0 (top) to N-1 (bottom), and columns are also numbered from 0 (left) to N-1 (right).
+  Implementation
+
+Implement the function solve($n, $targetImage). This function must return an array of strings: the list of instructions needed to recreate the provided $targetImage.
+
+The function takes 2 parameters:
+
+    $n is an integer representing the size of the canvas.
+    $targetImage is an array of strings that represents the image you need to produce. The image is given from top to bottom, meaning that row 0 is the first string in the array.
+
+Victory conditions
+After running all the instructions provided by your program, the resulting image matches exactly the provided target image.
+Lose Conditions
+
+    Your program produces an invalid command.
+    Your program returns more than 500 commands.
+    The resulting image does not match the target imaage.
+
+Constraints
+
+    3 ≤ $n ≤ 10
+    For each testcase, it is guaranteed that there exists a valid solution in fewer than 50 commands. You do not need to return the shortest possible sequence, any valid sequence containing 500 instructions or less will be accepted.
