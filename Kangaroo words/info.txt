@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/872345c3cdc0fc8ff39dedbd2ea1901b99440
+https://www.codingame.com/training/easy/kangaroo-words
 
 Goal
 Given a thesaurus, consisting of words grouped by synonyms, you must identify all kangaroo words and their corresponding joey words.
@@ -14,7 +14,7 @@ Given a thesaurus with 2 groups of synonyms:
 detect, examine, inspect, note, see, observe
 bag, box, can, container, tank, tin
 
-output the 2 kangaroo words on separate lines in alphabetical order. After each kangaroo output : followed by all corresponding joeys, in alphabetical order, separated by ,
+Output the 2 kangaroo words on separate lines in alphabetical order. After each kangaroo output : followed by all corresponding joeys, in alphabetical order, separated by ,
 
 container: can, tin
 observe: see
