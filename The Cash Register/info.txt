@@ -1,0 +1,18 @@
+https://www.codingame.com/contribute/view/87599157e9ad1c10bcfcc38937b3973d4472f
+
+Goal
+One of your friends came yesterday to ask you for help. He has opened a shop, and he would like to give change to his clients with as few coins as possible. Unfortunately, he is not very good at maths, and as he knows that you are a computer engineer, he thought you could create a program that would tell him which coins he has to give back according to what he has left in his cash register.
+
+To make it simpler, we will suppose that there are enough coins for each denomination present in the cash register
+
+Input
+Line 1 : A string containing integers separated by spaces called register, representing the values of the coins available in the cash register
+Line 2: An integer goalAmount representing the total amount to give back.
+
+Output
+Line 1 : A list of integers separated by spaces, representing the list of the coins to give back, sorted in decreasing order (print 0 if there is nothing to give back)
+
+Constraints
+There can't be more than 10 different denominations in the cash register
+Values of register are sorted in increasing order.
+0 <= goalAmount <= 10 000
