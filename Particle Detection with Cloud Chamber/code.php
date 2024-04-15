@@ -64,7 +64,7 @@ else {
  * x3²+y3² | x3 | y3 | 1
  */
 
-$m11 = matrix([[$p1[0], $p1[1], 1], [$p2[0], $p2[1], 1], [$p3[0], $p3[1], 1]]); //mxy => we solve the m after removing the row x and col y
+$m11 = matrix([[$p1[0], $p1[1], 1], [$p2[0], $p2[1], 1], [$p3[0], $p3[1], 1]]); //mxy => we solve the matrix m after removing the row x and col y
 
 //It's not a circle, it's a neutron
 if($m11 == 0) exit("n0 inf");
