@@ -76,15 +76,15 @@ $m14 = matrix([[$p1[0] ** 2 + $p1[1] ** 2, $p1[0], $p1[1]], [$p2[0] ** 2 + $p2[1
 $x0 = 0.5 * ($m12 / $m11); //X coordinate of the center
 $y0 = -0.5 * ($m13 / $m11); //Y coordinate of the center
 $r = sqrt($x0 ** 2 + $y0 ** 2 + $m14 / $m11); //Radius of the center
-$r = round($r / 10) * 10;
+$G = 1000000 * $gamma * $V / ($B * $r * C);
 
 //Check each particles
 foreach(PARTICLES as $name => [$q, $m, $s]) {
-    //Calculate the theorical radius
-    $theoricalR = (1000000 * $gamma * $m * $V) / (abs($q) * $B * C);
-    
+    //Calculate the theorical value
+    $g = abs($q) / $m;
+
     //We have found the particle
-    if(abs($theoricalR - $r) / $theoricalR < 0.5) exit("$s $r");
+    if(abs($g - $G) / $g < 0.45) exit("$s " . round($r, -1));
 }
 
 echo "I just won the Nobel prize in physics !" . PHP_EOL;
