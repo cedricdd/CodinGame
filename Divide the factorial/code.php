@@ -12,7 +12,7 @@ function findPowerPrime(int $fact, int $p): int {
     return $res; 
 } 
 
-//Return the primes factor decompostion of an integer $n
+//Return the prime factor decomposition of an integer $n
 function primeFactors(int $n): array {
     $factors = [];
 
