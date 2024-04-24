@@ -40,8 +40,12 @@ $nodes[] = []; //Add the root
 
 fscanf(STDIN, "%d", $N);
 for ($i = 0; $i < $N; $i++) {
-    addWord(trim(fgets(STDIN)));
+    $words[] = trim(fgets(STDIN));
 }
+
+sort($words); //To be able to easily compare nodes we need to make sure letters are always added in the same order (ie alphabetically)
+
+foreach($words as $word) addWord($word);
 
 $unique = [];
 
