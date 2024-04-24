@@ -1,100 +1,92 @@
 <?php
 
-const ALPHABET = ['a' => 0,'b' => 1,'c' => 2,'d' => 3,'e' => 4,'f' => 5,'g' => 6,'h' => 7,'i' => 8,'j' => 9,'k' => 10,'l' => 11,'m' => 12,'n' => 13,'o' => 14,'p' => 15,'q' => 16,'r' => 17,'s' => 18,'t' => 19,'u' => 20,'v' => 21,'w' => 22,'x' => 23,'y' => 24,'z' => 25];
+function addWord(string $word) {
+    global $nodes;
 
-class Tree {
-    private $root;
+    $nodeIndex = 0; //We start at the root
+    $len = strlen($word);
 
-    public function __construct() {
-        $this->root = new Node("", false);
+    for($i = 0; $i < $len; ++$i) {
+        $index = $word[$i];
+
+        //This node currently doesn't have a link for this letter
+        if(!isset($nodes[$nodeIndex]["childs"][$index])) {
+            $nodes[] = ["childs" => [], "end" => $i == $len - 1];
+            $newNodeIndex = array_key_last($nodes);
+
+            $nodes[$nodeIndex]["childs"][$index] = $newNodeIndex;
+        } 
+        
+        $nodeIndex = $nodes[$nodeIndex]["childs"][$index]; //Update the node index
+    }
+}
+
+function checkIfSimilar(int $n1, int $n2): bool {
+    static $history;
+    global $nodes, $redirections;
+
+    //Check if we have previously merge any of the nodes
+    if(isset($redirections[$n1])) $n1 = $redirections[$n1];
+    if(isset($redirections[$n2])) $n2 = $redirections[$n2];
+
+    if(isset($history[$n1][$n2])) return $history[$n1][$n2];
+
+    //One is an end, the other isn't, they are not similar
+    if($nodes[$n1]["end"] != $nodes[$n2]["end"]) {
+        return $history[$n1][$n2] = $history[$n2][$n1] = false;
     }
 
-    public function insert(string $word) {
-        $node = $this->root;
-        $len = strlen($word);
+    //They don't have the same number of children, they are not similar
+    if(count($nodes[$n1]["childs"]) != count($nodes[$n2]["childs"])) {
+        return $history[$n1][$n2] = $history[$n2][$n1] = false; 
+    }
 
-        error_log('adding ' . $word);
-
-        for($i = 0; $i < $len; ++$i) {
-            $index = ALPHABET[$word[$i]];
-
-            if($node->hasChild($index) == false) {
-                $newNode = new Node($word[$i], ($i == $len - 1));
-                $node->addChild($index, $newNode);
-            } 
-            
-            $node = $node->getChild($index);
+    foreach($nodes[$n1]["childs"] as $letter => $childID) {
+        //Node 2 doesn't have a child with that letter, they are not similar
+        if(!isset($nodes[$n2]["childs"][$letter])) {
+            return $history[$n1][$n2] = $history[$n2][$n1] = false; 
+        } //Check recursivly if the children are similar 
+        elseif(checkIfSimilar($childID, $nodes[$n2]["childs"][$letter]) == false) {
+            return $history[$n1][$n2] = $history[$n2][$n1] = false; 
         }
     }
 
-    public function getNodeCount(): int {
-        return $this->root->getChildCount();
-    }
+    return $history[$n1][$n2] = $history[$n2][$n1] = true;
+}
 
-    public function minimize() {
-        $node = $this->root;
+function minimize() {
+    global $nodes, $redirections;
 
-        while(true) {
-            error_log("at node " . $node->character);
-            $childs = $node->getChilds();
+    $count = count($nodes);
 
-            //If there's only on child, there's nothing to do
-            if(count($childs) == 1) {
-                $node = reset($childs);
-            } else {
-                foreach($childs as $i => $child1) {
-                    foreach($childs as $j => $child2) {
-                        if($i >= $j) continue;
+    for($i = 0; $i < $count; ++$i) {
+        if(!isset($nodes[$i])) continue;
 
-                        error_log("need to compare $i & $j");
-                    }
-                }
+        for($j = $i + 1; $j < $count; ++$j) {
+            if(!isset($nodes[$j])) continue;
 
-                break;
+            //If two nodes are similar we can merge them
+            if(checkIfSimilar($i, $j)) {
+                unset($nodes[$j]);
+
+                $redirections[$j] = $i;
             }
         }
     }
 }
 
-class Node {
-    public $character;
-    private $childs;
-    private $wordEnd;
-    private $counted;
+$start = microtime(1);
 
-    public function __construct(string $character, bool $wordEnd) {
-        $this->character = $character;
-        $this->wordEnd = $wordEnd;
-        $this->childs = [];
-        $this->counted = false;
-    }
-
-    public function hasChild(int $index): bool {
-        return isset($this->childs[$index]);
-    }
-
-    public function addChild(int $index, Node $node) {
-        $this->childs[$index] = $node;
-    }
-
-    public function getChild(int $index): Node {
-        return $this->childs[$index];
-    }
-
-    public function getChilds(): array {
-        return $this->childs;
-    }
-}
-
-$tree = new Tree();
+$nodes = [];
+$nodes[] = ["childs" => [], "end" => false]; //Add the root
 
 fscanf(STDIN, "%d", $N);
 for ($i = 0; $i < $N; $i++) {
-    $tree->insert(trim(fgets(STDIN)));
+    addWord(trim(fgets(STDIN)));
 }
 
-error_log(var_export($tree, true));
+minimize();
 
-$tree->minimize();
+echo (count($nodes) + 1) . PHP_EOL;
 
-// echo $tree->getNodeCount() . PHP_EOL;
+error_log(microtime(1) - $start);
