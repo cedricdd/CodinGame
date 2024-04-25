@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/8700378788609d29ea47b7d65c191ef84043c
+https://www.codingame.com/training/easy/zeckendorf-representation-part-i
 
 Goal
 Zeckendorf's theorem asserts that each positive integer can be expressed uniquely as the sum of one or more non-consecutive positive Fibonacci numbers.
