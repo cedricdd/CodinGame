@@ -25,11 +25,10 @@ const COUNTS = array (
 );
 
 function solve(string $n): string {
-    $len = strlen($n);
     $solution = "";
 
-    //The nth solid integer is bigger than n, we start by checking with an extra digit than n, from left to right
-    for($i = $len + 1; $i > 0; --$i) {
+    //We search for the value of the digit at position i, from left to right
+    for($i = 20; $i > 0; --$i) {
         $d = 0;
 
         /**
