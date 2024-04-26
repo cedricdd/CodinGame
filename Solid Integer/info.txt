@@ -1,0 +1,16 @@
+https://www.codingame.com/training/medium/solid-integer
+
+Goal
+We call an integer solid if it is positive and we do not need to use the digit 0 to write it down in base 10.
+For example, 115 is solid, but 10 and 1205 are not.
+The 10th solid integer is 11 because the first 10 solid integers are 1, 2, 3, 4, 5, 6, 7, 8, 9, 11.
+For each value of n, you have to compute the nth solid integer.
+
+Input
+An integer n.
+
+Output
+The nth solid integer.
+
+Constraints
+0 <n< 2^63
