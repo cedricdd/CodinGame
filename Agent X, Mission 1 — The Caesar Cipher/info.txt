@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/864107af2c02e58565d47823f4fede9f72cc7
+https://www.codingame.com/training/easy/agent-x-mission-1-the-caesar-cipher
 
 Goal
 [Crackling static]
@@ -26,12 +26,14 @@ For example, with a key of 3:
 Words are always separated by SP, ,, ., ?, ;, : and !
 
 Input
-Line 1 message : The encrypted message to be decrypted.
+Line 1 ciphertext : The encrypted message to be decrypted.
 Line 2 word : A word that is guaranteed to appear in the decrypted message
 
 Output
 Line 1 key : The key of the Caesar cipher.
-Line 2 decrypted_message : The decrypted message.
+Line 2 plaintext : The decrypted message.
+Constraints
+Length of word<25
 
 Constraints
 Length of word<25
