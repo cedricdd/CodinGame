@@ -1,0 +1,57 @@
+https://www.codingame.com/contribute/view/92151ec583af81e86d9790334193ae88ed06f
+
+Goal
+M.A.R.I. is a Mobile Autonomous Robotic Intelligence who works in a factory.
+After a thunder storm, the factory has gone crazy and you need to help her fixing it, crossing the factory to the last room where the central command is.
+
+Instructions
+Here are M.A.R.I.’s instructions:
+* p1 Go 1 square forward
+* p2 Go 2 squares forward
+* nop Do nothing (use it only as the last instruction of a set)
+* tl Turn left
+* tr Turn right
+* bk Drop the following instructions in the set
+* x2 Run twice the next instruction
+* uk Use key (to move the door)
+* zl Turn left then becomes a zr
+* zr Turn right then becomes a zl
+
+How to play
+But M.A.R.I. is also a bit messed up.
+You must play the instructions one by one.
+Each time you use an instruction from the list, M.A.R.I. plays the complete set of instructions from the beginning of the set, not only the one you used.
+You can insert the new instruction wherever you want.
+You might not use all the instructions.
+The first instruction is already engaged but you must use one of the next ones in order to move M.A.R.I.
+If the instruction list begins with a space, no instruction is already engaged.
+
+Example
+The solution to the first room is p2 p1 p2 p1 tr p2. But why?
+First set, you play p2. She has not reached the exit so you must use another instruction.
+Second set, you insert p1 before p2, M.A.R.I. must execute p1 p2. Still not on the exit.
+Third set, finally you insert tr between p1 and p2, follows p1 tr p2. M.A.R.I. reaches the exit. Well done!
+Just write these six instructions.
+
+The rooms
+Each room is 5 squares wide and 7 squares high. M.A.R.I. must not go out!
+Here is the meaning of the squares:
+* # Wall, do not bump into
+* . Empty square
+* 0 north 1 east 2 south 3 west is the initial position and direction of M.A.R.I.
+* E The exit where you need to end a set of instructions to finish the game
+* G A gear unfortunately fallen on the ground. You can only push it (like sokoban)
+* k If this tile is present, you need to grab it to finish the game or to use the door; and to end an instruction on it to grab it (beware of p2)
+* dd Moving see-saw door. Don’t crush M.A.R.I.!
+* r Railway for the door, you can walk on it if the door is not there
+* W Railway for the door inside a wall, same as # for M.A.R.I.
+
+Input
+Line 1: The instructions
+Next 7 lines: The room
+
+Output
+The instructions that bring M.A.R.I. to the exit
+
+Constraints
+Each room has got only one solution if nop is used as the last instruction.
