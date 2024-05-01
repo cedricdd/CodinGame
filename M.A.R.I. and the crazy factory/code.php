@@ -3,59 +3,121 @@
 //0 north 1 east 2 south 3 west
 const MOVES = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 
-function applyInstruction(int $x, int $y, string $d, array $instructions): array {
-    global $map;
+function applyInstruction(int $x, int $y, string $d, array $gear, array $door, bool $needKey, array $instructions): array {
+    global $map, $doorPositions;
 
-    foreach($instructions as $instruction) {
-        if($instruction == "p1") {
-            $x += MOVES[$d][0];
-            $y += MOVES[$d][1];
+    $count = count($instructions);
 
-            if(($map[$y][$x] ?? '#') == '#') return [-1, -1, ''];
-        } elseif($instruction == "p2") {
-            for($i = 0; $i < 2; ++$i) {
+    foreach($instructions as $i => $instruction) {
+        if($instruction == "x2") {
+            if($count == 1 || ($instructions[$i + 1] ?? "x2") == "x2") return [-1, -1, '', null, null, false, null];
+            $instruction = $instructions[$i + 1]; //Run twice the next instruction
+        }
+
+        switch($instruction) {
+            case "p2": //Go 2 squares forward
                 $x += MOVES[$d][0];
                 $y += MOVES[$d][1];
+    
+                if(($map[$y][$x] ?? '#') == '#' || isset($door[$y][$x])) return [-1, -1, '', null, null, false, null]; //Can't move there
 
-                if(($map[$y][$x] ?? '#') == '#') return [-1, -1, ''];
-            }
+                //We are pushing a gear
+                if(isset($gear[$y][$x])) {
+                    $xg = $x + MOVES[$d][0];
+                    $yg = $y + MOVES[$d][1];
+
+                    if(($map[$yg][$xg] ?? '#') == '#' || isset($door[$yg][$xg])) return [-1, -1, '', null, null, false, null]; //Can't push the gear
+
+                    $gear = [$yg => [$xg => 1]];
+                }
+            case "p1": // Go 1 square forward
+                $x += MOVES[$d][0];
+                $y += MOVES[$d][1];
+    
+                if(($map[$y][$x] ?? '#') == '#' || isset($door[$y][$x])) return [-1, -1, '', null, null, false, null]; //Can't move there
+
+                //We are pushing a gear
+                if(isset($gear[$y][$x])) {
+                    $xg = $x + MOVES[$d][0];
+                    $yg = $y + MOVES[$d][1];
+
+                    if(($map[$yg][$xg] ?? '#') == '#' || isset($door[$yg][$xg])) return [-1, -1, '', null, null, false, null]; //Can't push the gear
+
+                    $gear = [$yg => [$xg => 1]];
+                }
+                break;
+            case "bk": //Drop the remaining instructions in the set
+                break 2; 
+            case "zl": //Turn left then acts like a zr
+                $instructions[$i] = "zr";
+            case "tl": //Turn left
+                $d = ($d - 1 + 4) % 4; 
+                break;
+            case "zr": //Turn right then acts like a zl
+                $instructions[$i] = "zl";
+            case "tr": //Turn right
+                $d = ($d + 1) % 4; 
+                break;
+            case "nop": //Do nothing
+                if($i != $count - 1) return [-1, -1, '', null, null, false, null]; //We can only have nop as last instruction
+                break; 
+            case "uk": //Use key (to slide the door)
+                if($door == $doorPositions[0]) $door = $doorPositions[1];
+                else $door = $doorPositions[0];
+                break;
         }
-        elseif($instruction == "tl") $d = ($d - 1 + 4) % 4;
-        elseif($instruction == "tr") $d = ($d + 1) % 4;
     }
 
-    return [$x, $y, $d];
+    if($needKey && $map[$y][$x] == 'k') $needKey = false; //We have found the key
+
+    return [$x, $y, $d, $gear, $door, $needKey, $instructions];
 }
 
-function solve(int $xs, int $ys, string $ds, array $ins, string $list = "") {
-    global $xd, $yd, $start;
+function solve(int $xs, int $ys, string $ds, array $gear, array $door, bool $needKey, array $listIns, array $possibleIns, array $orderIns) {
+    global $xd, $yd, $firstForced;
     static $history = [];
 
-    if($xs == $xd && $ys == $yd) {
-        error_log(microtime(1) - $start);
-        error_log(trim($list));
-        return;
+    //We reached the exit
+    if(!$needKey && $xs == $xd && $ys == $yd) {
+        $solution = [];
+        $instructions = [];
+
+        //Generate the instructions that bring M.A.R.I. to the exit
+        foreach($orderIns as $i => [$index, $instruction]) {
+            array_splice($instructions, $index, 0, $instruction);
+
+            if($firstForced && $i == 0) continue;
+
+            $solution[] = implode(" ", $instructions);
+        }
+
+        exit(implode(" ", $solution));
     }
 
-    $count = count($ins);
+    $count = count($listIns);
+    $hash = serialize($orderIns);
 
-    if(isset($history[$ys][$xs][$ds]) && $history[$ys][$xs][$ds] <= $count) {
-        error_log("history for $xs $ys $ds");
-        return;
-    }
-    else $history[$ys][$xs][$ds] = $count;
+    if(isset($history[$hash])) return;
+    else $history[$hash] = 1;
 
-    for($i = 0; $i <= $count; ++$i) {
-        foreach(["p1", "p2", "tr"] as $instruction) {
-            $insUpdated = $ins;
-            array_splice($insUpdated, $i, 0, $instruction);
+    for($i = $count; $i >= 0; --$i) {
+        foreach($possibleIns as $j => $instruction) {
+            if($instruction == "uk" && $needKey) continue; //We can't slide the door without the key
+            
+            $listIns2 = $listIns;
+            array_splice($listIns2, $i, 0, $instruction);
 
-            // error_log(var_export($insUpdated, true));
+            [$x, $y, $d, $gear2, $door2, $needKey2, $listIns2] = applyInstruction($xs, $ys, $ds, $gear, $door, $needKey, $listIns2);
 
-            [$x, $y, $d] = applyInstruction($xs, $ys, $ds, $insUpdated);
+            //The set of instructions is valid
+            if($x != -1 && $y != -1) {
+                unset($possibleIns[$j]);
 
-            if($x != -1 && $y != 1) {
-                solve($x, $y, $d, $insUpdated, $list . " " . implode(" ", $insUpdated));
+                $orderIns[$count] = [$i, $instruction];
+
+                solve($x, $y, $d, $gear2, $door2, $needKey2, $listIns2, $possibleIns, $orderIns);
+
+                $possibleIns[] = $instruction;
             }
         }
     }
@@ -63,15 +125,26 @@ function solve(int $xs, int $ys, string $ds, array $ins, string $list = "") {
 
 $start = microtime(1);
 
-$ins = stream_get_line(STDIN, 40 + 1, "\n");
+$possibleIns = stream_get_line(STDIN, 40 + 1, "\n");
+$needKey = false;
+$door = [];
+$doorPositions = [];
+$orderIns = [];
+$firstForced = false;
+$gear = [];
 
-if($ins[0] == ' ') $ins = []; //We don't care about these instructions
-else {
-    $ins = explode(" ", $ins);
-    $ins = array_slice($ins, 0, 1);
+if($possibleIns[0] != ' ') $firstForced = true;
+
+$possibleIns = explode(" ", trim($possibleIns));
+
+//The forced instruction is forced
+if($firstForced) {
+    $instruction = array_shift($possibleIns);
+    $listIns[] = $instruction;
+    $orderIns[] = [0, $instruction];
 }
+else $listIns = [];
 
-error_log(var_export($ins, true));
 
 for ($y = 0; $y < 7; ++$y) {
     $line = trim(fgets(STDIN));
@@ -88,10 +161,35 @@ for ($y = 0; $y < 7; ++$y) {
         } elseif($c == 'E') {
             $xd = $x;
             $yd = $y;
+        } elseif($c == 'k') {
+            $needKey = true;
+        } elseif($c == 'd') {
+            $door[$y][$x] = 1;
+        } elseif($c == 'r') {
+            $xRail = $x;
+            $yRail = $y;
+        } elseif($c == 'G') {
+            $gear[$y][$x] = 1;
         }
     }
 }
 
-error_log("$xs $ys $d -- $xd $yd");
+//Find the different position of the door when it slides
+if(isset($xRail) && isset($yRail)) {
+    //Door is on the left
+    if($xRail >= 2 && $map[$yRail][$xRail - 1] == 'd') {
+        $doorPositions = [
+            [$yRail => [$xRail - 2 => 1, $xRail - 1 => 1]],
+            [$yRail => [$xRail - 1 => 1, $xRail => 1]],
+        ];
+    }
+    //Door is on the right
+    if($xRail <= 2 && $map[$yRail][$xRail + 1] == 'd') {
+        $doorPositions = [
+            [$yRail => [$xRail + 1 => 1, $xRail + 2 => 1]],
+            [$yRail => [$xRail => 1, $xRail + 1 => 1]],
+        ];
+    }
+}
 
-solve($xs, $ys, $d, $ins);
+solve($xs, $ys, $d, $gear, $door, $needKey, $listIns, $possibleIns, $orderIns);
