@@ -1,0 +1,74 @@
+https://www.codingame.com/contribute/view/89841305c64ac8f04cad689a6cad9aaa0eaa3
+
+Goal
+Given two teams of champions with list of hits performed by each of them.
+Output the order of champions on the left to win the fight with fewer number of hits.
+
+Rules:
+- All champions start with rage = 0
+- When a champion is hit, his/her rage increases by one.
+- When a champion uses special attack, his/her rage restarts at 0.
+- The fight stops when all fighters in a team are dead (life <= 0)
+- opponents are always fighting in the same order with same sequence of attacks.
+
+In the input, each hit is preceded by the direction of the attack:
+- > means champion1 hits champion2.
+- < means champion2 hits champion1.
+
+The table below shows the starting life and the damage caused by punch, kick and special attack of the champions.
+
+Champ.|Life|Punch|Kick|Special Attack
+KEN   |25  |6    |5   |3*rage
+RYU   |25  |4    |5   |4*rage
+TANK  |50  |2    |2   |2*rage
+VLAD  |30  |3    |3   |2*(rage+opp.rage);opp.rage=0
+JADE  |20  |2    |7   |number of hits made*rage
+ANNA  |18  |9    |1   |damage received*rage
+JUN   |60  |2    |1   |rage; and rage is added to JUN's life
+VI    |35  |12   |0   |0; and rage is added to VI's life
+JINX  |22  |4    |4   |damage received*rage*opp.rage
+TIFA  |38  |5    |5   |0; 4*rage is added to TIFA's life
+ZED   |27  |4    |5   |5*rage; rage is removed from ZED's life
+SETT  |39  |8    |0   |2*rage; rage is added to SETT's life
+
+Example
+INPUT       COMMENT                                     
+KEN;VI JINX Ken and Vi are fighting against JINX 
+            Ken fights first then Vi against Jinx alone
+7           total number of hits performed
+> PUNCH     Ken punches Jinx, Jinx's life decreases by 6
+< KICK      Jinx kicks Ken, Ken's life decreases by 4
+> PUNCH     Ken punches Jinx, Jinx's life decreases by 6
+< KICK      Jinx kicks Ken, Ken's life decreases by 4
+> PUNCH     Ken punches Jinx, Jinx's life decreases by 6
+< KICK      Jinx kicks Ken, Ken's life decreases by 4
+> PUNCH     Ken punches Jinx, Jinx's life decreases by 6
+            Ken and Vi beat Jinx in 4 hits
+
+            Second combination with same input.
+            Vi fights first then Ken against Jinx alone
+7           total number of hits performed
+> PUNCH     Vi punches Jinx, Jinx's life decreases by 12
+< KICK      Jinx kicks Vi, Vi's life decreases by 4
+> PUNCH     Ken punches Jinx, Jinx's life decreases by 12
+            Vi and Ken beat Jinx in 2 hits
+
+OUTPUT: VI;KEN beat JINX in 2 hits
+
+This challenge is the second of a series of 2 exercises proposed for the challenge « Street Fighter ». If you encounter difficulties with this challenge, you can start with the first « Street Fighter Level 1 » on the same topic but easier to solve.
+
+Input
+Line 1: my_team opponents separated by a space where my_team and opponents is a list of champions separated by a semi-coma and each champion is one of: KEN, RYU, TANK, VLAD, JADE, ANNA, JUN, VI, JINX, TIFA, ZED or SETT
+Line 2:n is an integer: the total number of hits performed by the champions
+Next n Lines: d ATTACK separated by a space where d is > or < and gives the direction of the attack; ATTACK is one specific attack : PUNCH, KICK or SPECIAL
+
+Output
+order of champion from my_team beat opponents in m hits
+or
+We always lose in case my team can't beat opponents
+
+Constraints
+champions from my_team is always different from champions from opponents.
+There is always a winner and a loser. No tie.
+There is always only one best solution.
+In my_team there are 2, 3, 4, 5 or 6 champions.
