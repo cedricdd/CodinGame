@@ -43,7 +43,7 @@ for ($i = 0; $i < $N; $i++) {
                 $damage = ${"c" . $attackerID}["Hits"] * ${"c" . $attackerID}["Rage"];
                 break;
             case "ANNA":
-                $damage = (CHAMPIONS[$attackerName]["Life"] - ${"c" . $attackerID}["Life"]) * ${"c" . $attackerID}["Rage"];
+                $damage = (18 - ${"c" . $attackerID}["Life"]) * ${"c" . $attackerID}["Rage"];
                 break;
             case "JUN":
                 $damage = ${"c" . $attackerID}["Rage"];
