@@ -1,0 +1,25 @@
+https://www.codingame.com/contribute/view/9291062e2f7b19f6821a28906a8ed60059751
+
+Goal
+As a fun computer project for the holidays, you are given the task to draw ASCII art - worms to be specific. However, you are only given a few details about them, their thickness, their coil length, and the number of turns they make. However, you don't really want to slave away on your computer typing patterns of underscores and vertical pipes, so you decide to make a program do it - it's a computer project anyways.
+
+For example, if the thickness is 2, the coil length is 5, and the number of turns is 4, you should get:
+
+ __ _____ _____
+|  |     |     |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|  |  |  |  |  |
+|_____|_____|__|
+
+Input
+Line 1: The worm thickness
+Line 2: Coil length of the worm
+Line 3: Number of turns made by the worm
+
+Output
+The worm made in ASCII art according to the inputs given.
+
+Constraints
+All the inputs are natural numbers.
+length >= 2
