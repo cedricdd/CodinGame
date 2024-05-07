@@ -3,7 +3,7 @@
 function sieveOfEratosthenes(int $limit): array {
 
     // Initialise the sieve array
-    $primes = array_fill(2, $limit, 1);
+    $primes = array_fill(2, $limit - 1, 1);
 
     for($i = 2; $i < $limit; ++$i) {
         //This number is still in the sieve, remove all it's multiples
