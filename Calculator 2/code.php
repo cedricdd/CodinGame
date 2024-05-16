@@ -1,7 +1,5 @@
 <?php
 
-const WEIGHTS = ["+" => 0, "-" => 0, "*" => 1, "/" => 1];
-
 function solve(string $expr): string {
     $operations = [];
     $result = "";
@@ -26,13 +24,19 @@ function solve(string $expr): string {
         elseif(!ctype_digit($c)) $operations[] = $c;
     }
 
-    usort($operations, function($a, $b) {
-        return WEIGHTS[$b] <=> WEIGHTS[$a];
-    });
+    error_log(var_export($operations, true));
 
-    error_log("returning -- " . ($result . implode("", $operations)));
+    while(count($operations)) {
+        if($operations[0] == '*' || $operations[0] == '/' || !isset($operations[1])) $result .= array_shift($operations);
+        else {
+            if($operations[1] == '+' || $operations[1] == '-') $result .= array_shift($operations);
+            else $result .= array_splice($operations, 1, 1)[0];
+        }
+    }
 
-    return $result . implode("", $operations);
+    error_log("returning -- " . $result);
+
+    return $result;
 }
 
 $expr = trim(fgets(STDIN));
