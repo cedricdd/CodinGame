@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/778302a4c4149234ae1ee8e5177b79776aa92
+https://www.codingame.com/training/easy/codongame
 
 Goal
 Your goal is to translate a genetic code into sequences of amino acids.
