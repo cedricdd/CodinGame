@@ -1,0 +1,40 @@
+https://www.codingame.com/contribute/view/93867607d2dc7427c7740ba3d68fb7bc8f766
+
+Goal
+Ol' Uncle CodinGame needs all available programmers to enlist for moderation duty.
+
+In many of our Community Forums, we have noticed many irrelevant comments being made by certain... well... detestable individuals. As our current moderators are slacking off in their duties, we want you to take your place among us and fulfil your moderation duty.
+
+You will be given a list of n post-s in a forum. You will also be given a forum_keyword, which should appear somewhere in each post for that post to be relevant. forum_keyword is case-sensitive, but can only appear in UPPERCASE or lowercase. forum_keyword can contain spaces.
+
+Each post has two substrings, username and comment, which are separated by a colon :.
+
+If the comment has forum_keyword in it, then the post is relevant, so don't output anything. If all n post-s are relevant, output: "NO USERS TO BAN.".
+
+If the comment does not have the forum_keyword in it, then the post is irrelevant. If the user has made one irrelevant post, output: "username HAS BEEN TEMPORARILY BANNED.". If the user has made more than one irrelevant post, output: "username's ACCOUNT HAS BEEN PERMANENTLY SUSPENDED!".
+
+Rules when outputting ban messages:
+• There can only be one ban message per line.
+• Ban messages should be grouped by type: temporary bans are outputted first, permanent suspensions last.
+• Each type of ban messages should be ordered based on the banned user's first post (even if it is a relevant post).
+
+Input
+Line 1: A string, forum_keyword. A character or string that must be in a comment, for that comment to be relevant.
+Line 2: An integer n, for the number of post-s made.
+Next n lines: A string, post. post consists of two colon-separated substrings, username and comment.
+
+Output
+1 Line: "NO USERS TO BAN."
+
+OR
+
+? Lines: "username HAS BEEN TEMPORARILY BANNED." or "username's ACCOUNT HAS BEEN PERMANENTLY SUSPENDED!"
+
+Constraints
+0 < n <= 20
+0 < length of forum_keyword <= 50
+0 < length of username <= 25
+0 < length of comment <= 150
+
+forum_keyword can contain spaces.
+username and comment do not include ":".
