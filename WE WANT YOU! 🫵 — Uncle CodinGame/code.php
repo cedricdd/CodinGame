@@ -1,6 +1,6 @@
 <?php
 
-$forumKeyword = trim(fgets(STDIN));
+$forumKeyword = stream_get_line(STDIN, 50 + 1, "\n");
 
 fscanf(STDIN, "%d", $n);
 
