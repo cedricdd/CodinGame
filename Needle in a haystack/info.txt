@@ -1,9 +1,9 @@
-https://www.codingame.com/contribute/view/95484243afefd03738728ee0cc9fa0bc07f95
+https://www.codingame.com/training/medium/needle-in-a-haystack
 
 Goal
 You are given a wall of characters, herein code-named the haystack, from which we want to find a needle, a sampling sub-string containing specific wanted elements.
 
-All lines from the haystack should be concatenated into a long string. The haystack could contain at most 36 different kinds of elements, represented by lower-case letters a-z and digits 0-9.
+All lines from the haystack should be concatenated into a long string. The haystack contains at most 36 different kinds of elements, represented by lower-case letters a-z and digits 0-9.
 
 Wanted elements
 
@@ -11,7 +11,7 @@ To define the wanted elements, we adopt a syntax commonly used by printers for d
 
 [0-9] means [0 1 2 3 4 5 6 7 8 9] (all base-10 digits)
 [a-e] means [a b c d e] (a sequence in alphabetical order)
-[a-c,x-z,2,4,6,8] means [a b c x y z 2 4 6 8] (hyphen and comma, without spaces)
+[a-c,x-z,2,4,6,8] means [a b c x y z 2 4 6 8] (use hyphen and comma, without spaces)
 [a-e,b] means [a b c d e] (in case of overlapping, deduplicate the result)
 
 Wanted needle
@@ -22,7 +22,7 @@ Input
 Line 1: Integer w and h for the width and height of the haystack.
 Next h lines: String of characters of length w, making up the haystack.
 Next line: Integer n for the number of test cases based on the above haystack.
-Next n lines: Each line is an independent test case defining what kind of needle you need to find, written in the syntax as described in the statement.
+Next n lines: Each line is an independent test case defining what kind of needle you need to find, written in the syntax described in the statement.
 
 Output
 Write n lines of answers corresponding to the test cases.
