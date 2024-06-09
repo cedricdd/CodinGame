@@ -14,6 +14,8 @@ function solve(int $value, array $register, array $coins, int $count) {
 
     $coin = array_pop($register); //Next coin to work on
 
+    if($coin === null) return; //We can't reach the amount anymore
+
     if($coin > $value) solve($value, $register, $coins, $count); //Coin value is too big
     //If we can reach the value with only using this coin it's the best solution
     elseif($value % $coin == 0) {
@@ -45,6 +47,8 @@ if($goalAmount == 0) exit("0");
 $solution = [[], INF];
 
 solve($goalAmount, $register, [], 0);
+
+if($solution[1] == INF) exit("IMPOSSIBLE");
 
 $output = [];
 
