@@ -1,0 +1,73 @@
+https://www.codingame.com/contribute/view/944617febd934bd70084f61c9e9dd435dd658
+
+Goal
+You have to print the horizontal histogram of occurrences of letters from the given texts. We only want the letters from A-Z and a-z. Letters of different cases are treated as the same letter when counting.
+The histogram shows the percentages.
+
+You have to write the histogram with the letters A to Z on the Y axis and the percentages on the X axis.
+The values are rounded to 2 decimal places (and displayed with all trailing zeros after the decimal point removed).
+The lengths of the histogram bars are rounded to the nearest integer. For example, a value of 4.85 would have 5 blank spaces, while a 0.4 would have 0.
+
+  +------------------------------------+
+A |                                    |36.36%
+  +------------------------------------+
+B |0%
+  +
+C |0%
+  +---------+
+D |         |9.09%
+  +---------+
+E |0%
+  +------------------+
+F |                  |18.18%
+  +---------+--------+
+G |         |9.09%
+  +---------+
+H |0%
+  +
+I |0%
+  +
+J |0%
+  +
+K |0%
+  +
+L |0%
+  +
+M |0%
+  +
+N |0%
+  +
+O |0%
+  +
+P |0%
+  +
+Q |0%
+  +
+R |0%
+  +------------------+
+S |                  |18.18%
+  +------------------+
+T |0%
+  +
+U |0%
+  +---------+
+V |         |9.09%
+  +---------+
+W |0%
+  +
+X |0%
+  +
+Y |0%
+  +
+Z |0%
+  +
+
+Input
+A string S for the text.
+
+Output
+A histogram of percentages of occurrences of letters in S.
+
+Constraints
+S contains at least one letter.
+1 ≤ length of S ≤ 1000
