@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/94232e60b5656124e0d138669db552f481c09
+https://www.codingame.com/training/hard/strobogrammatic-numbers
 
 Goal
 Given two integers, low and high, return how many strobogrammatic numbers are present in that range, inclusive.
