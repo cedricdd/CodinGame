@@ -10,7 +10,7 @@ function isStrobogrammiticNumber(string $number): int {
 function getCountTotal(int $size, bool $leadingZeroAllowed = false): int {
     if($size <= 0) return 1;
 
-    $count = (($size & 1) == 0) ? 1 : 3;
+    $count = (($size & 1) == 0) ? 1 : 3; //With a number of odd length, the middle position can only be 0, 1 or 8
 
     for($i = ($size >> 1); $i > 0; --$i) {
         if($i == 1 && $leadingZeroAllowed == false) $count *= 4; //We don't want '0' as first digit
@@ -30,8 +30,8 @@ function getCountUpTo(int $position, string $set, string $max): int {
 
     $full = getCountTotal($size - 2, true); 
 
-    foreach([[0, 0], [1, 1], [6, 9], [8, 8], [9, 6]] as $index => [$start, $end]) {
-        if($index == 0 && $position == 0) continue; //We don't want to '0' as first digit
+    foreach([[0, 0], [1, 1], [6, 9], [8, 8], [9, 6]] as [$start, $end]) {
+        if($position == 0 && $start == 0) continue; //We don't want to '0' as first digit
         if($size == 1 && $start != $end)  continue; //We only have 1 position not set
 
         if($start < $max[$position]) $count += $full; //All these numbers will be below the max
@@ -50,6 +50,7 @@ function getCountUpTo(int $position, string $set, string $max): int {
 
 $start = microtime(1);
 
+$total = 0; 
 $low = stream_get_line(STDIN, 4096 + 1, "\n");
 $sLow = strlen($low);
 $high = stream_get_line(STDIN, 4096 + 1, "\n");
@@ -60,8 +61,6 @@ if($low == $high) {
     echo isStrobogrammiticNumber(strval($low)) . PHP_EOL;
     exit();
 }
-
-$total = 0; 
 
 //Add everything where we count all the numbers of size $size
 for($size = $sLow; $size < $sHigh; ++$size) {
