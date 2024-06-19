@@ -1,0 +1,15 @@
+https://www.codingame.com/contribute/view/980586c9399b2a5ef286b63def9a8d9b9c2af
+
+Goal
+As a developer in an accounting company, you are tasked with developing a program that performs the lettering* of a bank transfer with one or more invoices.
+
+*lettering is like matching your bank statement with your bills. It’s a way to keep track of which payments have cleared for which invoices, kind of like when you check off items on a shopping list.
+
+Input
+Line 1: An integer N representing the number of invoices
+Line 2: An integer M representing the number of bank statements
+Next N lines: Integer invoice representing the amount of the invoice
+Next M lines: Integer statement representing the amount of the bank statement
+
+Output
+Next K lines: A B - C : where A is the letter of the lettering, B the amounts of invoices and C the amounts of bank statements
