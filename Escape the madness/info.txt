@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/934056de8810020413a557190170cdc6fc4f1
+https://www.codingame.com/training/easy/escape-the-madness
 
 Goal
 You are prerendering an HTML string from C99 code. You have already done the extraction part, what is left to do is to simulate the escape sequences of every step until you obtain the final document.
@@ -22,12 +22,12 @@ Step 2. Process escape sequences starting with \. The possible formats for such 
 * \Uhhhhhhhh: Produce a character represented using its Unicode code point on eight hexadecimal digits (e.g. \U00000068 produces h).
 * \C: Produce a literal character (e.g. \\\"\a produces \"a).
 
-Note: Hexadecimal characters can be provided uppercase or lowercase!
+Note: Hexadecimal characters can be provided uppercase or lowercase, and all codes, even using \U, will be contained within the ASCII range, i.e. between 1 and 127 included.
 
 Step 3. Process some HTML entities, using the following formats:
 
 * &entity_name;: Produce the entity for which the name is entity_name.
-* &#nn;: Produce the entity using its Unicode code point on a variable number of hexadecimal digits (e.g. &#43; for +).
+* &#nn;, &#nnn;, etc: Produce the entity using its Unicode code point on a variable number of decimal digits (e.g. &#43; for +).
 
 Only the following entity names should be supported:
 
@@ -37,6 +37,8 @@ Only the following entity names should be supported:
 * &bsol;: Produce \.
 
 If an entity name is not found, the HTML entity code should be rendered literally, i.e. &unknownsequence; should be returned as is.
+
+Note: All codes represented using &#nn;, will be contained within the ASCII range, i.e. between 1 and 127 included.
 
 Input
 First line: text to process.
