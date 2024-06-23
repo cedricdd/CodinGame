@@ -1,0 +1,26 @@
+https://www.codingame.com/contribute/view/984542829308271bd4a0c626e449dce97d7bc
+
+Goal
+Alice and Bob play a word chain game. In this game, the two players take alternating turns, with Alice going first.
+
+The players have a word list consisting of N words. All words in the word list are distinct.
+
+In each player's turn, the player chooses a word from the word list that satisfies the following two conditions:
+- The word has not been chosen before by either player.
+- If it's not the first turn of the game, the first character of the chosen word must be the same as the last character of the previous word.
+
+If a player is unable to choose a word satisfying the above conditions, that player loses and the other player wins.
+
+Determine who wins, if both players play optimally.
+
+Input
+Line 1: An integer N: the number of words in the word list.
+Next N lines: A single string - a word in the word list.
+
+Output
+Print Alice or Bob, the winner of the game.
+
+Constraints
+1 ≤ N ≤ 16
+The words in the word list are at most 12 letters long.
+The words in the word list are all distinct.
