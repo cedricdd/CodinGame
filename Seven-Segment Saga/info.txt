@@ -1,0 +1,30 @@
+https://www.codingame.com/contribute/view/99246bdb2579818c1bcae60c54e0be04f4d3d
+
+Goal
+Story:
+After investigating a very mysterious case, you and your team have successfully located an abandoned godown, a very peculiar one - one wall is entirely covered with an array of seven-segment displays, and each row has five of them. After a bit of preprocessing, your team has converted all the seven-segment displays into simplified ASCII representations, and as the main programmer, it's your task to figure out the hidden message behind it. Here is the progress as of now:
+
+Method:
+After a bit of careful observation, it is evident that in each row, there are some segments which are lit up for all of the individual displays, for example, in the following row:
+
+ _               _ 
+|_  |_| |_| |_| |_|
+|_| | | | | |_| | |
+
+
+It is noted that some segments are lit up in all of them. On only using these segments, we get a lowercase h:
+ 
+|_ 
+| |
+
+Goal:
+Given 5 seven-segment displays split in 3 rows, your aim is to join the common segments in all of them and display the output.
+
+Input
+Line 1: The first row row1 of the seven-segment displays
+Line 2: The second row row2 of the seven-segment displays
+Line 3: The third row row3 of the seven-segment displays
+
+Output
+Line 1, 2, 3: The rows of the final seven-segment display
+All trailing spaces should be kept intact.
