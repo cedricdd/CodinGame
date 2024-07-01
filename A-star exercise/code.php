@@ -2,7 +2,7 @@
 
 class CustomPriorityQueue extends SplPriorityQueue {
 
-    //When some nodes have the priority, the one with the smaller identifier is considered first.
+    //When some nodes have the same priority, the one with the smaller identifier is considered first.
     public function compare($a, $b) {
        if($a[0] == $b[0]) return $b[1] <=> $a[1];
        else return $b[0] <=> $a[0];
@@ -21,7 +21,7 @@ for ($i = 0; $i < $E; $i++) {
 
 $expanded = [];
 
-$queue = new \CustomPriorityQueue();
+$queue = new CustomPriorityQueue();
 $queue->insert([0, $S], [0, $S]);
 
 while($queue->count()) {
@@ -40,4 +40,3 @@ while($queue->count()) {
         $queue->insert([$weight + $cost, $newNode], [$weight + $cost + $estimations[$newNode], $newNode]);
     }
 }
-?>
