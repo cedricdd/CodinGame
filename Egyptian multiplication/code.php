@@ -10,9 +10,7 @@ if($b > $a) [$a, $b] = [$b, $a];
 echo $a . " * " . $b . PHP_EOL;
 
 while($b != 0) {
-    $r = $b % 2;
-    
-    if($r == 1) {
+    if($b % 2) {
         $c .= " + $a";
         $b -= 1;
     } else {
