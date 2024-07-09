@@ -35,7 +35,7 @@ foreach($distribution as $letter => $percentage) {
         $output[$index + 1][$max + 3] = '+';
     }
 
-    $output[$index] = $letter . " |" . str_repeat(' ', $max) . ($max > 0 ? '|' : '') . $percentage . '%';
+    $output[$index] = $letter . " |" . str_repeat(' ', $max) . ($max > 0 ? '|' : '') . number_format($percentage, 2) . '%';
 }
 
 echo implode("\n", array_map('rtrim', $output)) . PHP_EOL;
