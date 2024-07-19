@@ -66,20 +66,67 @@ $points = [];
 
 for ($y = 0; $y < $height; ++$y) {
     foreach(str_split(trim(fgets(STDIN))) as $x => $c) {
-        if($c == '.') {
-            $index = $y * $width + $x;
-
-            $distances[$index] = INF;
-        }
-
-        $grid[] = $c;
+        $grid[$y * $width + $x] = $c;
     }
 }
 
-$selected = selectLandmarks($distances, $landmarksNum);
+$total = 0;
+$groups = [];
+$visited = [];
 
-foreach($selected as $index) {
-    echo ($index % $width) . " " . intdiv($index, $width) . PHP_EOL;
+for($y = $height - 1; $y > 0; --$y) {
+    for($x = $width - 1; $x > 0; --$x) {
+        $index = $y * $width + $x;
+
+        if($grid[$index] == '.' && !isset($visited[$index])) {
+            error_log("starting at $index - $x $y");
+
+            $toCheck = [$index];
+            $group = [];
+
+            while($toCheck) {
+                $index = array_pop($toCheck);
+
+                if(isset($visited[$index])) continue;
+                else $visited[$index] = 1;
+
+                $group[$index] = INF;
+
+                foreach([-$width - 1, -$width, -$width + 1, -1, 1, $width - 1, $width, $width + 1] as $move) {
+                    if($grid[$index + $move] == '.') $toCheck[] = $index + $move;
+                }
+            }
+
+            $count = count($group);
+
+            error_log("found a group of $count");
+
+            if($count >= 50) {
+                $total += $count;
+                $groups[] = [$count, $group];
+            }
+        }
+    }
+}
+
+usort($groups, function($a, $b) {
+    return $b[0] <=> $a[0];
+});
+
+
+foreach($groups as $i => [$count, $group]) {
+    $landmark = max(1, intval($landmarksNum * ($count / $total)));
+
+    error_log("using $landmark for group $i - $count $total - " . ($count/$total));
+
+    foreach(selectLandmarks($group, $landmark) as $index) {
+        echo ($index % $width) . " " . intdiv($index, $width) . PHP_EOL;
+    }
+
+    $landmarksNum -= $landmark;
+    $total -= $count;
+
+    if($landmarksNum == 0) break;
 }
 
 error_log(microtime(1) - $start);
