@@ -54,6 +54,45 @@ function selectLandmarks(array $distances, int $n): array {
     return $selected;
 }
 
+function splitLandmarks(array &$groups, int $n) {
+
+    usort($groups, function($a, $b) {
+        return $b[0] <=> $a[0];
+    });
+
+    //We try to add at least 2 in each groups
+    // if($n >= count($groups) * 2) $min = 2;
+    // else $min = 1;
+
+    // foreach($groups as $i => $filler) {
+    //     $groups[$i][2] += $min;
+
+    //     if(($n -= $min) <= 0) return;
+    // }
+
+    $total = array_sum(array_column($groups, 0));
+    $landmarks = 0;
+
+    foreach($groups as $i => [$tiles, ,]) {
+        $value = $n * ($tiles / $total);
+
+        error_log(($tiles / $total) . " " . $n * ($tiles / $total));
+
+        $groups[$i][2] += floor($value);
+        $groups[$i][3] = $value - floor($value);
+
+        $landmarks += floor($value);
+    }
+
+    if(($n -= $landmarks) > 0) {
+        usort($groups, function($a, $b) {
+            return $b[3] <=> $a[3];
+        });
+
+        for($i = 0; $i < $n; ++$i) $groups[$i][2] += 1;
+    }
+}
+
 fscanf(STDIN, "%d %f", $landmarksNum, $efficiency);
 fscanf(STDIN, "%d %d", $width, $height);
 
@@ -70,19 +109,21 @@ for ($y = 0; $y < $height; ++$y) {
     }
 }
 
-$total = 0;
 $groups = [];
 $visited = [];
+$threshold = min(500, ($width - 1) * ($height - 1) * 0.05);
+
+error_log("threshold is $threshold");
 
 for($y = $height - 1; $y > 0; --$y) {
     for($x = $width - 1; $x > 0; --$x) {
         $index = $y * $width + $x;
 
         if($grid[$index] == '.' && !isset($visited[$index])) {
-            error_log("starting at $index - $x $y");
+            // error_log("starting at $index - $x $y");
 
             $toCheck = [$index];
-            $group = [];
+            $distances = [];
 
             while($toCheck) {
                 $index = array_pop($toCheck);
@@ -90,43 +131,34 @@ for($y = $height - 1; $y > 0; --$y) {
                 if(isset($visited[$index])) continue;
                 else $visited[$index] = 1;
 
-                $group[$index] = INF;
+                $distances[$index] = INF;
 
                 foreach([-$width - 1, -$width, -$width + 1, -1, 1, $width - 1, $width, $width + 1] as $move) {
                     if($grid[$index + $move] == '.') $toCheck[] = $index + $move;
                 }
             }
 
-            $count = count($group);
+            $count = count($distances);
 
             error_log("found a group of $count");
 
-            if($count >= 50) {
-                $total += $count;
-                $groups[] = [$count, $group];
+            if($count >= $threshold) {
+                $groups[] = [$count, $distances, 0];
             }
         }
     }
 }
 
-usort($groups, function($a, $b) {
-    return $b[0] <=> $a[0];
-});
+splitLandmarks($groups, $landmarksNum);
 
+foreach($groups as $i => [$count, $group, $landmarks]) {
+    error_log("group $i - $count - $landmarks");
 
-foreach($groups as $i => [$count, $group]) {
-    $landmark = max(1, intval($landmarksNum * ($count / $total)));
+    if($landmarks == 0) continue;
 
-    error_log("using $landmark for group $i - $count $total - " . ($count/$total));
-
-    foreach(selectLandmarks($group, $landmark) as $index) {
+    foreach(selectLandmarks($group, $landmarks) as $index) {
         echo ($index % $width) . " " . intdiv($index, $width) . PHP_EOL;
     }
-
-    $landmarksNum -= $landmark;
-    $total -= $count;
-
-    if($landmarksNum == 0) break;
 }
 
 error_log(microtime(1) - $start);
