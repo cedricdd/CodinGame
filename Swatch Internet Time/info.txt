@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/86244bae29b2cd32e7b3aad00d5e3b811e67d
+https://www.codingame.com/training/easy/swatch-internet-time
 
 Goal
 Swatch Internet Time is a decimal time system introduced in 1998 by Swatch. It is a universal time, expressed as a number between 0 and 1000 named beats representing the time in Biel (UTC+01:00), prefixed by the @ sign.
@@ -10,7 +10,7 @@ Step 2. You must convert the resulting Biel local time to beats, using the follo
 
 (3600 * HH + 60 * MM + SS) / 86.4
 
-Step 3. You must round the result to two decimal places (using half-up rounding), and always present the two decimal zeroes, e.g. @12.34 and @12.00.
+Step 3. You must round the result to two decimal places (using half-up rounding), and always present the two decimal digits, e.g. @12.34 and @12.00.
 
 As an example, let's try to convert 21:29:42 UTC+05:30 into beats:
 
