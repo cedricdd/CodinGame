@@ -1,7 +1,7 @@
-https://www.codingame.com/contribute/view/9759609a23b33c83c39e54c5a2feb63da4654
+https://www.codingame.com/training/medium/magic-coloring
 
 Goal
-Our nephew wants you to help him with his magic coloring. He doesn't want you to color for him, but rather to help him count the number of color blocks.
+Your nephew wants you to help him with his magic coloring. He doesn't want you to color for him, but rather to help him count the number of color blocks.
 
 To do this, you've been given a set of simplified drawings. The drawings are grids of x columns and y rows. Each square can be either without color (white) 0, or colored with a color between 1 and 9 inclusive.
 
