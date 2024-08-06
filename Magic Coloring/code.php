@@ -37,5 +37,5 @@ $colors = array_filter($colors);
 
 if(count($colors) == 0) echo "No coloring today" . PHP_EOL;
 else array_walk($colors, function ($value, $key) {
-        echo "$key -> $value" . PHP_EOL;
-    });
+    echo "$key -> $value" . PHP_EOL;
+});
