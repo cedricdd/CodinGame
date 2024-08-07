@@ -8,18 +8,24 @@ foreach(range("a", "z") as $indexLetter => $letter) {
     }
 }
 
+$alphabet = array_map('array_filter', $alphabet); //We don't need the info with 0
+
 fscanf(STDIN, "%d", $radius);
 
-$dp = array_fill(0, $radius + 1, 0);
 $dp[0] = 1;
-
+    
 foreach(str_split(trim(fgets(STDIN))) as $index => $c) {
+    $dp2 = [];
 
-    for($i = $radius; $i > 0; --$i) {
-        for($j = $i - 1; $j >= max(0, $i - 25); --$j) {
-            $dp[$i] += $dp[$j] * $alphabet[$c][$i - $j];
+    foreach($dp as $distance1 => $count1) {
+        foreach($alphabet[$c] as $distance2 => $count2) {
+            if(($distance = $distance1 + $distance2) <= $radius) {
+                $dp2[$distance] = ($dp2[$distance] ?? 0) + ($count1 * $count2);
+            }
         }
     }
+
+    $dp = $dp2;
 }
 
 echo array_sum($dp) . PHP_EOL;
