@@ -11,9 +11,6 @@ for ($i = 0; $i < $N; $i++) {
     $crew[$age] = $number;
 }
 
-krsort($crew); //We want them sorted from oldest to youngest
-
-
 $min = INF;
 $max = -INF;
 $expectancy = 39; //expectancy can't be below 40 otherwise no baby will ever be added
@@ -23,32 +20,32 @@ while(true) {
     $limit = ($expectancy >> 1);
     $crewShip = $crew;
 
-    for($year = 0; $year < $Y; ++$year) {
-        $fertile = 0;
+    for($i = 0; $i < $Y; $i++) {
+        $updated = [];
         $total = 0;
-
-        foreach($crewShip as $age => $number) {
-            unset($crewShip[$age]);
-            
+        $fertile = 0;
+       
+        foreach($crewShip as $a => $n) {
             //If they stay alive for another year
-            if(++$age <= $expectancy) {
-                $crewShip[$age] = $number;
-
-                $total += $number;
-
-                //They are in the range of getting a baby
-                if($age >= 20 && $age  <= $limit) $fertile += $number;
+            if($a++ < $expectancy) {
+                $updated[$a] = $n;
+                $total += $n;
             }
+
+            //They are in the range of getting a baby
+            if($a >= 20 && $a <= $limit) $fertile += $n;
         }
 
         //Add babies
         if(($babies = intdiv($fertile, 10)) > 0) {
-            $crewShip += [0 => $babies];
             $total += $babies;
+            $updated[0] = $babies;
         }
 
         if($total == 0) continue 2; //Everybody is dead
         if($total > $C) break 2; //Civil war
+
+        $crewShip = $updated;
     }
 
     if($total >= 200) {
