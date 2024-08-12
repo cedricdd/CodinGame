@@ -1,0 +1,42 @@
+https://www.codingame.com/contribute/view/747936e0eb23b14836ae22ad28570293216a6
+
+Goal
+Julian's kids played with their alarm clock, and now the embedded projector displays the time ...
+well ... upside down on the wall : reversed horizontally and vertically !
+
+More explicitly, on the their room's wall the digits are now in reversed order, and :
+- 0 is now readable as O or 0,
+- 1 is now readable as i or 1,
+- 2 is still displayed 2,
+- 3 is now readable as E,
+- 4 is now readable as h,
+- 5 is now readable as S or 5,
+- 6 is now readable as 9,
+- 7 is now readable as L,
+- 8 is still displayed 8,
+- 9 is now readable as 6.
+
+Given a readableText, output the realTime formatted as H:mm.
+
+Be careful, some texts may now refer to invalid time !
+If the realTime is not valid, output instead one or more lines to explain what is wrong, using the following format :
+-> if one or more invalid chars => print Error : invalid invalid chars (-> no Test Cases yet .. coming soon😉)
+-> if hours is NOT valid => then print Error hours hours
+-> if minutes is NOT valid => then print Error minutes minutes
+
+Input
+Line 1 : the readableText (string) projected on the wall
+
+Output
+If realTime is valid => then print the realTime in 24 hours format H:mm
+
+If realTime is NOT valid => then output one or more lines to explain what is wrong :
+-> if one or more invalid chars => print Error : invalid invalid chars (-> no Test Cases yet .. coming soon😉)
+-> if hours ≥ 24 => print Error hours hours
+-> if minutes ≥ 60 => print Error minutes minutes
+
+Constraints
+If readableText is valid :
+-> contains the : separator
+-> 0 ≤ hours ≤ 99
+-> 0 ≤ minutes ≤ 99
