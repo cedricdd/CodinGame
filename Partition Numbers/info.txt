@@ -1,0 +1,15 @@
+https://www.codingame.com/contribute/view/102909025c10381e978eff28f3e0da10b330c3
+
+Goal
+You must determine the partition number for a given integer n. The partition number p(n) represents the number of different ways n can be expressed as a sum of positive integers, irrespective of the order of addends.
+
+Input
+Line 1: An integer T representing the number of test cases.
+Next T lines: An integer n for which you need to find the partition number.
+
+Output
+T lines: For each test case, an integer representing the partition number p(n).
+
+Constraints
+1 ≤ T ≤ 15
+0 ≤ n ≤ 100
