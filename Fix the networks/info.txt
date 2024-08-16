@@ -1,9 +1,9 @@
-https://www.codingame.com/contribute/view/93835537195043e9f9e91fad1e8c9d0b23bf9
+https://www.codingame.com/training/easy/fix-the-networks
 
 Goal
 John's boss asked him to provision some networks for the company. John is an experienced network engineer, so the problem should be pretty straightforward. However, it was late at night, and he had a bit too much to drink, so he messed up a few of the numbers. Please help John fix the problem!
 
-A CIDR range consists of a prefix and a suffix. The prefix consists of four 8-bit numbers B separated by a dot, which represents a 32-bit IP address. For example, 10.0.0.8 is an IP address. The suffix is a number S between 0 and 32, which tells us how many bits are fixed, counting from the left. This means that the remaining bits are variable. These bits determine the number of addresses N available to the CIDR range.
+A CIDR range consists of a prefix and a suffix. The prefix consists of four 8-bit numbers B separated by a dot, which represents a 32-bit IP address. For example, 10.0.0.8 is an IP address. The suffix is a number S between 0 and 32 inclusive, which tells us how many bits are fixed, counting from the left. This means that the remaining bits are variable. These bits determine the number of addresses N available to the CIDR range.
 The prefix and the suffix are separated by a forward slash. An example of a CIDR range is 10.0.0.8/24.
 A CIDR range is valid if all of the variable bits are 0.
 
