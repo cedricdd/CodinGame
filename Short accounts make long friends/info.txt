@@ -1,0 +1,47 @@
+https://www.codingame.com/training/medium/short-accounts-make-long-friends
+
+Goal
+The purpose of this puzzle is to find the result (profit) asked from 6 supplied figures. You have at your disposal the four standard operators: addition (bill), subtraction, multiplication (increase) and division.
+
+Only subtractions resulting in a positive number are considered.
+Only divisions resulting in an integer are considered.
+
+Example 1:
+if input is
+Result : 862
+a : 7, b : 9, c : 100, d : 25, e : 3, f : 3
+
+100 - 7 = 93
+93 × 9 = 837
+837 + 25 = 862
+
+output would be
+POSSIBLE
+3
+
+Example 2:
+if input is
+Result : 862
+a : 3, b : 5, c : 6, d : 2, e : 1, f : 7
+
+3 × 7 = 21
+5 + 2 = 7
+7 × 6 = 42
+42 - 1 = 41
+41 × 21 = 861
+
+output would be
+IMPOSSIBLE
+1
+
+Input
+Line 1: 1 integer Result giving the expected result
+Line 2: 6 integers (a, b, c, d, e, f) giving the available numbers for the operation
+
+Output
+Line 1: POSSIBLE or IMPOSSIBLE whether the operation is possible or not
+Line 2: min distance from result if the expected result is impossible to obtain or minimal number of operations if the expected result is possible to achieve
+
+Constraints
+100 ≤ Result ≤ 999
+a, b, c, d, e, f in (1,2,3,4,5,6,7,8,9,10,25,50,75,100)
