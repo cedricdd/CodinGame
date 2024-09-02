@@ -1,0 +1,54 @@
+https://www.codingame.com/contribute/view/104790622b54633982ceedf364b3cb02a0f04f
+
+Goal
+Russian nesting dolls (also called matryoshka dolls) are typical souvenirs from Russia. These dolls open to reveal increasingly smaller versions of the same doll, one within another. The dolls can be pulled apart in the middle to reveal the next smaller doll, with the smallest doll being made of a solid piece of wood.
+
+A craftsman came up with an innovative idea that a mother doll can encapsulate not only one child doll. Multiple children is also possible. So he is starting to design these dolls.
+
+Representation of designs
+To represent the hierarchical designs we use an array of non-zero integers like this:
+-5 -4 -3 -2 -1 1 2 3 4 5
+
+Two integers are used to represent a doll. -5 and 5 are the lower and upper parts of a size #5 doll. This doll encapsulates a size #4 doll which is composed of -4 and 4, the lower and upper parts. Going several layers deeper, in the middle of the dolls set there is a size #1 doll, -1 and 1, with nothing inside indicating this doll is a solid wood. This is a traditional nesting dolls set.
+
+To standardize the representation, the negative number of a doll size should always be placed before the positive number. All the parts must be ordered according to their nesting order.
+
+An innovative doll set could be like this:
+-10 -3 -2 2 3 -1 1 -5 -3 -1 1 3 5 10
+
+A size #10 doll is encapsulating three smaller dolls, sizes #3, #1 and #5. The size #1 doll is a solid wood. The size #3 doll has a size #2 solid doll inside. The size #5 doll has a size #3 doll inside which is holding a size #1 solid doll.
+
+Pay attention to the sizes. A mother doll of size x can encapsulate children dolls of sizes x₁, x₂, x₃...xₙ if and only if x₁ + x₂ + x₃ +...+ xₙ < x
+
+Remark that this rule applies to only the direct children dolls. The sizes of grand- or grand-grand-children sizes do not count.
+
+Detecting errors
+There are thousands of ways for things to go wrong. Extend your imagination. Programmers in the real world are expected to detect all kinds of errors from human inputs.
+Here are a few examples, non-exhaustive, of invalid representations of designs:
+
+-10 -6 6 -4 4 10 (mother doll not big enough)
+-10 -6 -3 6 3 10 (wrong nesting order)
+-10 6 -6 -3 3 10 (-6 should come before 6)
+-10 0 10         (zero not allowed)
+-10 10 -9 9      (two separate dolls without a mother)
+-10              (a doll missing the upper part)
+#10              (wrong format)
+-10 1O           (wrong character)
+
+
+Your task is to verify some nesting dolls designs. If a design is valid and correct in representation, count how many solid dolls are in the set.
+
+Input
+Line 1: An integer n for the number of test cases to follow.
+Next n lines: Each line is an independent test case. Each test case is an array of space-separated values representing all the parts in one nesting dolls set. These values are supposed to be non-zero integers in valid designs.
+
+Output
+Write n lines corresponding to the input test cases.
+For each line,
+- if a dolls set design is invalid or violating the descriptions in the statement, write -1
+- if a design is valid, write how many solid dolls are in the set.
+
+Constraints
+1 ≤ n ≤ 200
+-200 ≤ doll size (lower/upper parts) ≤ 200, exclude 0
+length of input line < 256
