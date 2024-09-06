@@ -21,7 +21,7 @@ function findPosition(int $start, int $size, array $palindromes): array {
         }
 
         if($i % 2 == 0) {
-            ++$s; //Size the palindrome needs to be to reach the start increase
+            ++$s; //Size the palindrome needs to be to reach the start increases
             if((($i >> 1) + $s - 1) > $size) break; //The palindrom would end after the end of the string, we can stop
         }
     }
