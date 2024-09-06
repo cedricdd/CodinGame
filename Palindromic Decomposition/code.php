@@ -14,13 +14,10 @@ function findPosition(int $start, int $size, array $palindromes): array {
 
     //For the initial position it's impossible to have an even palindrome centered there
     for($i = (2 * $start + 2), $s = 1; $i < $count - 1; ++$i) {
-        //Some palindromes are centered at this position
-        if($palindromes[$i] > 0) {
-            //Is the palindrome centered here reaching up to our start position
-            if($palindromes[$i] >= $s) {
-                //Save the next position after the end of the palindrome
-                $results[($i >> 1) + $s - 1] = 1;
-            }
+        //Is the palindrome centered here reaching up to our start position
+        if($palindromes[$i] >= $s) {
+            //Save the next position after the end of the palindrome
+            $results[($i >> 1) + $s - 1] = 1;
         }
 
         if($i % 2 == 0) {
