@@ -1,0 +1,13 @@
+https://www.codingame.com/contribute/view/10502104a5e7aad97f1e41c40b061a6c6bcb36
+
+Goal
+Prime twins are pairs of prime numbers that differ by 2. For example, (11, 13) and (17, 19) are pairs of prime twins. Your task is to write a program that takes an integer 𝑛 as input and find the first pair of prime twins where both numbers are greater than 𝑛.
+
+Input
+an integer number 𝑛
+
+Output
+two integers separated by a space, for the first pair of prime twins both of which are greater than 𝑛
+
+Constraints
+1 ≤ 𝑛 ≤ 100,000
