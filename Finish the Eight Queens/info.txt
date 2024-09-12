@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/101523b088ab72c25c101bb170d5fd8cdb80b2
+https://www.codingame.com/training/medium/finish-the-eight-queens
 
 Goal
 The Eight Queens Puzzle is a chess puzzle, where the goal is to arrange 8 queens on a standard 8x8 Chess board such that no queen threatens another one by standard Chess rules (i.e. no two queens may be in the same row, column, or diagonal).
