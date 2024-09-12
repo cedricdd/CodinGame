@@ -1,0 +1,39 @@
+https://www.codingame.com/contribute/view/1054833e0c3398f4cfe2ed39ba7b151429967d
+
+Goal
+Clara loves books but she buys books faster than she can read them. Her bookshelf is filled with books and there is no more space available.
+On her bookshelf Clara has books she hasn't read yet (her TBR pile: to be read) and books she has already read.
+She ranks her book from 0 to 10, with 0 meaning she hates the book and 10 meaning she loves the book. If the book is part of her TBR, the rank is None.
+
+Unfortunately, she has bought a few more books and needs to find a place for them. Write a code to help her !
+Be careful, sometimes Clara forgets she already has a book and gets a duplicate!!!
+
+To get some space, Clara set some rules:
+- All her new books need to find a place on her shelf (even if she already has it and doesn't like it)
+- She should keep her favorite book(s), the one that has/those that share the highest ranking
+- She should keep her TBR books
+- She doesn't want to have duplicates on her bookshelf
+To do so:
+- She removes her least favorite books first, i.e. smallest ranking as well as the duplicate(s) on her bookshelf before adding the new books (duplicates included)
+- When she removes a book from her bookshelf, all the books with the same ranking will be removed! Even if it means after the cleaning her bookshelf has some free space
+
+Given the titles of the B books (title) she bought and the N books composing her bookshelf (name rank), find out if she can fit her new books on her shelf.
+
+If she can do so, print her bookshelf ordered in alphabetical order.
+If she can't, print Your TBR is out of control Clara!
+
+PS: We consider all the books the same size
+
+Input
+Line 1 : An integer b the number of new books
+Next b lines: A string title the title of one of her new books
+Line b+2 : An integer N for the number of books in her bookshelf
+Next N lines : a string name rank for the name and the rank of a book separated by a space, name may contain space characters. rank is always an integer or None.
+
+Output
+N lines : the N books composing her bookshelf ordered by alphabetical order
+or
+1 line : Your TBR is out of control Clara!
+
+Constraints
+0<=rank<=10 or None
