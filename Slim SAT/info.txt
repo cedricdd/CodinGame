@@ -1,0 +1,23 @@
+https://www.codingame.com/contribute/view/105450aa61db5001ee1b60395a1a7c35625540
+
+Goal
+You are given a logical formula with one free variable. The formula is made up of logical operations (e.g., AND) and variables (labeled with capital letters). Additionally, each logical operation is surrounded by parentheses '(...)'.
+
+All but one present variable X is assigned a fixed truth value in the input. Your job is to determine whether the given formula can be made true by assigning either TRUE or FALSE to X.
+Input
+Line 1: formula a string consisting of space-separated letters, logical words or parentheses.
+Line 2: N the number of fixed logical variables
+Next N lines: Space-separated pairs A value with variable name A and truth value value either TRUE or FALSE.
+
+The formula uses only the following logical expressions: AND, OR, XOR, where XOR denotes "exclusive or" which is true only if exactly one input is true (and not both).
+
+Output
+If the free variable X can be assigned a truth value to make the entire formula true, then return Satisfiable, otherwise return Unsatisfiable.
+
+Constraints
+0 <= N <= 25
+length(formula) <= 1000
+Logical variables are capital letters A,B,C,...,Z.
+The free variable is always denoted X.
+
+The formula is syntactically correct and fully parenthesized.
