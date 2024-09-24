@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/1058462a26d207590fb31f3b965a266d8aa9dc
+https://www.codingame.com/training/easy/azimut
 
 Goal
 Your companion on the other side of the phone is exploring a maze, however they don't have a compass! Can you help determine what direction they are facing after a succession of turns?
@@ -21,4 +21,4 @@ Output
 Line 1: A string containing the final direction your companion is facing.
 
 Constraints
-1 <= N <= 100
+1 <= N <= 15
