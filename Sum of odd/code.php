@@ -12,7 +12,7 @@
  * 
  * For each k we can calculate the start, it's valid if it's odd & an integer
  * For the lower bound of k we need at least 2 consecutive so it will be 2
- * For the upper bound of k we need N - (k - 1) * k > 0 => k² − k - N < 0
+ * For the upper bound of k we need N - (k - 1) * k > 0 => N - k² + k > 0 => k² - k < N 
  * Using the Quadratic Formula, since k needs to be positive we use the positive root => kmax = (1 + sqrt(1 + 4 * N)) / 2
  */
 
