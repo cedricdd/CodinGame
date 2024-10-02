@@ -91,7 +91,7 @@ function solve(int $xs, int $ys, string $ds, array $gear, array $door, bool $nee
             $solution[] = implode(" ", $instructions);
         }
 
-        exit(implode(" ", $solution));
+        exit(implode(PHP_EOL, $solution));
     }
 
     $count = count($listIns);
