@@ -1,4 +1,4 @@
-https://www.codingame.com/contribute/view/92151ec583af81e86d9790334193ae88ed06f
+https://www.codingame.com/training/hard/m-a-r-i--and-the-crazy-factory
 
 Goal
 M.A.R.I. is a Mobile Autonomous Robotic Intelligence who works in a factory.
@@ -11,7 +11,7 @@ Here are M.A.R.I.’s instructions:
 * nop Do nothing (use it only as the last instruction of a set)
 * tl Turn left
 * tr Turn right
-* bk Drop the remaining instructions in the set
+* bk Drop the remaining instructions in the set (can be used as nop if it is the last instruction of a set)
 * x2 Run twice the next instruction
 * uk Use key (to slide the door)
 * zl Turn left then acts like a zr
@@ -28,12 +28,12 @@ The first instruction is already in the set but you must use a new instruction t
 If the instruction list begins with a space, no instruction is already in the set.
 
 Example
-The solution of the first room is p2 p1 p2 p1 tr p2. But why?
+The solution of the first room is p2/p1 p2/p1 tr p2. But why?
 The instructions list is p1 tr p2, that starts with a space. Thus, the first set will be empty before you play the first instruction.
 First set, you play p2. She has not reached the exit so you must use another instruction.
 Second set, you insert p1 before p2, M.A.R.I. must execute p1 p2. Still not on the exit.
 Third set, finally you insert tr between p1 and p2, follows p1 tr p2. M.A.R.I. reaches the exit when p2 ends. Well done!
-Just write these six instructions.
+Just write these six instructions, each set on a line.
 
 The rooms
 Each room is 5 squares wide and 7 squares high. M.A.R.I. must not step out of the room!
@@ -52,7 +52,7 @@ Line 1: The available instructions
 Next 7 lines: The room
 
 Output
-The instructions that bring M.A.R.I. to the exit
+The instructions that bring M.A.R.I. to the exit, one line by set
 
 Constraints
 Each room has got only one solution if nop is used as the last instruction of a set.
