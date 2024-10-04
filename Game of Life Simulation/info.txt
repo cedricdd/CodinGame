@@ -1,11 +1,9 @@
-https://www.codingame.com/contribute/view/102942620cf864fa9ae36cbcee9a92d4e74f82
-
+https://www.codingame.com/training/medium/game-of-life-simulation
 Goal
 Game of life is a cellular automaton with easy rules.
 The action field is a matrix with width W and height H.
 Cells can be alive "#" or dead " ".
 Cells can have neighbours in 8 cells around it:
-
 =============
 | 1 | 2 | 3 |
 =============
@@ -22,7 +20,6 @@ If a live cell has 2 neighbours, it does not change.
 
 For example:
 Configuration:
-
  1234
 1 #
 2  #
@@ -49,12 +46,10 @@ Step 2:
 3# #
 4 ##
 
-
 Cells 4;3, 2;2 become alive because they have 3 neighbours.
 Cells 1;3, 3;2 become dead because they have 1 neighbour.
 
 Step 3:
-
  1234
 1  
 2 #  
@@ -119,14 +114,13 @@ Output the result of the inputed configuration:
 
 Source: https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
 
-
 Input
 Line 1: Two space separated integers W and H for width and height.
-
 Next H lines: Line with length W for configuration.
 
 Output
 Line 1: result of configuration: Still, Oscillator period or Death.
+
 Constraints
 1 ≤ W ≤ 40
 1 ≤ H ≤ 40
