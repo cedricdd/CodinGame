@@ -3,13 +3,26 @@
 function solve(array $posibilities, array $masks, int $requiredMask, array $maskLeft): int {
     $permutations = [0];
 
-    foreach($posibilities as $i => $list) {
+    foreach($posibilities as $i => $possibility) {
         $newPermutations = [];
 
+        $mask = 1;
+        $possibleMasks = [];
+
+        //Get all the letter that can be used at this position
+        while($possibility) {
+            if($possibility & 1) {
+                $possibleMasks[] = $mask;
+            }
+
+            $mask <<= 1;
+            $possibility >>= 1;
+        }
+
         foreach($permutations as $permutation) {
-            foreach($list as $letter => $filler) {
+            foreach($possibleMasks as $mask) {
                 //We don't want to generate the permutations, we only care of the letters used in the permutation
-                $newPermutation = $permutation | $masks[$letter];
+                $newPermutation = $permutation | $mask;
 
                 //Check if it's still possible to have all the required letters with the positions we have left
                 if((($newPermutation | $maskLeft[$i]) & $requiredMask) != $requiredMask) continue;
@@ -44,7 +57,7 @@ foreach($alphabet as $i => $letter) $masks[$letter] = 2 ** $i; //We set a mask f
 
 fscanf(STDIN, "%d", $length);
 
-$output = array_fill(0, $length, array_flip($alphabet)); //Each positions can use any of the letters from the alphabet
+$possibilities = array_fill(0, $length, (2 ** $aLen) - 1); //Each positions can use any of the letters from the alphabet
 
 fscanf(STDIN, "%d", $ruleN);
 
@@ -64,28 +77,20 @@ for ($i = 0; $i < $ruleN; $i++) {
     if($position == 0) {
         if($sign == '+') $requiredMask |= $masks[$letter]; //We need this letter at least once
         else {
-            for($i = 0; $i < $length; ++$i) unset($output[$i][$letter]); //This letter can't be anywhere
+            for($i = 0; $i < $length; ++$i) $possibilities[$i] &= ~$masks[$letter]; //This letter can't be anywhere
         }
     } else {
-        if($sign == '+') $output[$position - 1] = [$letter]; //That letter is at the position
-        else unset($output[$position - 1][$letter]); //That letter can't be at the position
+        if($sign == '+') $possibilities[$position - 1] = $masks[$letter]; //That letter is at the position
+        else $possibilities[$position - 1] &= ~$masks[$letter]; //That letter can't be at the position
     }
-}
-
-foreach($output as $i => $list) {
-    $maskPosition = array_reduce(array_flip($list), function($mask, $letter) use($masks) {
-        return $mask |= $masks[$letter];
-    }, 0);
-
-    $maskPositions[$i] = $maskPosition; //The mask of all the possible letter at this position
 }
 
 $maskLeft = array_fill(0, $length, 0);
 
 for($i = $length - 2; $i >= 0; $i--) {
-    $maskLeft[$i] = $maskPositions[$i + 1]  | $maskLeft[$i + 1]; //The mask of all the letters that can still be added after position $i
+    $maskLeft[$i] = $possibilities[$i + 1]  | $maskLeft[$i + 1]; //The mask of all the letters that can still be added after position $i
 }
 
-echo solve($output, $masks, $requiredMask, $maskLeft) . PHP_EOL;
+echo solve($possibilities, $masks, $requiredMask, $maskLeft) . PHP_EOL;
 
 error_log(microtime(1) - $start);
