@@ -1,8 +1,6 @@
 <?php
 
-function solve(array $posibilities, int $requiredMask): int {
-    global $masks;
-
+function solve(array $posibilities, array $masks, int $requiredMask, array $maskLeft): int {
     $permutations = [0];
 
     foreach($posibilities as $i => $list) {
@@ -11,21 +9,19 @@ function solve(array $posibilities, int $requiredMask): int {
         foreach($permutations as $permutation) {
             foreach($list as $letter => $filler) {
                 //We don't want to generate the permutations, we only care of the letters used in the permutation
-                $newPermutations[] = $permutation | $masks[$letter];
+                $newPermutation = $permutation | $masks[$letter];
+
+                //Check if it's still possible to have all the required letters with the positions we have left
+                if((($newPermutation | $maskLeft[$i]) & $requiredMask) != $requiredMask) continue;
+
+                $newPermutations[] = $newPermutation;
             }
         }
 
         $permutations = $newPermutations;
     }
 
-    $total = 0;
-
-    foreach($permutations as $permutation) {
-        //Check if all the requiered letter are present
-        if(($permutation & $requiredMask) == $requiredMask) $total++;
-    }
-
-    return $total;
+    return count($permutations);
 }
 
 function factorial(int $number): int { 
@@ -76,6 +72,20 @@ for ($i = 0; $i < $ruleN; $i++) {
     }
 }
 
-echo solve($output, $requiredMask) . PHP_EOL;
+foreach($output as $i => $list) {
+    $maskPosition = array_reduce(array_flip($list), function($mask, $letter) use($masks) {
+        return $mask |= $masks[$letter];
+    }, 0);
+
+    $maskPositions[$i] = $maskPosition; //The mask of all the possible letter at this position
+}
+
+$maskLeft = array_fill(0, $length, 0);
+
+for($i = $length - 2; $i >= 0; $i--) {
+    $maskLeft[$i] = $maskPositions[$i + 1]  | $maskLeft[$i + 1]; //The mask of all the letters that can still be added after position $i
+}
+
+echo solve($output, $masks, $requiredMask, $maskLeft) . PHP_EOL;
 
 error_log(microtime(1) - $start);
