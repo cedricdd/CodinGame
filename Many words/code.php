@@ -7,28 +7,25 @@ function solve(array $posibilities, array $masks, int $requiredMask, array $mask
         $newPermutations = [];
 
         $mask = 1;
-        $possibleMasks = [];
+ 
 
         //Get all the letter that can be used at this position
         while($possibility) {
             if($possibility & 1) {
-                $possibleMasks[] = $mask;
+                foreach($permutations as $permutation) {
+                    //We don't want to generate the permutations, we only care of the letters used in the permutation
+                    $newPermutation = $permutation | $mask;
+    
+                    //Check if it's still possible to have all the required letters with the positions we have left
+                    if((($newPermutation | $maskLeft[$i]) & $requiredMask) != $requiredMask) continue;
+    
+                    $newPermutations[] = $newPermutation;
+                }
+               
             }
 
             $mask <<= 1;
             $possibility >>= 1;
-        }
-
-        foreach($permutations as $permutation) {
-            foreach($possibleMasks as $mask) {
-                //We don't want to generate the permutations, we only care of the letters used in the permutation
-                $newPermutation = $permutation | $mask;
-
-                //Check if it's still possible to have all the required letters with the positions we have left
-                if((($newPermutation | $maskLeft[$i]) & $requiredMask) != $requiredMask) continue;
-
-                $newPermutations[] = $newPermutation;
-            }
         }
 
         $permutations = $newPermutations;
