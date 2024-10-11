@@ -1,56 +1,48 @@
 <?php
 
-//https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
-function sieveOfEratosthenes(int $limit): array {
+// Function to check if a number is prime
+function isPrime(int $num): bool {
+    if ($num <= 1) return false;
+    if ($num == 2) return true;
+    if ($num % 2 == 0) return false; 
 
-    // Initialise the sieve array
-    $sieve = array_fill(2, $limit - 1, 1);
+    $sqrtNum = sqrt($num);
 
-    for($i = 2; $i < $limit; ++$i) {
-        //This number is still in the sieve, remove all it's multiples
-        if(isset($sieve[$i])) {
-            for($j = $i * 2; $j < $limit; $j += $i) unset($sieve[$j]);
-        }
+    for ($i = 3; $i <= $sqrtNum; $i += 2) {
+        if ($num % $i == 0) return false;
     }
 
-    return array_keys($sieve);
+    return true;
 }
 
-//Get all the twin primes up to $n
-function twinPrimes(int $n): array {
-    $primes = sieveOfEratosthenes($n);
-    $count = count($primes);
-    $twins = [];
 
-    for($i = 1; $i < $count; ++$i) {
-        if($primes[$i - 1] == $primes[$i] - 2) $twins[] = $primes[$i] - 1;
+// Function to find the next pair of prime twins starting from X
+function findNextPrimeTwins(int $x): int {
+    // Start from the next odd number
+    if ($x % 2 == 0) $x++;
+
+    while (true) {
+        if (isPrime($x) && isPrime($x + 2)) return $x + 1; // Found the twin primes
+
+        $x += 2; // Move to the next odd number
     }
-
-    return $twins;
 }
 
 //Generate the alphabet with the key
 function getAlphabet(int $key): array {
-    $twins = twinPrimes(2000000);
-    $countTwins = count($twins);
     $alphabet = [];
     $value = $key;
-    $index = 0;
 
     foreach(range('A', 'Z') as $letter) {
         $alphabet[$letter] = strtoupper(dechex($key + $value));
 
-        //Restart at the last index, the next one can only be bigger
-        for($i = $index; $i < $countTwins; ++$i) {
-            if($twins[$i] >= $key + $value + 2) break;
-        }
-
-        $value = $twins[$i];
-        $index = $i + 1;
+        $value = findNextPrimeTwins($key + $value + 1);
     }
 
     return $alphabet;
 }
+
+$start = microtime(1);
 
 $operation = trim(fgets(STDIN));
 fscanf(STDIN, "%d", $key);
@@ -59,19 +51,30 @@ $alphabet = getAlphabet($key);
 
 //We are encoding
 if($operation == "ENCODE") {
-    foreach(str_split($message) as $c) {
-        $output[] = $alphabet[$c];
-    }
+    if(!preg_match("/^[A-Z ]+$/", $message)) echo "ERROR !!" . PHP_EOL;
+    else {
+        $alphabet[" "] = "";
 
-    echo implode("G", $output) . PHP_EOL;
+        foreach(str_split($message) as $c) {
+            $output[] = $alphabet[$c];
+        }
+    
+        echo implode("G", $output) . PHP_EOL;
+    }
 } //We are decoding
 else {
-    $alphabet = array_flip($alphabet);
-    $letters = preg_split("/G/", $message);
-
-    // error_log(var_export($letters, true));
-
-    echo implode("", array_map(function($letter) use ($alphabet) {
-        return $alphabet[$letter];
-    }, $letters)) . PHP_EOL;
+    //Check that all the characters are allowed and that we don't have a substring of G of odd length > 1
+    if(!preg_match("/^[0-9A-G]+$/", $message) || preg_match("/(?<!G)(G{2})+G(?!G)/", $message)) echo "ERROR !!" . PHP_EOL;
+    else {
+        $alphabet = array_flip($alphabet) + [" " => " "];
+        $letters = preg_split("/G/", str_replace("GG", "G G", $message), -1, PREG_SPLIT_NO_EMPTY);
+    
+        $decoded = implode("", array_map(function($letter) use ($alphabet) {
+            return $alphabet[$letter];
+        }, $letters));
+    
+        echo $decoded . PHP_EOL;
+    }
 }
+
+error_log(microtime(1) - $start);
