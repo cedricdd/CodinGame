@@ -1,17 +1,16 @@
-https://www.codingame.com/contribute/view/105615743c85425b98b0fae376894d845c68fc
+https://www.codingame.com/training/medium/bmp-compression
 
 Goal
-Binary graphic data (black and white images) can be stored in bitmap files where a black pixel is represented by 1 and a white pixel is represented by 0. Herein we try using two methods to store these 1's and 0's.
+Binary graphic data (black and white images) can be stored in bitmap files where a white pixel is represented by 0 and a black pixel is represented by 1. Herein we try using two methods to store these 0's and 1's.
 
-Method 1 - 2D array of 1's and 0's representing all pixels in the image.
+Method 1 - 2D array of 0's and 1's representing all pixels in the image.
 Method 2 - Decomposition.
 
 Algorithm
-
 ■ The entire image area is considered. If the area is fully composed of white pixels, Write a single 0. If the area is fully composed of black pixels, Write a single 1. After writing this 0 or 1, done for the area.
 ■ If the area is a mixture of black and white pixels, Write + as a marking to indicate we are going to decompose the area into four quarters.
 ■ Then focus on each of the quarters, in the order of upper-left, upper-right, lower-left, and finally lower-right, treating each quarter just like the full image area to write 0, 1, or + according to the same rules, until all pixels in each quarter are fully considered and recorded.
-■ When dividing the quarters, if the width and height of an area are even, the cutting line is in the middle, evenly dividing the area into four sub-areas. If the width is odd, the left side sub-areas will have one pixel wider than the right sub-areas. If the height is odd, the upper sub-areas will have one pixel taller than the lower sub-areas.
+■ When dividing an area into quarters, if the width and height of the area are even, the cutting line is in the middle, evenly dividing the area into four sub-areas. If the width is odd, the left side sub-areas will have one pixel wider than the right sub-areas. If the height is odd, the upper sub-areas will have one pixel taller than the lower sub-areas.
 ■ If the area to be decomposed has only one row of pixels, horizontal cut is skipped. Do only the vertical cut. If the area has only one column of pixels, vertical cut is skipped. Do only the horizontal cut.
 
 Compression ◄ ► De-compression
@@ -25,12 +24,10 @@ At the same time, you have to reverse the procedure to de-compress quadtree imag
 Optional reading
 
 Skip if you wish to. The following section verbosely explains how the image in the Example is encoded.
-
 ....#  2D array of pixels
 ...#.  encoded result:
 #.#..
 .#...  +0+0110++101+0100
-
 
 ...│.#  The whole image is
 ...│#.  neither all-black nor all-white.
@@ -55,9 +52,7 @@ Lower-L, 2 rows of 3 columns. Mixed.
 Lower-R, all white. Write 0
 
 References
-
 A. Rosenfeld, "Quadtree grammars for picture languages," IEEE Trans. Syst., Man, Cybern., vol. SMC-12, pp. 401-405, 1982.
-
 K. Knowlton, "Progressive transmission of grey scale and B/W pictures by simple, efficient and lossless encoding schemes," Proc. IEEE, vol. 68, pp. 885-896, 1980.
 
 Input
