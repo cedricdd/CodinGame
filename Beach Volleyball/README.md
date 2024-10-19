@@ -1,6 +1,7 @@
-https://www.codingame.com/training/medium/beach-volleyball
+# Puzzle
+**Beach Volleyball** https://www.codingame.com/training/medium/beach-volleyball
 
-Goal
+# Goal
 You love playing beach volleyball! Out there in the sun, playing with your friends, volleying that ball back and forth, it's the best.
 
 Until dude-face comes along, and kicks your precious volleyball into the ocean. You'd kick sand at him, but that volleyball could float away and you have to go get it right away!
@@ -13,17 +14,17 @@ You will travel in a straight line towards the shoreline to coordinate X=beach_x
 
 Find the best integer value for beach_x on the shore line that will result in the least travel time.
 
-Input
-Line 1: space separated values start_x and start_y
-Line 2: beach_y
-Line 3: space separated values ball_x and ball_y
-Line 4: speed_land
-Line 5: speed_water
+# Input
+* Line 1: space separated values start_x and start_y
+* Line 2: beach_y
+* Line 3: space separated values ball_x and ball_y
+* Line 4: speed_land
+* Line 5: speed_water
 
-Output
-Line 1 : beach_x - The X coordinate of the point where you meet the beach on your way to the ball.
+# Output
+* Line 1 : beach_x - The X coordinate of the point where you meet the beach on your way to the ball.
 
-Constraints
-0 ≤ start_x,ball_x ≤ 20,000,000
-0 ≤ start_y < beach_y < ball_y ≤ 20,000,000
-1 ≤ speed_water ≤ speed_land ≤ 1,000
+# Constraints
+* 0 ≤ start_x,ball_x ≤ 20,000,000
+* 0 ≤ start_y < beach_y < ball_y ≤ 20,000,000
+* 1 ≤ speed_water ≤ speed_land ≤ 1,000
