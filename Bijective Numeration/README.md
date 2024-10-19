@@ -1,6 +1,7 @@
-https://www.codingame.com/training/medium/bijective-numeration
+# Puzzle
+**Bijective Numeration** https://www.codingame.com/training/medium/bijective-numeration
 
-Goal
+# Goal
 Decimal isn't the only base ten positional numbering system!
 
 Write a simple calculator that operates entirely in "decimary" notation to sum a list of positive integer values. Decimary is a fun name for what mathematics calls bijective numeration base ten, which uses A to represent ten and lacks a zero digit.
@@ -13,13 +14,13 @@ The system is better illustrated than explained. Starting from one, these numera
 
 199, 19A = two hundred, 1A1 = two hundred and one, ...
 
-Input
-Line 1: An integer count representing the number of input values
-Line 2: A string of decimary values, separated by spaces
+# Input
+* Line 1: An integer count representing the number of input values
+* Line 2: A string of decimary values, separated by spaces
 
-Output
-Line 1: A string in "decimary" notation representing the summation
+# Output
+* Line 1: A string in "decimary" notation representing the summation
 
-Constraints
-2 <= count < 10
-1 <= length of each decimary representation < 10
+# Constraints
+* 2 <= count < 10
+* 1 <= length of each decimary representation < 10
