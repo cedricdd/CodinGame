@@ -1,5 +1,5 @@
 # Puzzle 
-**Tree Recognition** https://www.codingame.com/contribute/view/106374c7a62bb7b1b6fe4d1d0554a96fee055c
+**Tree Recognition** https://www.codingame.com/training/medium/tree-recognition
 
 # Goal
 Computers are becoming so advanced that they can recognize facial images, fingerprints and car license plates. Can they also recognize tree diagrams?
