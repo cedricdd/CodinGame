@@ -1,0 +1,85 @@
+# Puzzle
+**Bitmap Compression** https://www.codingame.com/training/medium/bmp-compression
+
+# Goal
+Binary graphic data (black and white images) can be stored in bitmap files where a white pixel is represented by 0 and a black pixel is represented by 1. Herein we try using two methods to store these 0's and 1's.
+
+Method 1 - 2D array of 0's and 1's representing all pixels in the image.  
+Method 2 - Decomposition.
+
+*Algorithm*  
+■ The entire image area is considered. If the area is fully composed of white pixels, Write a single 0. If the area is fully composed of black pixels, Write a single 1. After writing this 0 or 1, done for the area.  
+■ If the area is a mixture of black and white pixels, Write + as a marking to indicate we are going to decompose the area into four quarters.  
+■ Then focus on each of the quarters, in the order of upper-left, upper-right, lower-left, and finally lower-right, treating each quarter just like the full image area to write 0, 1, or + according to the same rules, until all pixels in each quarter are fully considered and recorded.  
+■ When dividing an area into quarters, if the width and height of the area are even, the cutting line is in the middle, evenly dividing the area into four sub-areas. If the width is odd, the left side sub-areas will have one pixel wider than the right sub-areas. If the height is odd, the upper sub-areas will have one pixel taller than the lower sub-areas.  
+■ If the area to be decomposed has only one row of pixels, horizontal cut is skipped. Do only the vertical cut. If the area has only one column of pixels, vertical cut is skipped. Do only the horizontal cut.  
+
+Compression ◄ ► De-compression
+
+Researchers called this decomposition structure Quadtree. It was a popular research topic in the 1980's for encoding and compressing graphics.
+
+In this puzzle, you are given binary images in 2D array of characters. We use . and # rather than 0 and 1 to obtain sharper visuals. You are going to encode the data into quadtree structure. Data will usually be compressed after encoding.
+
+At the same time, you have to reverse the procedure to de-compress quadtree image data back to 2D array of image pixels.
+
+Optional reading
+
+Skip if you wish to. The following section verbosely explains how the image in the Example is encoded.
+```
+....#  2D array of pixels
+...#.  encoded result:
+#.#..
+.#...  +0+0110++101+0100
+```
+```
+...│.#  The whole image is
+...│#.  neither all-black nor all-white.
+───┼──
+#.#│..  Write +. Divide.
+.#.│..
+```
+
+```
+Upper-L, all white. Write 0  
+Upper-R, mixed. Write +. Divide 4 pixels into 4 quarters  
+  └── upper-L is white. Write 0  
+  └── upper-R is black. Write 1  
+  └── lower-L is black. Write 1  
+  └── lower-R is white. Write 0  
+Lower-L, 2 rows of 3 columns. Mixed.  
+  └── Write +. Divide.  
+  └── upper-L is '#.' mixed. Write +. Divide.  
+        └── sub-areas are '#' and '.'. Write 1 and 0  
+  └── upper-R is '#'. Write 1  
+  └── lower-L is '.#' mixed. Write +. Divide.  
+        └── sub-areas are '.' and '#'. Write 0 and 1  
+  └── lower-R is '.'. Write 0  
+Lower-R, all white. Write 0
+```
+
+*References*  
+A. Rosenfeld, "Quadtree grammars for picture languages," IEEE Trans. Syst., Man, Cybern., vol. SMC-12, pp. 401-405, 1982.  
+K. Knowlton, "Progressive transmission of grey scale and B/W pictures by simple, efficient and lossless encoding schemes," Proc. IEEE, vol. 68, pp. 885-896, 1980.
+
+# Input
+* Line 1 : h c r, space separated
+* h is a header character, either B for bitmap or C for compressed-bitmap
+* c is an integer for number of columns in the uncompressed image
+* r is an integer for number of rows in the uncompressed image
+
+* Line 2 : An integer ln for number of lines to follow
+
+Following ln lines : When it is a Bitmap, ln is the same as r. Each line has a length of c. Read all lines to obtain an image in 2D array.
+
+When it is a Compressed-bitmap, ln indicates how many lines the encoded image data is split into. Each line has a length of 50. The last line can be shorter.
+
+# Output
+* When input is a Bitmap, encode the image into quadtree data structure as defined above.
+* When the data string is longer than 50, split the output data into 50 characters per line. Two regular header lines of Compressed-bitmap input are needed. Refer to the Input description.
+
+* When input is a Compressed-bitmap, decode the data into 2D array of image data. Use dot . for white pixels. Use # for black pixels. Two regular header lines of Bitmap input are needed. Refer to the input description.
+
+Because input and output have compatible data structures, it is possible to re-inject an output data to the same program to obtain the original input data.
+
+# Constraints
+* 1 ≤ c,r,ln ≤ 500
