@@ -1,4 +1,5 @@
-https://www.codingame.com/training/hard/blunder-episode-2
+# Puzzle
+**Blunder - Episode 2** https://www.codingame.com/training/hard/blunder-episode-2
 
 You have managed to find Blunder. His circuits are programmed with an algorithm which has made him lose all sense of humor or fun. You decide to return his system to his original behavior.
 
@@ -14,13 +15,12 @@ Each room in the building has a unique number. Each door of a room is marked wit
 
 The first room in which Blunder finds himself has the number 0.
 
-Game Input
-Line 1: the number N of rooms in the building.
+# Input
+* Line 1: the number N of rooms in the building.
+* N following lines: one line with a room number (integer), a sum of money (integer), the two numbers of the rooms which are accessible (integers or E if the door is an exit). These four values are separated by a white space.
 
-N following lines: one line with a room number (integer), a sum of money (integer), the two numbers of the rooms which are accessible (integers or E if the door is an exit). These four values are separated by a white space.
+# Output
+* An integer representing the maximum amount of money that Blunder can collect by taking a series of doors to reach the outside of the building.
 
-Output
-An integer representing the maximum amount of money that Blunder can collect by taking a series of doors to reach the outside of the building.
-
-Constraints
-0 < N < 10000
+# Constraints
+* 0 < N < 10000
