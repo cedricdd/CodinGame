@@ -13,9 +13,11 @@ The first one will be the border of the Line, the second one for the Rectangle a
 The triangle base will be equal to its height (theight) , same for the reverse triangle.  
 For a basic TRIANGLE you should output a triangle where the tip of its height is pointing upward. For a REVERSE_TRIANGLE, its height will be pointing down.
 
-Example :
+*Example*  
+
+Input:  
 ```
-Input:
+
 15
 2
 12
@@ -23,8 +25,8 @@ Input:
 { / @
 LINE RECTANGLE TRIANGLE REVERSE_TRIANGLE
 ```
+Output:  
 ```
-Output:
 {{{{{{{{{{{{{{{
 
 ////////////
