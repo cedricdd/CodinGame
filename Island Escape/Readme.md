@@ -1,5 +1,5 @@
 # Puzzle
-**Island Escape** https://www.codingame.com/contribute/view/1092129119d92582daee02f28f01f1339e8986
+**Island Escape** https://www.codingame.com/training/easy/island-escape
 
 # Goal
 You're dropped onto an island, starting at the very middle of an N by N terrain. Luckily you have a raft and a map showing the elevation of each square plot of land. The ocean lies all along the borders of the map at elevation 0.
