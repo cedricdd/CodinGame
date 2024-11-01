@@ -1,31 +1,45 @@
 <?php
 
-function explore(string $binary, int $index, array &$list) {
-    $size = strlen($binary);
+function generate(int $mask) {
+    global $listIntegers;
 
-    if($index == $size) {
-        $decimal = bindec($binary);
+    $previous = [];
 
-        if($decimal != 0) $list[] = $decimal; //We just want to filter out 0
+    while($mask) {
+        $bit = $mask & 1;
+        $previousNext = [];
 
-        return;
-    }
+        //We can generate some values here
+        if($bit == 1) {
+            foreach(($previous ?: ['']) as $end) {
+                $listIntegers[] = bindec('1' . $end);
+                $previousNext[] = '1' . $end;
+            }
+        }
 
-    //We can switch that bit to 0
-    if($binary[$index] == "1") {
-        $binary2 = $binary;
-        $binary2[$index] = "0";
+        foreach(($previous ?: ['']) as $end) $previousNext[] = '0' . $end;
 
-        explore($binary2, $index + 1, $list);
-    }
-    
-    explore($binary, $index + 1, $list); //We keep the bit as it is
+        $previous = $previousNext;
+
+        if(count($listIntegers) > 15) break; //We don't need more than the 15 smallest values
+        else $mask >>= 1;
+    } 
 }
 
-$mask = base_convert(trim(fgets(STDIN)), 16, 2);
+$start = microtime(1);
+
 $listIntegers = [];
+$mask = trim(fgets(STDIN));
+$binary = base_convert($mask, 16, 2);
+$integer = base_convert($mask, 16, 10);
 
-explore($mask, 0, $listIntegers);
+generate($integer);
 
+sort($listIntegers);
+
+//We have 15 or less, show everything
 if(count($listIntegers) <= 15) echo implode(",", $listIntegers) . PHP_EOL;
-else echo implode(",", array_slice($listIntegers, 0, 13)) . ",...," . implode(",", array_slice($listIntegers, -2)) . PHP_EOL;
+//Show the 13 first, the largest is just the input and the second largest is just the rightmost 1 replaced with a 0
+else echo implode(",", array_slice($listIntegers, 0, 13)) . ",...," . bindec(substr_replace($binary, '0', strripos($binary, '1'), 1)) . "," . $integer . PHP_EOL;
+
+error_log(microtime(1) - $start);
