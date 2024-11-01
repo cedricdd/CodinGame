@@ -39,7 +39,7 @@ sort($listIntegers);
 
 //We have 15 or less, show everything
 if(count($listIntegers) <= 15) echo implode(",", $listIntegers) . PHP_EOL;
-//Show the 13 first, the largest is just the input and the second largest is just the rightmost 1 replaced with a 0
-else echo implode(",", array_slice($listIntegers, 0, 13)) . ",...," . bindec(substr_replace($binary, '0', strripos($binary, '1'), 1)) . "," . $integer . PHP_EOL;
+//Show the 13 first, the largest is just the input and the second largest is just the input minus the smallest
+else echo implode(",", array_slice($listIntegers, 0, 13)) . ",...," . ($integer - $listIntegers[0]) . "," . $integer . PHP_EOL;
 
 error_log(microtime(1) - $start);
