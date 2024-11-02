@@ -1,5 +1,54 @@
 <?php
 
+function solve(int $count, array $colors, int $vertices, bool $test = false): int {
+    global $adjacent;
+    static $history = [];
+
+    $hash = serialize($colors);
+
+    if(isset($history[$hash])) {
+        // error_log("using history");
+        return $history[$hash];
+    }
+
+    // error_log($hash);
+
+    if($vertices == $count) return max($colors);
+
+    $min = INF;
+
+    for($i = 0; $i < $count; ++$i) {
+        if($colors[$i] != 0) continue;
+
+        //Working on vertex $i
+        $possibleColors = array_fill(1, $count + 1, 1);
+
+        foreach(($adjacent[$i] ?? []) as $neighbor => $filler) {
+            unset($possibleColors[$colors[$neighbor]]);
+        }
+
+        $color = array_key_first($possibleColors);
+
+        // if($test) error_log("using $color for $i");
+
+        $colors[$i] = $color;
+
+        $test2 = solve($count, $colors, $vertices + 1);
+
+        // if($test) error_log($test2);
+
+        $min = min($min, $test2);
+
+        if($min == 2) break;
+
+        $colors[$i] = 0;
+    }
+
+    return $history[$hash] = $min;
+}
+
+$start = microtime(1);
+
 fscanf(STDIN, "%d", $w);
 fscanf(STDIN, "%d", $h);
 for ($i = 0; $i < $h; $i++){
@@ -39,26 +88,41 @@ for($y = 0; $y < $h; ++$y) {
 }
 
 $nbrColors = 1;
+$adjacent = [];
 
 //For each characters that can be a seperator between zones, check how many zones we have.
 for($y = 1; $y < $h - 1; ++$y) {
     for($x = 1; $x < $w - 1; ++$x) {
         if($sheet[$y][$x] != ' ') {
-            $zones = [];
+            if($x > 1 && $x < $w - 2) {
+                if($sheet[$y][$x - 1] == ' ' && $sheet[$y][$x + 1] == ' ') {
+                    $z1 = $zone[$y][$x - 1];
+                    $z2 = $zone[$y][$x + 1];
 
-            if(isset($zone[$y - 1][$x - 1])) $zones[] = $zone[$y - 1][$x - 1];
-            if(isset($zone[$y - 1][$x + 1])) $zones[] = $zone[$y - 1][$x + 1];
-            if(isset($zone[$y + 1][$x - 1])) $zones[] = $zone[$y + 1][$x - 1];
-            if(isset($zone[$y + 1][$x + 1])) $zones[] = $zone[$y + 1][$x + 1];
+                    if($z1 != $z2) {
+                        $adjacent[$z1][$z2] = 1;
+                        $adjacent[$z2][$z1] = 1;
+                    }
+                }
+            }
+            if($y > 1 && $y < $h - 1) {
+                if($sheet[$y - 1][$x] == ' ' && $sheet[$y + 1][$x] == ' ') {
+                    $z1 = $zone[$y - 1][$x];
+                    $z2 = $zone[$y + 1][$x];
 
-            $zones = array_unique($zones);
-            $count = count($zones);
-
-            if($count == 4) $count >>= 1; //Touching diagonally is not adjacent, if we have 4 we only need 2 colors.
-
-            $nbrColors = max($nbrColors, $count);
+                    if($z1 != $z2) {
+                        $adjacent[$z1][$z2] = 1;
+                        $adjacent[$z2][$z1] = 1;
+                    }
+                }  
+            }
         }
     }
 }
 
-echo $nbrColors . PHP_EOL;
+// error_log(var_export($adjacent[49], 1));
+
+if($zoneIndex == 0) echo "1" . PHP_EOL;
+else echo solve($zoneIndex, array_fill(0, $zoneIndex, 0), 0, 1) . PHP_EOL;
+
+error_log(microtime(1) - $start);
