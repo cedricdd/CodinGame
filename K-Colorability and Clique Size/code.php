@@ -3,7 +3,7 @@
 function findMaximumClique(int $last, array $current, array $potential) {
     global $maxClique, $links;
 
-    //no vertices that can still be added
+    //No vertices that can still be added
     if(count($potential) == 0) {
         $maxClique = max($maxClique, count($current));
          
@@ -25,6 +25,37 @@ function findMaximumClique(int $last, array $current, array $potential) {
     }
 }
 
+function solve(int $count, array $colors, int $vertices): int {
+    global $links, $maxClique;
+    
+    if($vertices == $count) return max($colors);
+
+    $minColors = $count;
+
+    for($i = 0; $i < $count; ++$i) {
+        if($colors[$i] != 0) continue;
+
+        //Working on vertex $i
+        $possibleColors = array_fill(1, $count + 1, 1);
+
+        foreach(($links[$i] ?? []) as $neighbor => $filler) {
+            unset($possibleColors[$colors[$neighbor]]);
+        }
+
+        $color = array_key_first($possibleColors); //The color we are going to use for this vertex
+
+        $colors[$i] = $color;
+
+        $minColors = min($minColors, solve($count, $colors, $vertices + 1));
+
+        if($minColors == $maxClique) break; //We know maxClique is the lower bound, we can't find a solution any lower
+
+        $colors[$i] = 0;
+    }
+
+    return $minColors;
+}
+
 $start = microtime(1);
 
 $vertices = [];
@@ -42,36 +73,13 @@ for ($i = 0; $i < $m; $i++) {
 
 fscanf(STDIN, "%d", $k);
 
-$minColors = 1;
+$maxClique = 1;
 
-//For each vertices get the min number of colors we need
-foreach($vertices as $vertex => $filler) {
-    $neighbors = $links[$vertex];
+findMaximumClique(-1, [], $vertices);
 
-    $max = 0;
+$minColors = solve($n, array_fill(0, $n, 0), 0);
 
-    foreach($neighbors as $neighbor => $filler) {
-        $count = 0;
-
-        foreach($links[$neighbor] as $vertex2 => $filler) {
-            if($vertex2 == $vertex) continue;
-
-            if(isset($neighbors[$vertex2])) ++$count; //This neighbor is also linked to another neighbor
-        }
-
-        $max = max($max, $count);
-    }
-
-    $minColors = max($minColors, $max + 2);
-}
-
-if($minColors <= $k) {
-    $maxClique = 1;
-
-    findMaximumClique(-1, [], $vertices);
-
-    echo "YES " . $maxClique . PHP_EOL;
-}
+if($minColors <= $k) echo "YES " . $maxClique . PHP_EOL;
 else echo "NO" . PHP_EOL;
 
 error_log(microtime(1) - $start);
