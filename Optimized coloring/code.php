@@ -1,21 +1,38 @@
 <?php
 
-function solve(int $count, array $colors, int $vertices, bool $test = false): int {
-    global $adjacent;
-    static $history = [];
+//Find the maximum clique in the graph
+function findMaximumClique(int $last, array $current, array $potential) {
+    global $links, $maxClique;
 
-    $hash = serialize($colors);
-
-    if(isset($history[$hash])) {
-        // error_log("using history");
-        return $history[$hash];
+    //no vertices that can still be added
+    if(count($potential) == 0) {
+        $maxClique = max($maxClique, count($current));
+ 
+        return;
     }
 
-    // error_log($hash);
+    foreach($potential as $vertex1 => $filler) {
+        if($last >= $vertex1) continue; //No need to test the same vertices in different orders
 
+        foreach($current as $vertex2 => $filler) {
+            if(!isset($links[$vertex1][$vertex2])) continue 2; //By using this vertex it's no longer a clique
+        }
+
+        $current[$vertex1] = 1; //We can add this vertex
+
+        findMaximumClique($vertex1, $current, array_intersect_key($potential, ($links[$vertex1] ?? [])));
+
+        unset($current[$vertex1]);
+    }
+}
+
+
+function solve(int $count, array $colors, int $vertices): int {
+    global $links, $maxClique;
+    
     if($vertices == $count) return max($colors);
 
-    $min = INF;
+    $minColors = $count;
 
     for($i = 0; $i < $count; ++$i) {
         if($colors[$i] != 0) continue;
@@ -23,28 +40,22 @@ function solve(int $count, array $colors, int $vertices, bool $test = false): in
         //Working on vertex $i
         $possibleColors = array_fill(1, $count + 1, 1);
 
-        foreach(($adjacent[$i] ?? []) as $neighbor => $filler) {
+        foreach(($links[$i] ?? []) as $neighbor => $filler) {
             unset($possibleColors[$colors[$neighbor]]);
         }
 
-        $color = array_key_first($possibleColors);
-
-        // if($test) error_log("using $color for $i");
+        $color = array_key_first($possibleColors); //The color we are going to use for this vertex
 
         $colors[$i] = $color;
 
-        $test2 = solve($count, $colors, $vertices + 1);
+        $minColors = min($minColors, solve($count, $colors, $vertices + 1));
 
-        // if($test) error_log($test2);
-
-        $min = min($min, $test2);
-
-        if($min == 2) break;
+        if($minColors == $maxClique) break; //We know maxClique is the lower bound, we can't find a solution any lower
 
         $colors[$i] = 0;
     }
 
-    return $history[$hash] = $min;
+    return $minColors;
 }
 
 $start = microtime(1);
@@ -87,10 +98,11 @@ for($y = 0; $y < $h; ++$y) {
     }
 }
 
+$maxClique = 0;
 $nbrColors = 1;
-$adjacent = [];
+$links = [];
 
-//For each characters that can be a seperator between zones, check how many zones we have.
+//For each characters that can be a seperator between zones.
 for($y = 1; $y < $h - 1; ++$y) {
     for($x = 1; $x < $w - 1; ++$x) {
         if($sheet[$y][$x] != ' ') {
@@ -99,9 +111,10 @@ for($y = 1; $y < $h - 1; ++$y) {
                     $z1 = $zone[$y][$x - 1];
                     $z2 = $zone[$y][$x + 1];
 
+                    //We have different zones on the left & right
                     if($z1 != $z2) {
-                        $adjacent[$z1][$z2] = 1;
-                        $adjacent[$z2][$z1] = 1;
+                        $links[$z1][$z2] = 1;
+                        $links[$z2][$z1] = 1;
                     }
                 }
             }
@@ -110,9 +123,10 @@ for($y = 1; $y < $h - 1; ++$y) {
                     $z1 = $zone[$y - 1][$x];
                     $z2 = $zone[$y + 1][$x];
 
+                    //We have different zones on the top & bottom
                     if($z1 != $z2) {
-                        $adjacent[$z1][$z2] = 1;
-                        $adjacent[$z2][$z1] = 1;
+                        $links[$z1][$z2] = 1;
+                        $links[$z2][$z1] = 1;
                     }
                 }  
             }
@@ -120,9 +134,11 @@ for($y = 1; $y < $h - 1; ++$y) {
     }
 }
 
-// error_log(var_export($adjacent[49], 1));
 
 if($zoneIndex == 0) echo "1" . PHP_EOL;
-else echo solve($zoneIndex, array_fill(0, $zoneIndex, 0), 0, 1) . PHP_EOL;
+else {
+    findMaximumClique(-1, [], array_fill(0, $zoneIndex, 1));
+    echo solve($zoneIndex, array_fill(0, $zoneIndex, 0), 0) . PHP_EOL;
+}
 
 error_log(microtime(1) - $start);
