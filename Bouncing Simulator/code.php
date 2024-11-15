@@ -24,28 +24,28 @@ while($n > 0) {
     //Hitting the left wall
     if($x == 0) {
         $d[0] = 1;
-        $x += 2;
+        $x += ($w == 1 ? 1 : 2);
         $hit = true;
     }
 
     //Hitting the right wall
     if($x > $w) {
         $d[0] = -1;
-        $x -= 2;
+        $x -= ($w == 1 ? 1 : 2);
         $hit = true;
     }
         
     //Hitting the top wall
     if($y == 0) {
         $d[1] = 1;
-        $y += 2;
+        $y += ($h == 1 ? 1 : 2);
         $hit = true;
     }
         
     //Hitting the bottom wall
     if($y > $h) {
         $d[1] = -1;
-        $y -= 2;
+        $y -= ($h == 1 ? 1 : 2);
         $hit = true;
     }
     
