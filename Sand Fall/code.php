@@ -38,4 +38,8 @@ for ($i = 0; $i < $N; $i++) {
     addSand($x, $letter, ord($letter) > 96);
 }
 
-echo implode("\n", $box) . PHP_EOL;
+echo implode("\n", array_map(function($line) {
+    return '|' . $line . '|';
+}, $box)) . PHP_EOL;
+
+echo '+' . str_repeat('-', $W) . '+' . PHP_EOL;
