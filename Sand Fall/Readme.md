@@ -71,13 +71,15 @@ Fcabe
 
 # Input
 * Line 1: Two integers w and h representing the width and height of the box.
-* Line 2: n: the number of grains of sand that will fall.
-* Next n lines: The character s representing the grain of sand followed by its initial position p above the box, separated by a space. p = 0 if it is above the left edge of the box, and p = w - 1 if it is above the right edge of the box.
+* Line 2: n: the number of grains of sand being dropped.
+* Next n lines: The character s representing the grain of sand followed by its initial position p above the box, separated by a space. p = 0 if it is above the left-most column and p = w - 1 if it is above the right-most column of the box.
 
 # Output
-* h lines: the content of the box - any unoccupied space of the box should be filled with the space character, which should not be removed in the output - or OVERFLOW if at least one grain of sand can't fall into the box.
+* h lines: the box content, outlined by | on both sides.
+* Last line: the box bottom, represented by +----+ where - is repeated w times.
 
 # Constraints
-* 2 <= w, h <= 30
-* 0 < n <= 1000
+* 2 <= w, h <= 50
+* 0 < n < 256
 * 0 <= p < w
+* All grains will fit inside the box.
