@@ -1,5 +1,5 @@
 # Puzzle
-**Linguistic Scramble** https://www.codingame.com/contribute/view/10927847b0d993b9733416113429dd01e93726
+**Literary Alfabet Soupe** https://www.codingame.com/training/medium/literary-alfabet-soupe
 
 # Goal
 A quotation from a classic literary work has been translated into a dozen different European languages. However, the translations have all been shuffled in some arbitrary order. With the original mixed in, that's 13 languages altogether. What bad luck!
