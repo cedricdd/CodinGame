@@ -2,7 +2,7 @@
 
 const ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-function permutations(array $characters, string $number, int $count) {
+function permutations(int $start, string $number, int $count) {
     global $solutions, $d, $n;
 
     //We have generated a permutation, check it
@@ -16,10 +16,10 @@ function permutations(array $characters, string $number, int $count) {
         return;
     }
 
-    foreach($characters as $i => $c) {
+    for($i = $start; $i < $n; ++$i) {
         //We can only use values that are >= of the last value used.
         //1234, 2341, 3412, 1432, ... they would all would all generate the same max & min numbers
-        permutations(array_slice($characters, $i), $number . $c, $count + 1);
+        permutations($i, $number . ALPHABET[$i], $count + 1);
     }
 }
 
@@ -30,7 +30,7 @@ $solutions = [];
 fscanf(STDIN, "%d", $n);
 fscanf(STDIN, "%d", $d);
 
-permutations(str_split(substr(ALPHABET, 0, $n)), "", 0);
+permutations(0, "", 0);
 
 $count = count($solutions);
 
