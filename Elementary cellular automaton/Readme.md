@@ -28,7 +28,7 @@ where each digit in the binary representation of the code represents the evoluti
 For example, if the provided rule is the code 53, or 00110101 in binary, then this would be interpreted as follows:
 ```
 Neighborhood:	111   110   101   100   011   010   001   000
-Next value:	   0     0     1     1     0     1     0     1
+Next value:	  0     0     1     1     0     1     0     1
 ```
 
 And so a neighborhood resembling 010 would evolve into a 1, while a neighborhood resembling 110 would evolve into a 0.
