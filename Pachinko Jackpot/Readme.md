@@ -1,5 +1,5 @@
 # Puzzle
-**Pachinko Jackpot** https://www.codingame.com/contribute/view/111951263ebdcf58bb182c141664337cf38734
+**Pachinko Jackpot** https://www.codingame.com/training/easy/pachinko-jackpot
 
 #Goal
 In the arcade game pachinko, also called plinko, a ball or chip is dropped from the top of a triangular board and randomly bounces off pegs as it descends. In this electronic version, a sprite bounces off one peg in each row and wins a prize if it lands in a catcher at the bottom. Here is a possible trajectory on a 5-high pachinko board:
