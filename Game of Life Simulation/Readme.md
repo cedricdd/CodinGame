@@ -1,0 +1,145 @@
+# Puzzle
+**Game of Life Simulation** https://www.codingame.com/training/medium/game-of-life-simulation
+
+# Goal
+Game of life is a cellular automaton with easy rules.  
+The action field is a matrix with width W and height H.  
+Cells can be alive "#" or dead " ".  
+Cells can have neighbours in 8 cells around it:  
+```
+=============
+| 1 | 2 | 3 |
+=============
+| 4 |   | 5 |
+=============
+| 6 | 7 | 8 |
+=============
+```
+Cells on the sides or at the corners have fewer neighbours.
+
+If a dead cell has 3 neighbours it becomes alive.  
+If a living cell has fewer than 2 or more than 3 neighbours, it becomes dead.  
+If a live cell has 2 neighbours, it does not change.  
+
+*For example:*  
+Configuration:
+```
+ 1234
+1 #
+2  #
+3###
+4
+```
+
+Cells 2;4, 1;2 become alive because they have 3 neighbours (2;4 has 1;3, 2;3, 3;3. 1;2 has 2;1, 1;3, 2;3.)  
+Cells 2;1, 1;3 become dead (2;1 has only 3;2. 1;3 has only 2;3.)  
+
+*Step 1:*
+```
+ 1234
+1  
+2# #
+3 ##
+4 #
+```
+
+Cells 3;4, 1;3 become alive because they have 3 neighbours (3;4 has 2;3, 3;3, 2;4. 1;3 has 1;2, 2;3, 2;4.)  
+Cells 1;2, 2;3 become dead (1;2 has only 2;3. 2;3 has too many: 1;2, 2;4, 3;2, 3;3)
+
+*Step 2:*
+```
+ 1234
+1  
+2  #
+3# #
+4 ##
+```
+
+Cells 4;3, 2;2 become alive because they have 3 neighbours.  
+Cells 1;3, 3;2 become dead because they have 1 neighbour.
+
+*Step 3:*
+```
+ 1234
+1  
+2 #  
+3  ##
+4 ##
+```
+
+Cells 3;2, 4;4 become alive because they have 3 neighbours.  
+Cells 2;2, 3;3 become dead because they have 1 neighbour or more than 3.
+
+*Step 4:*
+```
+ 1234
+1  
+2  #  
+3   #
+4 ###
+```
+
+We come to the initial configuration, but it has shifted right and down. In the next steps, it will move further.  
+But what happens when it reaches the corner?
+
+Cell 2;3 becomes alive because it has 3 neighbours.  
+Cells 3;2, 2;4 become dead because they have 1.
+
+*Step 5:*
+```
+ 1234
+1
+2
+3 # #
+4  ##
+```
+
+Cell 3;2 becomes dead because it has 1.
+
+*Step 6:* 
+```
+ 1234
+1
+2
+3   #
+4  ##
+```
+
+Cell 3;3 becomes alive because it has 3 neighbours.
+
+*Step 7:*
+```
+ 1234
+1
+2
+3  ##
+4  ##
+```
+
+This configuration will be still.
+
+Game of life has 3 ends:  
+1. Still.  
+Configuration after some actions becomes stationary.  
+2. Oscillator.  
+Configuration will repeat itself in some moves.  
+3. Death.  
+No living cell remains.  
+
+Output the result of the inputed configuration:  
+1. Still.
+2. Oscillator period (how many moves needed to repeat the configuration).
+3. Death.
+
+Source: https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+
+# Input
+* Line 1: Two space separated integers W and H for width and height.
+* Next H lines: Line with length W for configuration.
+
+# Output
+* Line 1: result of configuration: Still, Oscillator period or Death.
+
+# Constraints
+* 1 ≤ W ≤ 40
+* 1 ≤ H ≤ 40
