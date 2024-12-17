@@ -1,5 +1,5 @@
 # Puzzle
-**Fussy Fuzzy Matching** https://www.codingame.com/contribute/view/4647924c1a7eb5df085ab2a6ee68d2c1a4732
+**Fussy Fuzzy Matching** https://www.codingame.com/training/easy/fussy-fuzzy-matching
 
 # Goal
 Determine which candidate strings (if any) match the given template string according to the stated rules.  
