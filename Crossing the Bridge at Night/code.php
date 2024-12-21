@@ -1,75 +1,50 @@
 <?php
 
-function solve(array $sides, int $index): int {
-    static $history = [];
-    // error_log(var_export($sides, 1));
-
-    $hash = md5(serialize($sides));
-
-    if(isset($history[$hash][$index])) return $history[$hash][$index];
-
-    if(count($sides[0]) == 0) return 0;
-
-    if($index == 1) {
-        rsort($sides[1]);
-
-        $time = array_pop($sides[1]);
-
-        $sides[0][] = $time;
-
-        return $history[$hash][$index] = $time + solve($sides, 0);
-    } else {
-        sort($sides[0]);
-
-        //We use the fastest and the slowest
-        $slowest = array_pop($sides[0]);
-        $fastest = array_shift($sides[0]);
-
-        $sides2 = $sides;
-
-        array_push($sides2[1], $fastest, $slowest);
-
-        $time = $slowest + solve($sides2, 1);
-
-        if(count($sides[0])) {
-            //We use the two slowest
-            $sides2 = $sides;
-
-            $extra = array_pop($sides2[0]);
-
-            array_push($sides2[1], $slowest, $extra);
-            array_push($sides2[0], $fastest);
-
-            $time2 = $slowest + solve($sides2, 1);
-
-            if($time2 < $time) $time = $time2;
-
-            //We use the two fastest
-            $sides2 = $sides;
-
-            $extra = array_shift($sides2[0]);
-
-            array_push($sides2[1], $fastest, $extra);
-            array_push($sides2[0], $slowest);
-
-            $time2 = $extra + solve($sides2, 1);
-
-            if($time2 < $time) $time = $time2;
-        }
-
-        return $history[$hash][$index] = $time;
-    }
-}
-
 $start = microtime(1);
+
+$total = 0;
 
 fscanf(STDIN, "%d", $N);
 for ($i = 0; $i < $N; $i++) {
     fscanf(STDIN, "%d", $times[]);
 }
 
-error_log(var_export($times, 1));
+sort($times);
 
-echo solve([$times, []], 0) . PHP_EOL;
+while($times) {
+    $count = count($times);
+
+    if($count == 2) {
+        $total += end($times);
+        $times = [];
+    }
+    elseif($count == 3) {
+        //We move the fastest and the slowest, then the fastest back, then the last two, in total we use the count of each of the three people
+        $total += array_sum($times);
+
+        $times = [];
+    } elseif($count == 4) {
+        $t4 = array_pop($times);
+        $t3 = array_pop($times);
+        $t2 = array_pop($times);
+        $t1 = array_pop($times);
+
+        /**
+         * Choice 1: We move t1 & t2, then t1 back, then t3 & t4, then t2 back, then t1 & t2
+         * Choice 2: We move t1 & t4, then t1 back, then t1 & t3, then t1 back, then t1 & t2
+         */
+        $total += min(3 * $t2 + $t1 + $t4, $t4 + $t1 + $t3 + $t1 + $t2);
+    } else {
+        //We first move the two fastest (t1 & t2), then move back t1, move the two slowest (t3 & t4) and then move back t2
+        $t1 = $times[0];
+        $t2 = $times[1];
+        $t4 = array_pop($times);
+        $t3 = array_pop($times);
+
+        $total += $t2 + $t1 + $t4 + $t2;
+    }
+}
+
+echo $total . PHP_EOL;
 
 error_log(microtime(1) - $start);
