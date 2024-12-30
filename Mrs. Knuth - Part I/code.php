@@ -1,7 +1,5 @@
 <?php
 
-const TIMES = ['8', '9', '10', '11', '1', '2', '3', '4'];
-
 function showSchedule(array $slots) {
     $schedule = [
         "       Monday        Tuesday       Wednesday       Thursday        Friday    ",
@@ -44,53 +42,63 @@ function showSchedule(array $slots) {
     echo implode(PHP_EOL, array_map("rtrim", $schedule)) . PHP_EOL;
 }
 
-function solve(array $students, int $left, array $slots = []) {
-    global $names, $instruments, $idsByInstument, $start;
+function solve(array $students, array $counts, int $studentLeft, array $slots = []) {
+    global $names, $instruments, $idsByInstument;
 
-    if($left == 0) {
+    //We have placed all the students
+    if($studentLeft == 0) {
         showSchedule($slots);
         return;
     }
 
     //Find the student with the less possibilties
-    $lowestCount = PHP_INT_MAX;
+    $lowestCount = 40;
     $lowestID = 0;
 
-    foreach($students as $id => $availability) {
-        $count = count($availability);
-
-        if($count == 0) return;
-
+    foreach($counts as $id => $count) {
         if($count < $lowestCount) {
             $lowestCount = $count;
             $lowestID = $id;
         }
     }
 
-    // error_log("lowest: $lowestID - $lowestCount");
+    $instrument = $instruments[$lowestID];
+    $name = $names[$lowestID];
 
     foreach($students[$lowestID] as $timeSlot => $filler) {
         [$date, $time] = explode("-", $timeSlot);
 
-
+        $counts2 = $counts;
         $students2 = $students;
 
         unset($students2[$lowestID]);
+        unset($counts2[$lowestID]);
 
         //Nobody else can use this slot
-        foreach($students2 as $studentID => $filler2) unset($students2[$studentID][$timeSlot]);
+        foreach($students2 as $studentID => $filler2) {
+            if(isset($students2[$studentID][$timeSlot])) {
+                unset($students2[$studentID][$timeSlot]);
 
-        //Nobody else playing the same instrument
-        foreach($idsByInstument[$instruments[$lowestID]] as $studentID) {
-            foreach(TIMES as $time) {
-                unset($students2[$studentID][$date . "-" . $time]);
+                if(--$counts2[$studentID] == 0) continue 2; //No more slots for this student => impossible
             }
         }
 
-        solve($students2, $left - 1, $slots + [$timeSlot => $names[$lowestID] . "/" . $instruments[$lowestID]]);
+        //Nobody else playing the same instrument can use any slot the same day
+        foreach($idsByInstument[$instrument] as $studentID) {
+            foreach(['8', '9', '10', '11', '1', '2', '3', '4'] as $time) {
+                if(isset($students2[$studentID][$date . "-" . $time])) {
+                    unset($students2[$studentID][$date . "-" . $time]);
+
+                    if(--$counts2[$studentID] == 0) continue 3; //No more slots for this student => impossible
+                }
+            }
+        }
+
+        solve($students2, $counts2, $studentLeft - 1, $slots + [$timeSlot => $name . "/" . $instrument]);
     }
 }
 
+//Extract the availabilities from the string
 function getAvailability(string $input): array {
     $availability = [];
 
@@ -127,11 +135,9 @@ for ($i = 0; $i < $numStudents; $i++) {
     $instruments[] = $instrument;
     $idsByInstument[$instrument][] = $i;
     $names[] = $name;
+    $counts[] = count($slots);
 }
 
-solve($students, $numStudents);
-
-// error_log(var_export($teacher, 1));
-// error_log(var_export($students, 1));
+solve($students, $counts, $numStudents);
 
 error_log(microtime(1) - $start);
