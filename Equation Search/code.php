@@ -1,15 +1,22 @@
 <?php
 
-function solve(array $digits, int $index, array $equations) {
+function solve(array $digits, int $index, array $equations): int {
     global $results, $right, $nbrEquations;
 
-    if($index == $nbrEquations) {
-        $results[] = $equations;
+    static $history = [];
 
-        return;
+    $hash = serialize($digits);
+
+    if(isset($history[$hash][$index])) return $history[$hash][$index];
+
+    if($index == $nbrEquations) {
+        $results = $equations;
+
+        return 1;
     }
 
     $goal = $right[$index];
+    $total = 0;
 
     // error_log("working on $goal -- $index");
 
@@ -25,7 +32,7 @@ function solve(array $digits, int $index, array $equations) {
             if($digits2[$diff] == 1) unset($digits2[$diff]);
             else $digits2[$diff]--;
 
-            solve($digits2, $index + 1, $equations + [$index => "$d + $diff = $goal"]);
+            $total += solve($digits2, $index + 1, $equations + [$index => "$d + $diff = $goal"]);
         }
 
         if($goal % $d == 0) {
@@ -40,10 +47,12 @@ function solve(array $digits, int $index, array $equations) {
                 if($digits2[$div] == 1) unset($digits2[$div]);
                 else $digits2[$div]--;
     
-                solve($digits2, $index + 1, $equations + [$index => "$d x $div = $goal"]);
+                $total += solve($digits2, $index + 1, $equations + [$index => "$d x $div = $goal"]);
             }
         }
     }
+
+    return $history[$hash][$index] = $total;
 }
 
 $start = microtime(1);
@@ -57,14 +66,10 @@ foreach(explode(" ", trim(fgets(STDIN))) as $i => $v) {
 
 $results = [];
 
-solve($digits, 0, []);
-
-// error_log(var_export($results, 1));
-
-$count = count($results);
+$count = solve($digits, 0, []);
 
 echo $count . PHP_EOL;
 
-if($count == 1) echo implode(PHP_EOL, $results[0]) . PHP_EOL;
+if($count == 1) echo implode(PHP_EOL, $results) . PHP_EOL;
 
 error_log(microtime(1) - $start);
