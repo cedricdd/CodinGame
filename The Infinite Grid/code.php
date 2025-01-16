@@ -10,8 +10,6 @@ while(true) {
     ++$x;
 }
 
-error_log("$x $number");
-
 $p = $x - 1;
 $n = $x + 1;
 $t = $x * 2 - 1;
