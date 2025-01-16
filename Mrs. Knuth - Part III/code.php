@@ -1,6 +1,9 @@
 <?php
 
+const TIMES = ['8', '9', '10', '11', '1', '2', '3', '4'];
 const LOUD = ["Trumpet" => 1, "Drums" => 1, "Trombone" => 1];
+const MORNING = ['M' => 15, 'Tu' => 12, 'W' => 9, 'Th' => 6, 'F' => 3];
+const AFTERNOON = ['M' => 10, 'Tu' => 8, 'W' => 6, 'Th' => 4, 'F' => 2];
 
 function showSchedule(array $slots) {
     $schedule = [
@@ -41,8 +44,57 @@ function showSchedule(array $slots) {
         $schedule[$line] = substr_replace($schedule[$line], str_pad($info, 14, " ", STR_PAD_BOTH), $offset, 14);
     }
 
-    error_log("FOUND ONE");
-    // echo implode(PHP_EOL, array_map("rtrim", $schedule)) . PHP_EOL;
+    // error_log("FOUND ONE");
+    echo implode(PHP_EOL, array_map("rtrim", $schedule)) . PHP_EOL;
+}
+
+function getScore(array $slots): array {
+    // error_log(var_export($slots, 1));
+
+    $scores = array_fill(0, 4, [0, 0, 0, 0, 0]);
+
+    foreach(['M', 'Tu', 'W', 'Th', 'F'] as $i => $day) {
+        $continuous = 0;
+
+        foreach(['8', '9', '10', '11', '12', '1', '2', '3', '4'] as $time) {
+            if(!isset($slots[$day . "-" . $time])) ++$continuous;
+            else {
+                if($continuous != 0) $scores[0][$i] += 2 ** $continuous;
+
+                $continuous = 0;
+
+                //Morning
+                if($time >= 8) {
+                    $scores[2][$i] += MORNING[$day];
+
+                    //Loud instrument in the morning
+                    if(preg_match("/.*\/(Trumpet|Drums|Trombone)/", $slots[$day . "-" . $time])) {
+                        $scores[1][$i] += 50;
+                    }
+                } //Afternoon
+                else {
+                    $scores[2][$i] += AFTERNOON[$day];
+                } 
+            }
+        }
+
+        if($continuous != 0) $scores[0][$i] += 2 ** $continuous;
+    }
+
+    foreach(['M', 'Tu', 'W', 'Th', 'F'] as $i => $day) {
+        $alphabetical = 0;
+
+        for($j = 0; $j < 7; ++$j) {
+            if(isset($slots[$day . "-" . TIMES[$j]]) && isset($slots[$day . "-" . TIMES[$j + 1]])) {
+                //Students are in alphabetical order
+                if(strcmp($slots[$day . "-" . TIMES[$j]], $slots[$day . "-" . TIMES[$j + 1]]) < 0) ++$alphabetical;
+            }
+        }
+
+        $scores[3][$i] = 15 * $alphabetical;
+    }
+
+    return $scores;
 }
 
 function generatePermutations(array $timeSlots, int $count, array $current, array &$results) {
@@ -71,11 +123,20 @@ function generatePermutations(array $timeSlots, int $count, array $current, arra
 }
 
 function solve(array $students, array $counts, int $studentLeft, array $slots = []) {
-    global $names, $instruments, $idsByInstument, $troublesome, $hoursRequested;
+    global $names, $instruments, $idsByInstument, $troublesome, $hoursRequested, $bestSchedule;
 
     //We have placed all the students
     if($studentLeft == 0) {
-        showSchedule($slots);
+        $scores = getScore($slots);
+
+        $total = array_sum(array_map("array_sum", $scores));
+
+        if($total > $bestSchedule[2]) {
+            $bestSchedule = [$slots, $scores, $total];
+        }
+
+        error_log(var_export($total, 1));
+        
         return;
     }
 
@@ -137,7 +198,7 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
     
             //Nobody else playing the same instrument can use any slot the same day
             foreach($idsByInstument[$instrument] as $studentID) {
-                foreach(['8', '9', '10', '11', '1', '2', '3', '4'] as $time2) {
+                foreach(TIMES as $time2) {
                     if(isset($students2[$studentID][$date][$time2])) {
                         unset($students2[$studentID][$date][$time2]);
     
@@ -256,6 +317,18 @@ for ($i = 0; $i < $pairs; $i++) {
 
 // error_log(var_export($troublesome, 1));
 
+$bestSchedule = [[], [], 0];
+
 solve($students, $counts, $numStudents);
+
+showSchedule($bestSchedule[0]);
+
+echo PHP_EOL;
+
+foreach($bestSchedule[1] as $scores) {
+    echo implode("+", $scores) . "=" . array_sum($scores) . PHP_EOL;
+}
+
+echo $bestSchedule[2] . PHP_EOL;
 
 error_log(microtime(1) - $start);
