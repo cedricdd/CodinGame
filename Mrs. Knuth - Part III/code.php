@@ -44,7 +44,6 @@ function showSchedule(array $slots) {
         $schedule[$line] = substr_replace($schedule[$line], str_pad($info, 14, " ", STR_PAD_BOTH), $offset, 14);
     }
 
-    // error_log("FOUND ONE");
     echo implode(PHP_EOL, array_map("rtrim", $schedule)) . PHP_EOL;
 }
 
@@ -82,16 +81,18 @@ function getScore(array $slots): array {
     }
 
     foreach(['M', 'Tu', 'W', 'Th', 'F'] as $i => $day) {
-        $alphabetical = 0;
+        $students = [];
 
-        for($j = 0; $j < 7; ++$j) {
-            if(isset($slots[$day . "-" . TIMES[$j]]) && isset($slots[$day . "-" . TIMES[$j + 1]])) {
-                //Students are in alphabetical order
-                if(strcmp($slots[$day . "-" . TIMES[$j]], $slots[$day . "-" . TIMES[$j + 1]]) < 0) ++$alphabetical;
-            }
+        foreach(TIMES as $time) {
+            if(isset($slots[$day . "-" . $time])) $students[] = $slots[$day . "-" . $time];
         }
 
-        $scores[3][$i] = 15 * $alphabetical;
+        $count = count($students);
+
+        for($j = 0; $j < $count - 1; ++$j) {
+            //Students are in alphabetical order
+            if(strcmp($students[$j], $students[$j + 1]) < 0) $scores[3][$i] += 15;
+        }
     }
 
     return $scores;
@@ -129,14 +130,12 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
     if($studentLeft == 0) {
         $scores = getScore($slots);
 
-        $total = array_sum(array_map("array_sum", $scores));
+        $total = array_sum(array_map("array_sum", $scores)); //The score of this schedule
 
         if($total > $bestSchedule[2]) {
             $bestSchedule = [$slots, $scores, $total];
         }
 
-        error_log(var_export($total, 1));
-        
         return;
     }
 
@@ -155,18 +154,12 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
     $name = $names[$lowestID];
     $permutations = [];
 
+    //We have more slots left than what we need
     if($lowestCount > $hoursRequested[$lowestID]) {
-        // error_log(var_export($students[$lowestID], 1));
-        // error_log($hoursRequested[$lowestID]);
-    
         generatePermutations($students[$lowestID], $hoursRequested[$lowestID], [], $permutations);
-    
-        // error_log(var_export($permutations, 1));
-        // exit();
-    } else {
+    } //We need to use all the slots left
+    else {
         $permutations[] = $students[$lowestID];
-        // error_log("directly using all for $lowestID");
-        // error_log(var_export($permutations, 1));
     }
 
     foreach($permutations as $permutation) {
@@ -178,9 +171,7 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
         unset($counts2[$lowestID]);
 
         foreach($permutation as $date => $list) {
-            $time = array_key_first($list);
-
-            // error_log("we are adding $name at $date $time");
+            $time = array_key_first($list); //We can't have more than one slot per day
 
             $slots2[$date . "-" . $time] = $name . "/" . $instrument;
 
@@ -189,10 +180,7 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
                 if(isset($students2[$studentID][$date][$time])) {
                     unset($students2[$studentID][$date][$time]);
     
-                    if(--$counts2[$studentID] < $hoursRequested[$studentID]) {
-                        // error_log("skipping 4");
-                        continue 2; //No more slots for this student => impossible
-                    }
+                    if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 2; //No more slots for this student => impossible
                 }
             }
     
@@ -202,10 +190,7 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
                     if(isset($students2[$studentID][$date][$time2])) {
                         unset($students2[$studentID][$date][$time2]);
     
-                        if(--$counts2[$studentID] < $hoursRequested[$studentID]) {
-                            // error_log("skipping 1");
-                            continue 3; //No more slots for this student => impossible
-                        }
+                        if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 3; //No more slots for this student => impossible
                     }
                 }
             }
@@ -221,20 +206,14 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
                         if(isset($students2[$studentID][$date][$time + 1])) {
                             unset($students2[$studentID][$date][$time + 1]);
             
-                            if(--$counts2[$studentID] < $hoursRequested[$studentID]) {
-                                // error_log("skipping 2");
-                                continue 2; //No more slots for this student => impossible
-                            }
+                            if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 2; //No more slots for this student => impossible
                         }
     
                         //The student can't use the prev slot
                         if(isset($students2[$studentID][$date][$time - 1])) {
                             unset($students2[$studentID][$date][$time - 1]);
             
-                            if(--$counts2[$studentID] < $hoursRequested[$studentID]) {
-                                // error_log("skipping 3");
-                                continue 2; //No more slots for this student => impossible
-                            }
+                            if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 2; //No more slots for this student => impossible
                         }
                     }
                 }  
@@ -242,8 +221,6 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
             
             //Pair of troublesome students can't be placed together
             foreach(($troublesome[$name] ?? []) as $studentID => $studentName) {
-                // error_log("adding $name at $timeSlot => $studentName can't use $prevSlot & $nextSlot");
-    
                 //The student can't use the next slot
                 if(isset($students2[$studentID][$date][$time + 1])) {
                     unset($students2[$studentID][$date][$time + 1]);
@@ -314,8 +291,6 @@ for ($i = 0; $i < $pairs; $i++) {
     $troublesome[$a][array_search($b, $names)] = $b;
     $troublesome[$b][array_search($a, $names)] = $a;
 }
-
-// error_log(var_export($troublesome, 1));
 
 $bestSchedule = [[], [], 0];
 
