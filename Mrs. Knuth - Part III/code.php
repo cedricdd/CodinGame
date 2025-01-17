@@ -124,7 +124,7 @@ function generatePermutations(array $timeSlots, int $count, array $current, arra
 }
 
 function solve(array $students, array $counts, int $studentLeft, array $slots = []) {
-    global $names, $instruments, $idsByInstument, $troublesome, $hoursRequested, $bestSchedule;
+    global $names, $instruments, $idsByInstument, $troublesome, $hoursRequested, $bestSchedule, $conflicts;
 
     //We have placed all the students
     if($studentLeft == 0) {
@@ -175,64 +175,11 @@ function solve(array $students, array $counts, int $studentLeft, array $slots = 
 
             $slots2[$date . "-" . $time] = $name . "/" . $instrument;
 
-            //Nobody else can use this slot
-            foreach($students2 as $studentID => $filler2) {
-                if(isset($students2[$studentID][$date][$time])) {
-                    unset($students2[$studentID][$date][$time]);
+            foreach(($conflicts[$lowestID][$date . "-" . $time] ?? []) as [$studentID2, $date2, $time2]) {
+                if(isset($students2[$studentID2][$date2][$time2])) {
+                    unset($students2[$studentID2][$date2][$time2]);
     
-                    if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 2; //No more slots for this student => impossible
-                }
-            }
-    
-            //Nobody else playing the same instrument can use any slot the same day
-            foreach($idsByInstument[$instrument] as $studentID) {
-                foreach(TIMES as $time2) {
-                    if(isset($students2[$studentID][$date][$time2])) {
-                        unset($students2[$studentID][$date][$time2]);
-    
-                        if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 3; //No more slots for this student => impossible
-                    }
-                }
-            }
-    
-            //We can't have two loud instruments following each other
-            if(isset(LOUD[$instrument])) {
-                foreach($students2 as $studentID => $filler2) {
-                    if($studentID == $lowestID) continue;
-    
-                    //This student is also using a loud instrument
-                    if(isset(LOUD[$instruments[$studentID]])) {
-                        //The student can't use the next slot
-                        if(isset($students2[$studentID][$date][$time + 1])) {
-                            unset($students2[$studentID][$date][$time + 1]);
-            
-                            if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 2; //No more slots for this student => impossible
-                        }
-    
-                        //The student can't use the prev slot
-                        if(isset($students2[$studentID][$date][$time - 1])) {
-                            unset($students2[$studentID][$date][$time - 1]);
-            
-                            if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 2; //No more slots for this student => impossible
-                        }
-                    }
-                }  
-            }
-            
-            //Pair of troublesome students can't be placed together
-            foreach(($troublesome[$name] ?? []) as $studentID => $studentName) {
-                //The student can't use the next slot
-                if(isset($students2[$studentID][$date][$time + 1])) {
-                    unset($students2[$studentID][$date][$time + 1]);
-    
-                    if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 2; //No more slots for this student => impossible
-                }
-    
-                //The student can't use the prev slot
-                if(isset($students2[$studentID][$date][$time - 1])) {
-                    unset($students2[$studentID][$date][$time - 1]);
-    
-                    if(--$counts2[$studentID] < $hoursRequested[$studentID]) continue 2; //No more slots for this student => impossible
+                    if(--$counts2[$studentID2] < $hoursRequested[$studentID2]) continue 2; //No more slots for this student => impossible
                 }
             }
         }
@@ -280,7 +227,7 @@ for ($i = 0; $i < $numStudents; $i++) {
     $idsByInstument[$instrument][] = $i;
     $names[] = $name;
     $hoursRequested[]= $hours;
-    $counts[] = count($slots, COUNT_RECURSIVE );
+    $counts[] = count($slots, COUNT_RECURSIVE);
 }
 
 fscanf(STDIN, "%d", $pairs);
@@ -288,8 +235,52 @@ fscanf(STDIN, "%d", $pairs);
 for ($i = 0; $i < $pairs; $i++) {
     [$a, $b] = explode(" ", trim(fgets(STDIN)));
 
-    $troublesome[$a][array_search($b, $names)] = $b;
-    $troublesome[$b][array_search($a, $names)] = $a;
+    $a = array_search($a, $names);
+    $b = array_search($b, $names);
+
+    $troublesome[$a] = $b;
+    $troublesome[$b] = $a;
+}
+
+$conflicts = [];
+
+foreach($students as $studentID => $schedule) {
+
+    $instrument = $instruments[$studentID];
+
+    foreach($schedule as $day => $slots) {
+        foreach($slots as $time => $filler) {
+
+            foreach($students as $studentID2 => $filler2) {
+                if($studentID == $studentID2) continue;
+
+                $instrument2 = $instruments[$studentID2];
+
+                //Both student are playing the same instrument, any slots the same day can't be used anymore
+                if($instrument2 == $instrument) {
+                    foreach(($students[$studentID2][$day] ?? []) as $time2 => $filler3) {
+                        $conflicts[$studentID][$day . "-" . $time][] = [$studentID2, $day, $time2];
+                    }
+                }
+                else {
+                    //Nobody else can use the same slot
+                    if(isset($students[$studentID2][$day][$time])) $conflicts[$studentID][$day . "-" . $time][] = [$studentID2, $day, $time];
+
+                    //No two loudInstruments shall be scheduled in back-to-back hours.
+                    if(isset(LOUD[$instrument]) && isset(LOUD[$instrument2])) {
+                        if(isset($students[$studentID2][$day][$time - 1])) $conflicts[$studentID][$day . "-" . $time][] = [$studentID2, $day, $time - 1];
+                        if(isset($students[$studentID2][$day][$time + 1])) $conflicts[$studentID][$day . "-" . $time][] = [$studentID2, $day, $time + 1]; 
+                    }
+
+                    //troublesomePairs shall not be scheduled back-to-back.
+                    if(isset($troublesome[$studentID]) && $studentID2 = $troublesome[$studentID]) {
+                        if(isset($students[$studentID2][$day][$time - 1])) $conflicts[$studentID][$day . "-" . $time][] = [$studentID2, $day, $time - 1];
+                        if(isset($students[$studentID2][$day][$time + 1])) $conflicts[$studentID][$day . "-" . $time][] = [$studentID2, $day, $time + 1]; 
+                    }
+                }
+            }
+        }
+    }
 }
 
 $bestSchedule = [[], [], 0];
