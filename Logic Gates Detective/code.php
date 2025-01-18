@@ -8,8 +8,6 @@ foreach(explode(" ", trim(fgets(STDIN))) as $input) {
     $alphabet[$c] = intval($v);
 }
 
-// error_log(var_export($alphabet, 1));
-
 $nodes = explode(" ", trim(fgets(STDIN)));
 
 $n = trim(fgets(STDIN));
