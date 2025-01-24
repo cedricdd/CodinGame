@@ -1,11 +1,11 @@
 # Puzzle
-**The Sovereign's Game** https://www.codingame.com/contribute/view/11307306c9d6081549b4e9ed20ddb4cd10b995
+**The Sovereign's Game** https://www.codingame.com/training/medium/the-sovereigns-game
 
 # Goal
-You have successfully completed The Institute as Primus of House Mars and have been invited to play The Sovereign's Game. The game is designed to ensure that only the most strategic and ambitious prevail. There are n piles of resources available, and the objective is to collect the MAXIMUM number of resource points within k turns.
+You have successfully completed The Institute as Primus of House Mars and have been invited to play The Sovereign's Game. The game is designed to ensure that only the most ambitious and greedy prevail. There are n piles of resources available, and the objective is to collect the MAXIMUM number of resource points within k turns.
 
 *Collecting Resources:*  
-Each turn, you may select any one resource pile and collect ALL the resource points from that pile.
+Each turn, you can select ONE resource pile. As a Gold, it is in your nature to be greedy. As a result, you will only select the resource pile with the most resource points currently available. If two or more piles have the same resource points, select the one with the larger replenishment rate. Collecting a resource pile will collect ALL the resource points from that pile.
 
 *Resource Replenishment:*  
 After a resource pile has been collected, it is replenished to rate% of its current value rounded DOWN. Once a resource pile has been collected, it CANNOT be collected again until 3 turns have passed from when it was last collected.
