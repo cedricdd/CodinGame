@@ -1,5 +1,5 @@
 # Puzzle
-**Pipes** https://www.codingame.com/ide/demo/1045944dcb3f338f2bcfc8859973f857419500b
+**Pipes** https://www.codingame.com/contribute/view/770704f6a7a41813573d2a8249165ea48f065
 
 # Goal
 You must solve the classic Pipes puzzle.
