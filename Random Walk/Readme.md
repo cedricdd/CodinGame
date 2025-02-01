@@ -1,5 +1,5 @@
 # Puzzle
-**Random Walk* https://www.codingame.com/training/easy/random-walk
+**Random Walk** https://www.codingame.com/training/easy/random-walk
 
 # Goal
 Starting at coordinates (0,0) with D[0]=0, a random direction generator D[n+1] = (a*D[n]+b) mod m tells you which direction to go next   
