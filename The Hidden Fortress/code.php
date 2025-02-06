@@ -25,8 +25,6 @@ for ($y = 0; $y < $size; ++$y) {
  */
 $nbrFortress = array_sum($colSums) / ($size * 2 - 1);
 
-error_log($nbrFortress);
-
 //Every fortress will add one to the sum of the col via the rows and each fortress in the col will add an additional $size - 1
 foreach($colSums as $sum) $cols[] = ($sum - $nbrFortress) / ($size - 1);
 
