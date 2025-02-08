@@ -1,15 +1,15 @@
 # Puzzle
-**Excavating Palindromes** https://www.codingame.com/contribute/view/1156146d442abd1af9d939579c1417e72dfe3e
+**Excavating Palindromes** https://www.codingame.com/training/medium/excavating-palindromes
 
 # Goal
 You are given a string s consisting of alphanumeric characters and underscores. By removing some characters from the string (but not reordering them), you can create a palindrome.
 
 Your task is to determine the length of the longest palindrome that can be made.
 
-A palindrome is a string that reads the same backward as forward.
+A palindrome is a string that reads the same backward as forward.  
 - Examples: a, aba, aabbaa.
 - Non-examples: ab, abc, aabbaaa.
-
+  
 Case is important: ABBA is a palindrome, but Abba is not.
 
 # Input
