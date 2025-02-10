@@ -1,42 +1,51 @@
 <?php
 
-function solve(array $patterns, int $listID): int {
-    global $list, $success, $history;
+function solve(array $patterns, int $snakeID): int {
+    global $snakes, $success, $history;
 
-    error_log($listID . " " . implode("-", $patterns));
+    $hash = implode("-", $patterns);
 
-    if($listID == $success) return 1;
+    if(isset($history[$hash][$snakeID])) return $history[$hash][$snakeID]; //Using history we already know the result
+
+    //We placed all the snakes
+    if($snakeID == $success) {
+        if(strpos($hash, '#') !== false) return 0; //Invalid solution we still have some character representing a snake
+        else return 1;
+    }
 
     $pattern = array_pop($patterns);
 
-    if($pattern === null) return 0;
+    if($pattern === null) return 0; //Nowhere left to place a snake
 
-    $s1 = $list[$listID];
+    $s1 = $snakes[$snakeID];
     $s2 = strlen($pattern);
     $count = 0;
 
-    error_log("we need to add $s1 in $pattern ($s2)");
+    //Not enough space left for the next snake
+    if($s1 > $s2) {
+        if(strpos($pattern, '#') === false) return $history[$hash][$snakeID] = solve($patterns, $snakeID); //Everything left can be a free space
+        else return $history[$hash][$snakeID] = 0; //Invalid solution
+    }
 
-    if($s1 > $s2) return solve($patterns, $listID);
+    $max = $s2 - $s1;
 
-    for($i = 0; $i <= $s2 - $s1; ++$i) {
-        error_log("we can start at $i");
-
-        if($i != 0 && $pattern[$i - 1] == '#') continue;
-
-        if($i + $s1 == $s2) $count += solve($patterns, $listID + 1);
+    //Test all the start position for the snake
+    for($i = 0; $i <= $max; ++$i) {
+        if($i + $s1 == $s2) $count += solve($patterns, $snakeID + 1); //We are using everything that's left
         elseif($pattern[$i + $s1] != '#') {
-            $patterns[] = substr($pattern, $i + $s1 + 1);
+            $patterns[] = substr($pattern, $i + $s1 + 1); //We can add more snakes in the part of the pattern that's left
 
-            $count += solve($patterns, $listID + 1);
+            $count += solve($patterns, $snakeID + 1);
 
             array_pop($patterns);
         }
+
+        if($pattern[$i] == '#') return $history[$hash][$snakeID] = $count; //We can't skip snake parts
     }
 
-    $count += solve($patterns, $listID);
+    if(strpos($pattern, '#') === false) $count += solve($patterns, $snakeID); //We can consider that evertying should be empty space
 
-    return $count;
+    return $history[$hash][$snakeID] = $count;
 }
 
 $start = microtime(1);
@@ -46,13 +55,11 @@ fscanf(STDIN, "%d", $n);
 for ($i = 0; $i < $n; $i++) {
     $history = [];
 
-    [$pattern, $list] = explode(" ", trim(fgets(STDIN)));
+    [$pattern, $snakes] = explode(" ", trim(fgets(STDIN)));
     preg_match_all("/[\?\#]+/", $pattern, $matches);
 
-    $list = explode(",", $list);
-    $success = count($list);
-
-    // error_log(var_export($matches, 1));
+    $snakes = explode(",", $snakes);
+    $success = count($snakes);
 
     echo solve(array_reverse($matches[0]), 0) . PHP_EOL;
 }
