@@ -1,5 +1,5 @@
 # Puzzle 
-**Mrs. Knuth - Part II** https://www.codingame.com/contribute/view/950238e7e8f40105ccd0fd6237bf60c4d25b3
+**Mrs. Knuth - Part II** https://www.codingame.com/training/medium/mrs--knuth---part-ii
 
 # Goal
 This puzzle is part 2 of a multi-part Algorithm X tutorial and is meant to be done per the guidance in the following playground: https://www.codingame.com/playgrounds/156252
