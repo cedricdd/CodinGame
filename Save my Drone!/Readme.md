@@ -1,5 +1,5 @@
 # Puzzle
-**Save my Drone!** https://www.codingame.com/contribute/view/1161422656f5c18dd787725bbd8c80d286b885
+**Save my Drone!** https://www.codingame.com/training/easy/save-my-drone
 
 # Goal
 Inspired by the modular ship builder game "Droneboi" by Beau.  
