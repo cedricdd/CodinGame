@@ -1,5 +1,5 @@
 <?php
-//§ is the only that doesn't use single byte econding, no need to deal with that, just repalce it with &
+//§ is the only that doesn't use single byte econding, no need to deal with that, just replace it with &
 const NAMES = ['#' => "Block", '^' => "Thruster", '@' => "Gyroscope", '+' => "Fuel", "&" => "Core"];
 
 fscanf(STDIN, "%d", $width);
