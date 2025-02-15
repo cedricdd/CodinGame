@@ -1,5 +1,5 @@
 # Puzzle
-**1D Snake Arrange** https://www.codingame.com/contribute/view/1157130bbaba6db6ff2da433a9c0dc5eb30f1e
+**1D Snake Arrange** https://www.codingame.com/training/medium/1d-snake-arrange
 
 # Goal
 Given a list of snakes and a pattern, can you calculate the number of possible arrangements?
