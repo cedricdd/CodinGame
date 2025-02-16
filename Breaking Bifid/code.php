@@ -32,11 +32,11 @@ const ROWS_INFO = [
     24 => [[20,21,22,23], [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]],
 ];
 const ROWS_INFO2 = [
-    0 => [[0,1,2,3,4], [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]],
-    1 => [[5,7,8,9,6], [0,1,2,3,4,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]],
-    2 => [[10,11,12,13,14], [0,1,2,3,4,5,6,7,8,9,15,16,17,18,19,20,21,22,23,24]],
-    3 => [[15,16,17,18,19], [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24]],
-    4 => [[20,21,22,23,24], [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]],
+    0 => [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],
+    1 => [0,1,2,3,4,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],
+    2 => [0,1,2,3,4,5,6,7,8,9,15,16,17,18,19,20,21,22,23,24],
+    3 => [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24],
+    4 => [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],
 ];
 const COLS_INFO = [
     0 => [[5,10,15,20], [1,2,3,4,6,7,8,9,11,12,13,14,16,17,18,19,21,22,23,24]],
@@ -66,15 +66,50 @@ const COLS_INFO = [
     24 => [[4,9,14,19], [0,1,2,3,5,6,7,8,10,11,12,13,15,16,17,18,20,21,22,23]],
 ];
 const COLS_INFO2 = [
-    0 => [[0,5,10,15,20], [1,2,3,4,6,7,8,9,11,12,13,14,16,17,18,19,21,22,23,24]],
-    1 => [[1,6,11,16,21], [0,2,3,4,5,7,8,9,10,12,13,14,15,17,18,19,20,22,23,24]],
-    2 => [[2,7,12,17,22], [0,1,3,4,5,6,8,9,10,11,13,14,15,16,18,19,20,21,23,24]],
-    3 => [[3,8,13,18,23], [0,1,2,4,5,6,7,9,10,11,12,14,15,16,17,19,20,21,22,24]],
-    4 => [[4,9,14,19,24], [0,1,2,3,5,6,7,8,10,11,12,13,15,16,17,18,20,21,22,23]],
+    0 => [1,2,3,4,6,7,8,9,11,12,13,14,16,17,18,19,21,22,23,24],
+    1 => [0,2,3,4,5,7,8,9,10,12,13,14,15,17,18,19,20,22,23,24],
+    2 => [0,1,3,4,5,6,8,9,10,11,13,14,15,16,18,19,20,21,23,24],
+    3 => [0,1,2,4,5,6,7,9,10,11,12,14,15,16,17,19,20,21,22,24],
+    4 => [0,1,2,3,5,6,7,8,10,11,12,13,15,16,17,18,20,21,22,23],
 ];
 
-function solve(array $secret, array $letters, $test = false) {
-    global $relations, $rows, $cols;
+//Function used to decoge a text encoded with a given polybius square
+function decode(array $secret) {
+    global $cipherText2;
+
+    foreach($secret as $y => $line) {
+        foreach($line as $x => $letter) {
+            $letters[$letter] = [$x, $y];
+        }
+    }
+
+    $decoded = "";
+    $size = strlen($cipherText2);
+
+    for($i = 0; $i < $size; ++$i) {
+        $values[] = $letters[$cipherText2[$i]][1];
+        $values[] = $letters[$cipherText2[$i]][0];
+    }
+
+    for($i = 0; $i < $size; ++$i) {
+        $decoded .= $secret[$values[$i]][$values[$i + $size]];
+    }
+
+    echo strtoupper($decoded) . PHP_EOL;
+}
+
+function solve(array $secret, array $letters) {
+    global $relations, $rows, $cols, $start;
+
+    //We have placed all the letters, we have found a polybius square producing the desired encoding
+    if(count($letters) == 0) {
+        foreach($secret as &$value) $value = array_search($value, ALPHABET_VALUES);
+
+        decode(array_chunk($secret, 5));
+
+        error_log(microtime(1) - $start);
+        exit();
+    }
 
     $minCount = PHP_INT_MAX;
     $minLetter = null;
@@ -88,67 +123,83 @@ function solve(array $secret, array $letters, $test = false) {
             if($mask & ALPHABET_VALUES[$letter]) $positions[] = $index;
         }
 
-        if(($count = count($positions)) < $minCount) {
+        $count = count($positions);
+
+        if($count == 0) return;
+        elseif($count < $minCount) {
             $minCount = $count;
             $minLetter = $letter;
             $minPositions = $positions;
+
+            if($count == 1) break; //We can't do better
         }
     }
 
-    if($test == false) $minLetter = 'b';
-
-    error_log("min is $minCount - $minLetter");
-    // error_log(var_export($minPositions, 1));
-
     unset($letters[$minLetter]);
 
+    //We try all the positions where the letter can be placed
     foreach($minPositions as $position) {
-        error_log("setting $minLetter at $position");
-
         $secret2 = $secret;
         $secret2[$position] = ALPHABET_VALUES[$minLetter]; //We set the letter at this position
 
+        //Each letter can only appear once
+        for($i = 0; $i < 25; ++$i) {
+            if($i == $position) continue;
+            elseif(($secret2[$i] &= ALPHABET_INV_VALUES[$minLetter]) == 0) continue 2; //We have a position with no possible letter
+        }
+
+        //This letter is part of a group of letter in the row
         if(isset($rows[$minLetter])) {
-            error_log("rows");
-            error_log(var_export($rows[$minLetter]));
-
-            foreach(ROWS_INFO[$position][0] as $position2) $secret2[$position2] &= $rows[$minLetter][0];
-            foreach(ROWS_INFO[$position][1] as $position2) $secret2[$position2] &= $rows[$minLetter][1];
+            //All the positions inside the row
+            foreach(ROWS_INFO[$position][0] as $position2) {
+                if(($secret2[$position2] &= $rows[$minLetter][0]) == 0) continue 2;
+            }
+            //All the positions outside the row
+            foreach(ROWS_INFO[$position][1] as $position2) {
+                if(($secret2[$position2] &= $rows[$minLetter][1]) == 0) continue 2;
+            }
         }
 
+        //This letter is part of a group of letter in the col
         if(isset($cols[$minLetter])) {
-            error_log("cols");
-            error_log(var_export($cols[$minLetter]));
-
-            foreach(COLS_INFO[$position][0] as $position2) $secret2[$position2] &= $cols[$minLetter][0];
-            foreach(COLS_INFO[$position][1] as $position2) $secret2[$position2] &= $cols[$minLetter][1];
+            //All the positions inside the col
+            foreach(COLS_INFO[$position][0] as $position2) {
+                if(($secret2[$position2] &= $cols[$minLetter][0]) == 0) continue 2;
+            }
+            //All the positions outside the col
+            foreach(COLS_INFO[$position][1] as $position2) {
+                if(($secret2[$position2] &= $cols[$minLetter][1]) == 0) continue 2;
+            }
         }
 
+        //This letter is part of a relation x/y coordinates
         if(isset($relations[$minLetter])) {
-            error_log("relations");
-            error_log(var_export($relations[$minLetter]));
-
             $x = $position % 5;
             $y = intdiv($position, 5);
 
             foreach($relations[$minLetter] as $letter2 => $relation) {
                 if($relation == 'x') {
-
+                    //All the positions outside the row
+                    foreach(ROWS_INFO2[$x] as $position2) {
+                        if(($secret2[$position2] &= ALPHABET_INV_VALUES[$letter2]) == 0) continue 3;
+                    }
+                } else {
+                    //All the positions outside the col
+                    foreach(COLS_INFO2[$y] as $position2) {
+                        if(($secret2[$position2] &= ALPHABET_INV_VALUES[$letter2]) == 0) continue 3;
+                    }  
                 }
             }
         }
 
-        error_log(var_export($secret2, 1));
-
-        solve($secret2, $letters, true);
-
-        if($minLetter != 'b') exit();
+        solve($secret2, $letters);
     }
 }
 
 $start = microtime(1);
 
 $plainText1 = strtolower(stream_get_line(STDIN, 200 + 1, "\n"));
+//We need to remove spaces & replace j with i
 $plainText1 = str_replace(" ", "", $plainText1);
 $plainText1 = str_replace("j", "i", $plainText1);
 
@@ -156,108 +207,92 @@ $cipherText1 = strtolower(stream_get_line(STDIN, 200 + 1, "\n"));
 $cipherText2 = strtolower(stream_get_line(STDIN, 200 + 1, "\n"));
 
 $size = strlen($cipherText1);
-
+$middle = $size >> 1;
 $rows = [];
 $cols = [];
 
+//Start with the rows info, get all the letters we know are on the same row in the polybius square
 for($i = 0; $i < $size; $i += 2) {
     $c1 = $plainText1[$i];
     $c2 = $cipherText1[$i / 2];
 
-    if($c1 == $c2) continue;
+    if($c1 == $c2) continue; //Obviously
 
-    // error_log("$c1 $c2");
-
-    $rows2[$c1][$c2] = 1;
-    $rows2[$c2][$c1] = 1;
+    $rowsInfo[$c1][$c2] = 1;
+    $rowsInfo[$c2][$c1] = 1;
 }
 
 $index = 0;
 $groups = [];
 
-//We merge the info, if we know that a & b are on the same col and b & c are ont he same col then a & c also are on the same col
-while($rows2) {
-    $groups[$index] = [array_key_first($rows2)];
+//We merge the info, if we know that a & b are on the same row and b & c are on the same row then a & c also are on the same row
+while($rowsInfo) {
+    //Start a new group
+    $groups[$index] = [array_key_first($rowsInfo)];
 
+    //Find all the letter we know are in the same row
     foreach($groups[$index] as &$current) {
-        foreach($rows2[$current] as $letter => $filler) {
+        foreach($rowsInfo[$current] as $letter => $filler) {
             //We don't already have this letter in the group
             if(array_search($letter, $groups[$index]) === false) $groups[$index][] = $letter;
         }
 
-        unset($rows2[$current]);
+        unset($rowsInfo[$current]);
     }
-
-    $groups[$index] = array_flip($groups[$index]);
-
-    /*
-    //We save the info, we don't need the info that a letter is on the col as itself
-    foreach($groups[$index] as $letter => $filler) {
-        unset($groups[$index][$letter]);
-
-        $rows[$letter] = $groups[$index];
-
-        $groups[$index][$letter] = 1;
-    }
-    */
 
     ++$index;
 }
 
-// error_log(var_export($groups, 1));
-
 foreach($groups as $indexGroup => $group) {
     $count = count($group);
 
+    //When we place a letter from the group, we can no longer place any letters from the group in any positions outside of the row
     $outside = ALL_LETTERS;
 
-    foreach($group as $letter => $filler) $outside &= ALPHABET_INV_VALUES[$letter];
+    foreach($group as $letter) $outside &= ALPHABET_INV_VALUES[$letter];
 
+    //We know the 5 letters in the group, any positions inside the row can only use another letter from the group
     if($count == 5) {
         $inside = 0;
 
-        foreach($group as $letter => $filler) $inside |= ALPHABET_VALUES[$letter];
+        foreach($group as $letter) $inside |= ALPHABET_VALUES[$letter];
     }
     else {
+        //If the count of the current group and another group is bigger than 5 we know that any letters from the other group can't be placed in any positions inside the row
         $inside = ALL_LETTERS;
 
         foreach($groups as $indexGroup2 => $group2) {
             if($indexGroup == $indexGroup2) continue;
     
             if($count + count($group2) > 5) {
-                foreach($group2 as $letter => $filler) $inside &= ALPHABET_INV_VALUES[$letter];
+                foreach($group2 as $letter) $inside &= ALPHABET_INV_VALUES[$letter];
             }
         }
     }
 
-    foreach($group as $letter => $filler) $rows[$letter] = [$inside & ALPHABET_INV_VALUES[$letter], $outside];
+    foreach($group as $letter) $rows[$letter] = [$inside & ALPHABET_INV_VALUES[$letter], $outside];
 }
 
-// error_log(count($rows));
-// error_log(var_export($rows, 1));
-
-$middle = $size >> 1;
-
+//Work on the cols info, get all the letters we know are on the same col in the polybius square
 for($i = ($size & 1 ? 0 : 1); $i < $size; $i += 2) {
     $c1 = $plainText1[$i];
     $c2 = $cipherText1[$middle + intval($i / 2)];
 
-    if($c1 == $c2) continue;
-
-    // error_log("$c1 $c2");
+    if($c1 == $c2) continue; //Obviously
 
     $cols2[$c1][$c2] = 1;
     $cols2[$c2][$c1] = 1;
 }
 
-
 $index = 0;
 $groups = [];
 
-//We merge the info, if we know that a & b are on the same col and b & c are ont he same col then a & c also are on the same col
+//We merge the info, if we know that a & b are on the same col and b & c are on the same col then a & c also are on the same col
 while($cols2) {
+    //Start a new group
     $groups[$index] = [array_key_first($cols2)];
 
+    //Find all the letter we know are in the same col
     foreach($groups[$index] as &$current) {
         foreach($cols2[$current] as $letter => $filler) {
             //We don't already have this letter in the group
@@ -269,33 +304,25 @@ while($cols2) {
 
     $groups[$index] = array_flip($groups[$index]);
 
-    //We save the info, we don't need the info that a letter is on the col as itself
-    foreach($groups[$index] as $letter => $filler) {
-        unset($groups[$index][$letter]);
-
-        $cols[$letter] = $groups[$index];
-
-        $groups[$index][$letter] = 1;
-    }
-
     ++$index;
 }
-
-// error_log(var_export($groups, 1));
 
 foreach($groups as $indexGroup => $group) {
     $count = count($group);
 
+    //When we place a letter from the group, we can no longer place any letters from the group in any positions outside of the col
     $outside = ALL_LETTERS;
 
     foreach($group as $letter => $filler) $outside &= ALPHABET_INV_VALUES[$letter];
 
+    //We know the 5 letters in the group, any positions inside the col can only use another letter from the group
     if($count == 5) {
         $inside = 0;
 
         foreach($group as $letter => $filler) $inside |= ALPHABET_VALUES[$letter];
     }
     else {
+        //If the count of the current group and another group is bigger than 5 we know that any letters from the other group can't be placed in any positions inside the col
         $inside = ALL_LETTERS;
 
         foreach($groups as $indexGroup2 => $group2) {
@@ -310,17 +337,12 @@ foreach($groups as $indexGroup => $group) {
     foreach($group as $letter => $filler) $cols[$letter] = [$inside & ALPHABET_INV_VALUES[$letter], $outside];
 }
 
-// error_log(count($cols));
-// error_log(var_export($cols, 1));
-
-
+//We now work on the relation where we know that the x coordinate of a letter is the same as the y coordiante of another letter and the other way around
 for($i = 1; $i < $size; $i += 2) {
     $c1 = $plainText1[$i];
     $c2 = $cipherText1[intdiv($i, 2)];
 
     if($c1 == $c2) continue;
-
-    // error_log("$c1 $c2");
 
     $relations[$c1][$c2] = 'y';
     $relations[$c2][$c1] = 'x';
@@ -334,14 +356,9 @@ for($i = ($size & 1 ? 1 : 0); $i < $size; $i += 2) {
 
     if($c1 == $c2) continue;
 
-    // error_log("$c1 $c2");
-
     $relations[$c1][$c2] = 'x';
     $relations[$c2][$c1] = 'y';
 }
-
-
-// error_log(var_export($relations, 1));
 
 solve(array_fill(0, 25, ALL_LETTERS), ALPHABET);
 
