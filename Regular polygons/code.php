@@ -45,7 +45,7 @@ $count = 0;
 $power = 1;
 
 //Until the power of 2 is bigger than the end of the range
-while($power < $b) {
+while($power <= $b) {
     foreach(FERMAT as $fermat) {
         $number = $power * $fermat;
 
