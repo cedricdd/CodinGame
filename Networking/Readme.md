@@ -1,5 +1,5 @@
 # Puzzle
-**Networking** https://www.codingame.com/contribute/view/1168352f1e2693c9e0c242d68a4d16a1ff9227
+**Networking** https://www.codingame.com/training/medium/networking
 
 # Goal
 Calculate how many separate groups of people there are in an organisation based on lists of users in email threads.
@@ -16,6 +16,6 @@ So two groups are separate if no member of either group has ever appeared in an 
 * Line 1 : The number g of separate groups of users.
 
 # Constraints
-* 5 ≤ N ≤ 200
-* 2 ≤ p ≤ 8
-* 1 ≤ g ≤ 200
+* 5 ≤ N ≤ 500
+* 2 ≤ p ≤ 16
+* 1 ≤ g ≤ 500
