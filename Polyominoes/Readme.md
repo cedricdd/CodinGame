@@ -1,10 +1,11 @@
 # Puzzle
-**Polyominos** https://www.codingame.com/contribute/view/118617e82691f956c4a6959ea420471eeae900
+**Polyominoes** https://www.codingame.com/contribute/view/118617e82691f956c4a6959ea420471eeae900
 
 # Goal
-Fill the given 2D shape completely by placing all the provided polyominoes.
-  
-You will be given a predefined shape that must be entirely covered using the available polyominoes.
+Little Timmy is "helping" you build a puzzle. He is handing you polyomino pieces one by one. However, you must place them in the exact order he gives them to you. If you don’t, he’ll throw a tantrum!  
+Your task is to carefully arrange all the given polyominoes to perfectly fill the predefined shape while respecting his order. Rotate and flip the pieces as needed, but make sure everything fits!
+
+You will be given a predefined shape that must be entirely covered using the available polyominoes.  
 * Each polyomino can be rotated by 0°, 90°, 180°, or 270°.
 * Polyominoes can also be flipped horizontally or vertically, giving each piece up to 8 possible orientations.
 * Below is an overview of all polyominoes used in the puzzle:
