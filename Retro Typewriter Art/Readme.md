@@ -13,12 +13,12 @@ nl meaning NewLine (aka Carriage Return)
 how many of the character and what character  
 
 For example:  
-4z means zzzz  
-1{ means {  
-10= means ==========  
-5bS means \\\\\\\\\\ (see Abbreviations list below)  
-27 means 77  
-123 means 333333333333  
+4z means ```zzzz```  
+1{ means ```{```  
+10= means ```==========```  
+5bS means ```\\\\\``` (see Abbreviations list below)  
+27 means ```77```  
+123 means ```333333333333```
 (If a chunk is composed only of numbers, the character is the last digit.)  
 
 So if part of the recipe is  
@@ -30,9 +30,9 @@ So if part of the recipe is
 ```
 
 Abbreviations used:  
-* sp = space
-* bS = backSlash \
-* sQ = singleQuote '
+* sp = space ``` ```
+* bS = backSlash ```\```
+* sQ = singleQuote ```'```
 * nl = NewLine
 
 # Input
