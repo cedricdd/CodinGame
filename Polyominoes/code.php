@@ -11,6 +11,12 @@ const SHAPES = [
         [[0, 0], [1, 0], [1, -1], [1, -2]],
         [[0, 0], [0, 1], [1, 1], [2, 1]],
     ],
+    'B' => [
+        [[0, 0], [1, 0], [1, 1], [1, 2], [0, 2]],
+        [[0, 0], [0, 1], [1, 1], [2, 1], [2, 0]],
+        [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2]],
+        [[0, 0], [1, 0], [2, 0], [0, 1], [2, 1]],
+    ],
     'C' => [
         [[0, 0], [1, 0], [1, -1], [1, 1], [2, 0]],
     ],
@@ -42,20 +48,50 @@ const SHAPES = [
         [[0, 0], [1, 0], [1, 1]],
         [[0, 0], [1, 0], [1, -1]],
     ],
+    'I' => [
+        [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2], [1, 3]],
+        [[0, 0], [1, 0], [1, -1], [2, -1], [3, -1], [3, 0]],
+        [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3], [0, 3]],
+        [[0, 0], [0, 1], [1, 1], [2, 1], [2, 0], [3, 0]],
+        [[0, 0], [1, 0], [1, 1], [1, 2], [0, 2], [0, 3]],
+        [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1], [3, 0]],
+        [[0, 0], [1, 0], [1, -1], [0, 1], [0, 2], [1, 2]],
+        [[0, 0], [0, 1], [1, 0], [2, 0], [2, 1], [3, 1]],
+    ],
     'J' => [
         [[0, 0], [1, 0], [2, 0], [2, 1], [2, 2]],
         [[0, 0], [1, 0], [2, 0], [2, -1], [2, -2]],
         [[0, 0], [0, 1], [0, 2], [1, 2], [2, 2]],
         [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2]],
     ],
+    'K' => [
+        [[0, 0], [1, 0], [0, 1], [1, 1]],
+    ],
     'L' => [
         [[0, 0], [1, 0], [1, -1], [1, -2], [2, -2]], 
         [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2]], 
         [[0, 0], [1, 0], [1, 1], [1, 2], [2, 2]], 
         [[0, 0], [0, -1], [1, -1], [2, -1], [2, -2]], 
-    ]
+    ],
+    'M' => [
+        [[0, 0], [1, 0], [1, 1], [2, 1]],
+        [[0, 0], [1, 0], [1, -1], [0, 1]],
+        [[0, 0], [1, 0], [1, -1], [2, -1]],
+        [[0, 0], [0, 1], [1, 1], [1, 2]],
+    ],
+    'N' => [
+        [[0, 0], [1, 0], [2, 0], [1, 1], [2, 1]], 
+        [[0, 0], [1, 0], [1, -1], [0, 1], [1, 1]], 
+        [[0, 0], [1, 0], [0, 1], [1, 1], [2, 1]], 
+        [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]], 
+        [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1]], 
+        [[0, 0], [1, 0], [0, 1], [1, 1], [1, 2]], 
+        [[0, 0], [1, 0], [2, 0], [1, -1], [2, -1]], 
+        [[0, 0], [0, 1], [1, 1], [0, 2], [1, 2]], 
+    ],
 ];
 
+//Find all the positions where we can put a shape or one of it's variant
 function findPositions(string $letter, array $grid): array {
     global $w, $h;
 
@@ -64,6 +100,7 @@ function findPositions(string $letter, array $grid): array {
     for($y = 0; $y < $h; ++$y) {
         for($x = 0; $x < $w; ++$x) {
             if($grid[$y][$x] == 'O') {
+                //Test all the rotations/mirrors
                 foreach(SHAPES[$letter] as $list) {
                     $positions = [];
 
@@ -71,7 +108,7 @@ function findPositions(string $letter, array $grid): array {
                         $xp = $x + $xm;
                         $yp = $y + $ym;
 
-                        if(($grid[$yp][$xp] ?? '.') == '.') continue 2;
+                        if(($grid[$yp][$xp] ?? '.') == '.') continue 2; //Shape can't be inserted here
 
                         $positions[] = $yp * $w + $xp;
                     }
@@ -85,14 +122,12 @@ function findPositions(string $letter, array $grid): array {
     return $placements;
 }
 
+//Place all the shapes using Knuth's Algorithm X
 function placeShapes(array $counts, array $shapesByPositions, array $listShapes, $solution = []) {
     global $listShapesByLetter, $listLettersByShape;
 
-    if(!$counts) {
-        error_log("Solution:");
-        error_log(var_export($solution, 1));
-        return $solution;
-    }
+    //We have placed evertying, return the solution
+    if(!$counts) return $solution;
     
     //Find the next positions to work on
     $minCount = PHP_INT_MAX;
@@ -108,11 +143,8 @@ function placeShapes(array $counts, array $shapesByPositions, array $listShapes,
         }
     }
 
-    error_log("using position $minPosition");
-
+    //We try all the shapes that can still be added at the position we have selected
     foreach($shapesByPositions[$minPosition] as $shapeID1 => $filler) {
-        // error_log("using shape $shapeID1 - " . $listLettersByShape[$shapeID1]);
-
         $counts2 = $counts;
         $listShapes2 = $listShapes;
         $shapesByPositions2 = $shapesByPositions;
@@ -122,7 +154,7 @@ function placeShapes(array $counts, array $shapesByPositions, array $listShapes,
             
             if(!isset($shapesByPositions2[$index1])) continue; //This position has already been removed
 
-            //Loop through all the shapes that could have been place at this position
+            //Loop through all the shapes that could have been placed at this position
             foreach($shapesByPositions[$index1] as $shapeID2 => $filler) {
 
                 if(!isset($listShapes2[$shapeID2])) continue; //This shape has already been removed
@@ -132,9 +164,10 @@ function placeShapes(array $counts, array $shapesByPositions, array $listShapes,
                     unset($shapesByPositions2[$index2][$shapeID2]);
                 }
 
-                unset($listShapes2[$shapeID2] );
+                unset($listShapes2[$shapeID2]); //We are done with this shape
             }
 
+            //We are don't with this position
             unset($shapesByPositions2[$index1]);
             unset($counts2[$index1]);
         }
@@ -142,22 +175,20 @@ function placeShapes(array $counts, array $shapesByPositions, array $listShapes,
         //We can only use each shape type once
         $type = $listLettersByShape[$shapeID1];
 
-        // error_log("Type is $type");
-        // error_log(var_export($listShapesByLetter[$type], 1));
-
+        //loop through all the shapes of this type
         foreach($listShapesByLetter[$type] as $shapeID) {
-            if(isset($listShapes2[$shapeID])) {
-                // error_log("need to remove $shapeID");
-                foreach($listShapes2[$shapeID] as $index) {
-                    if(--$counts2[$index] == 0) continue 2; 
-                    unset($shapesByPositions2[$index][$shapeID]);
-                }
+
+            if(!isset($listShapes2[$shapeID])) continue; //We have alreade removed this shape
+
+            //Update all the positions
+            foreach($listShapes2[$shapeID] as $index) {
+                if(--$counts2[$index] == 0) continue 3; //We have a position with nothing left => invalid
+                unset($shapesByPositions2[$index][$shapeID]);
             }
         }
 
-        $result = placeShapes($counts2, $shapesByPositions2, $listShapes2, $solution + [$shapeID1 => 1]);
-
-        if($result !== null) return $result;
+        //If using the shape gets us a solution we can stop here.
+        if(($result = placeShapes($counts2, $shapesByPositions2, $listShapes2, $solution + [$shapeID1 => 1])) !== null) return $result;
     }
 
     return null;
@@ -172,8 +203,7 @@ function solve(array $letters, array $grid): array {
     $counts = array_fill(0, $w * $h, 0);
 
     foreach($letters as $letter) {
-        error_log("Letter $letter");
-
+        //Find all the positions where we can put this type of shape
         foreach(findPositions($letter, $grid) as $positions) {
             $listShapes[$shapeIndex] = $positions;
 
@@ -189,9 +219,7 @@ function solve(array $letters, array $grid): array {
         }
     }
 
-    $counts = array_filter($counts);
-
-    // error_log(var_export($shapesByPositions, 1));
+    $counts = array_filter($counts); //Remove all the positions where we can't put anything
 
     return placeShapes($counts, $shapesByPositions, $listShapes);
 }
@@ -204,27 +232,20 @@ while (TRUE) {
 
     $start = microtime(1);
 
-    error_log($remaining . " " . $current);
-
     fscanf(STDIN, "%d %d", $h, $w);
 
-    for ($y = 0; $y < $h; ++$y) {
-        $grid[] = str_split(trim(fgets(STDIN)));
-    }
+    for ($y = 0; $y < $h; ++$y) $grid[] = str_split(trim(fgets(STDIN)));
 
+    //This is the first turn we need to find a solution
     if($solution === null) {
         foreach(solve(str_split($remaining), $grid) as $shapeID => $filler) {
             $solution[$listLettersByShape[$shapeID]] = $shapeID;
         }
-
-        error_log(var_export($solution, 1));
     }
-
-    error_log("adding $current - " . $solution[$current]);
-    error_log(var_export($listShapes[$solution[$current]], 1));
 
     $positions = [];
 
+    //Get all the positions of the shape we want to add in the current turn
     foreach($listShapes[$solution[$current]] as $position) $positions[] = "(" . intdiv($position, $w) . "," . ($position % $w) . ")";
 
     echo implode(" ", $positions) . PHP_EOL;
