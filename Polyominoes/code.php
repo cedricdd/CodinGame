@@ -175,7 +175,7 @@ function placeShapes(array $counts, array $shapesByPositions, array $listShapes,
         //We can only use each shape type once
         $type = $listLettersByShape[$shapeID1];
 
-        //loop through all the shapes of this type
+        //Loop through all the shapes of this type
         foreach($listShapesByLetter[$type] as $shapeID) {
 
             if(!isset($listShapes2[$shapeID])) continue; //We have alreade removed this shape
@@ -227,28 +227,22 @@ function solve(array $letters, array $grid): array {
 $solution = null;
 
 while (TRUE) {
-    $remaining = stream_get_line(STDIN, 15 + 1, "\n");// IDs of remaining tiles
-    $current = stream_get_line(STDIN, 1 + 1, "\n");// ID of current tile to place on board
-
-    $start = microtime(1);
+    $remaining = stream_get_line(STDIN, 15 + 1, "\n");
 
     fscanf(STDIN, "%d %d", $h, $w);
 
+    $start = microtime(1);
+
     for ($y = 0; $y < $h; ++$y) $grid[] = str_split(trim(fgets(STDIN)));
 
-    //This is the first turn we need to find a solution
-    if($solution === null) {
-        foreach(solve(str_split($remaining), $grid) as $shapeID => $filler) {
-            $solution[$listLettersByShape[$shapeID]] = $shapeID;
-        }
+    $solution = solve(str_split($remaining), $grid);
+    $output = array_fill(0, $h, str_repeat(".", $w));
+
+    foreach(solve(str_split($remaining), $grid) as $shapeID => $filler) {
+        foreach($listShapes[$shapeID] as $position) $output[intdiv($position, $w)][$position % $w] = $listLettersByShape[$shapeID];
     }
 
-    $positions = [];
-
-    //Get all the positions of the shape we want to add in the current turn
-    foreach($listShapes[$solution[$current]] as $position) $positions[] = "(" . intdiv($position, $w) . "," . ($position % $w) . ")";
-
-    echo implode(" ", $positions) . PHP_EOL;
+    echo implode(PHP_EOL, $output) . PHP_EOL;
 
     error_log(microtime(1) - $start);
 }
