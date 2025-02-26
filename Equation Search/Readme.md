@@ -1,5 +1,5 @@
 # Puzzle
-**Equation Search** https://www.codingame.com/contribute/view/100071e2989e321b98a5118cdacdf90ebf6d26
+**Equation Search** https://www.codingame.com/training/medium/equation-search
 
 # Goal
 This puzzle is a BONUS exercise associated with a multi-part Algorithm X tutorial and is meant to be done per the guidance in the following playground:
