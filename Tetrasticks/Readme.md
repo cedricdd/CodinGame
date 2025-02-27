@@ -1,0 +1,176 @@
+# Puzzle
+**Tetrasticks** https://www.codingame.com/contribute/view/118881f59230e1500f13bfc4f9138add967b0e
+
+# Goal
+After months of struggling, little Jimmy finally solved the Tetrasticks puzzle. Frustrated with how tricky it was, he started gluing the pieces to the game board. But just as he was in the middle of it, he opened a window and went to the bathroom. Suddenly, a gust of wind blew in, knocking the board to the floor! Now, only the glued pieces remain in place, while the rest are scattered.
+
+You must quickly restore the puzzle before Jimmy notices, or he'll throw a fit again! Carefully place the missing pieces to fill the board, making sure everything fits perfectly.
+
+# Rules
+You will be given a board description, that has to be entirely covered using the available tetrasticks.  
+
+* Each tetrastick is composed of 4 line segments.
+* Retrasticks can share the same intersection but can't cross each other.
+* Tetrasticks can be flipped horizontally and/or rotated by 0°, 90°, 180°, or 270°
+* Below is an overview of all 16 tetrasticks used in the puzzle with their respective IDs, partially resembling their shapes.
+
+Visual representation of tetrasticks
+```
+ F   H I  J  L   N   O  P   R
+┌─╴ ╷   ╷   ╷ ╷   ╷   ┌─┐ ╶─┐ ╶─┐ 
+├─╴ ├─┐ │ ╷ │ │   └─┐ └─┘ ┌─┘   ├─╴
+╵   ╵ ╵ │ └─┘ │     │     ╵     ╵ 
+        │     └─╴   ╵              
+        ╵
+
+  T    U     V    W   X    Y   Z
+╶─┬─╴ ╷   ╷    ╷   ┌─╴  ╷   ╷   ╶─┐ 
+  │   └───┘    │ ┌─┘  ╶─┼─╴ ├─╴   │ 
+  ╵         ╶──┘ ╵      ╵   │     └─╴
+```
+
+ASCII representation of tetrasticks as provided in input (no flip + no rotation)
+```
+F        H        I     J        L        N
+......   ......   ...   ......   ......   ......
+..FF..   ......   ...   ......   ......   ......
+.F....   .H....   .I.   ....J.   .L....   .N....
+.F....   .H....   .I.   ....J.   .L....   .N....
+..FF..   ..HH..   ...   ......   ......   ..NN..
+.F....   .H..H.   .I.   .J..J.   .L....   ....N.
+.F....   .H..H.   .I.   .J..J.   .L....   ....N.
+......   ......   ...   ..JJ..   ......   ......
+......   ......   .I.   ......   .L....   ....N.
+                  .I.            .L....   ....N.
+                  ...            ..LL..   ......
+                  .I.            ......   ......
+                  .I.
+                  ...
+                  ...
+
+
+O        P        R           T           U
+......   ......   .........   .........   .........
+..OO..   ..PP..   ..RR.....   ..TT.TT..   .........
+.O..O.   ....P.   ....R....   ....T....   .U.....U.
+.O..O.   ....P.   ....R....   ....T....   .U.....U.
+..OO..   ..PP..   .....RR..   .........   ..UU.UU..
+......   .P....   ....R....   ....T....   .........
+         .P....   ....R....   ....T....
+         ......   .........   .........
+         ......   .........   .........
+
+V           W           X           Y        Z
+.........   .........   .........   ......   .........
+.........   .....WW..   .........   ......   ..ZZ.....
+.......V.   ....W....   ....X....   .Y....   ....Z....
+.......V.   ....W....   ....X....   .Y....   ....Z....
+.........   ..WW.....   ..XX.XX..   ..YY..   .........
+.......V.   .W.......   ....X....   .Y....   ....Z....
+.......V.   .W.......   ....X....   .Y....   ....Z....
+..VV.VV..   .........   .........   ......   .....ZZ..
+.........   .........   .........   .Y....   .........
+                                    .Y....
+                                    ......
+                                    ......
+```
+
+![451a17bc3e846b7130ebca9336906b1121b27c3392508ae213008f436c7bf630](https://github.com/user-attachments/assets/09d58d91-2ed7-4e61-8a83-6c1654ef26ba)
+
+Your task is to fill a 5×5 board of squares or, more precisely, a 6×6 grid of edges using the provided tetrasticks. Some tetrasticks may already be glued to the board, so pay close attention to the input.
+
+Each turn, you must place one tetrastick on the board. To do so, you need to specify:  
+* The ID of the tetrastick you want to place.
+* Whether you want to flip it horizontally.
+* The number of times you want to rotate it clockwise.
+* The row and column where you want to place it.
+
+Make sure all pieces fit correctly within the grid! 
+
+**Example - Tetrastick transformation and placement**
+The R tetrastick as shown in Fig 1, requires you to flip it horizontally (flip = 1) and rotate it twice (rotate = 2):
+```
+original    h-flip      rotation1   rotation2
+.........   .........   .........   .........
+..RR.....   .....RR..   .........   .........
+....R....   ....R....   ....R....   ....R....
+....R....   ....R....   ....R....   ....R....
+.....RR..   ..RR.....   ..RR.RR..   .....RR..
+....R....   ....R....   .......R.   ....R....
+....R....   ....R....   .......R.   ....R....
+.........   .........   .........   ..RR.....
+.........   .........   .........   .........
+```
+
+The bounding box of this tetrastick is 2×2 (see Fig 1). You must specify the row and column where top-left corner of bounding box should be placed. In the example above, that would be row = 0 and column = 2.
+
+*Example - Game Board representation*  
+During each game turn, you will receive a complete description of the board. Since multiple pieces can share the same intersection, each intersection is represented as a 3×3 grid. Let's look at this intersection:
+
+![8e0eff1eeb2593126bfd4c204d5cbfb9fece2b1f1e159ae3e5fea706964f55af](https://github.com/user-attachments/assets/21941a77-de16-422b-a0e0-23c2f996c9be)
+
+ The O piece extends downward and to the right, while the F piece extends upwards. Therefore this part of the grid will look like this:
+```
+.........
+..FF.FF..
+.F..F....
+.F..F....
+.....OO..
+....O..O.
+....O..O.
+.....OO..
+.........
+```
+
+The whole board as shown on Fig 1 will look like this (spaces added for readability):
+```
+... ... ... ... ... ...
+..J J.. ... ..V V.V V..
+.J. ... ... .R. .Y. .V.
+
+.J. ... ... .R. .Y. .V.
+..J J.J J.. ..R R.Y Y..
+... .N. ... .R. .Y. .V.
+
+... .N. ... .R. .Y. .V.
+... ..N N.R R.Z Z.. ...
+... ... .N. .Z. .Y. ...
+
+... ... .N. .Z. .Y. ...
+..I I.I I.I I.I I.. ...
+... ... .N. .Z. ... ...
+
+... ... .N. .Z. ... ...
+... ... ..Z Z.. ..O O..
+... ... ... ... .O. .O.
+
+... ... ... ... .O. .O.
+... ... ... ... ..O O..
+... ... ... ... ... ...
+```
+
+If you want to place the J-shaped tetrastick on the board as shown in Fig 1, you have to rotate it once and place it on position 0, 0, therefore your turn output should be exactly:
+J 0 1 0 0
+
+Placing the Z-shaped tetrastick would require a horizontal flip and position 2, 2, so output should look like this:
+Z 1 0 2 2
+
+# Input
+Every turn you will receive current configuration in following format:  
+* Line 1: number n representing amount of remaining tetrasticks to place
+* Line 2: n space separated IDs of remaining tetrasticks
+* Line 3: space separated h - height and w - width of game board (both always 18)
+* Following lines: h strings of length w representing game board consisting of either . for an unoccupied space or a tetrastick id for an occupied space as described in example
+  
+# Output
+* 1 Line: 5 Space separated values id, flip, rotations, row, column
+    * id of tetrastick
+    * flip 1 if tetrastick should be flipped horizontally, 0 otherwise
+    * rotations from interval <0 ; 3> - count of clockwise rotations
+    * row from interval <0 ; 5> - vertical placement
+    * column from interval <0 ; 5> - horizontal placement
+
+For example H 1 2 0 3 will flip (1) horizontally h-shaped tetrastick (H ) and rotate it 2 times clockwise. After that the tetrastick will be placed on first row and fourth column.
+
+# Constraints
+* Allotted response time to output is ≤ 2s in first turn and 50ms in remaining turns
