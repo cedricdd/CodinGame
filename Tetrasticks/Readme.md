@@ -91,14 +91,6 @@ Make sure all pieces fit correctly within the grid!
 The R tetrastick as shown in Fig 1, requires you to flip it horizontally (flip = 1) and rotate it twice (rotate = 2): 
 ![0dfd28a026ce147ac057df8f01f1d789e75705435831124b8fdbda90375a508b](https://github.com/user-attachments/assets/48b68431-8ea1-4f09-8b22-ead737177e4a)
 
-
-The bounding box of this tetrastick is 2×2 (see Fig 1). You must specify the row and column where top-left corner of bounding box should be placed. In the example above, that would be row = 0 and column = 2.
-
-*Example - Game Board representation*  
-During each game turn, you will receive a complete description of the board. Since multiple pieces can share the same intersection, each intersection is represented as a 3×3 grid. Let's look at this intersection:
-
-![8e0eff1eeb2593126bfd4c204d5cbfb9fece2b1f1e159ae3e5fea706964f55af](https://github.com/user-attachments/assets/21941a77-de16-422b-a0e0-23c2f996c9be)
-
 The bounding box of this tetrastick is 2×2. The row and column values represent the position of the top-left corner of the bounding box. In the example above, that would be row = 0 and column = 2.
 
 A tetrastick placement is described using its id, flip, rotate, x and y separated by space. For example: R 1 2 0 2
