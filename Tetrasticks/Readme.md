@@ -88,19 +88,9 @@ Each turn, you must place one tetrastick on the board. To do so, you need to spe
 Make sure all pieces fit correctly within the grid! 
 
 **Example - Tetrastick transformation and placement**
-The R tetrastick as shown in Fig 1, requires you to flip it horizontally (flip = 1) and rotate it twice (rotate = 2):
-```
-original    h-flip      rotation1   rotation2
-.........   .........   .........   .........
-..RR.....   .....RR..   .........   .........
-....R....   ....R....   ....R....   ....R....
-....R....   ....R....   ....R....   ....R....
-.....RR..   ..RR.....   ..RR.RR..   .....RR..
-....R....   ....R....   .......R.   ....R....
-....R....   ....R....   .......R.   ....R....
-.........   .........   .........   ..RR.....
-.........   .........   .........   .........
-```
+The R tetrastick as shown in Fig 1, requires you to flip it horizontally (flip = 1) and rotate it twice (rotate = 2): 
+![0dfd28a026ce147ac057df8f01f1d789e75705435831124b8fdbda90375a508b](https://github.com/user-attachments/assets/48b68431-8ea1-4f09-8b22-ead737177e4a)
+
 
 The bounding box of this tetrastick is 2×2 (see Fig 1). You must specify the row and column where top-left corner of bounding box should be placed. In the example above, that would be row = 0 and column = 2.
 
@@ -109,58 +99,18 @@ During each game turn, you will receive a complete description of the board. Sin
 
 ![8e0eff1eeb2593126bfd4c204d5cbfb9fece2b1f1e159ae3e5fea706964f55af](https://github.com/user-attachments/assets/21941a77-de16-422b-a0e0-23c2f996c9be)
 
- The O piece extends downward and to the right, while the F piece extends upwards. Therefore this part of the grid will look like this:
-```
-.........
-..FF.FF..
-.F..F....
-.F..F....
-.....OO..
-....O..O.
-....O..O.
-.....OO..
-.........
-```
+The bounding box of this tetrastick is 2×2. The row and column values represent the position of the top-left corner of the bounding box. In the example above, that would be row = 0 and column = 2.
 
-The whole board as shown on Fig 1 will look like this (spaces added for readability):
-```
-... ... ... ... ... ...
-..J J.. ... ..V V.V V..
-.J. ... ... .R. .Y. .V.
+A tetrastick placement is described using its id, flip, rotate, x and y separated by space. For example: R 1 2 0 2
 
-.J. ... ... .R. .Y. .V.
-..J J.J J.. ..R R.Y Y..
-... .N. ... .R. .Y. .V.
-
-... .N. ... .R. .Y. .V.
-... ..N N.R R.Z Z.. ...
-... ... .N. .Z. .Y. ...
-
-... ... .N. .Z. .Y. ...
-..I I.I I.I I.I I.. ...
-... ... .N. .Z. ... ...
-
-... ... .N. .Z. ... ...
-... ... ..Z Z.. ..O O..
-... ... ... ... .O. .O.
-
-... ... ... ... .O. .O.
-... ... ... ... ..O O..
-... ... ... ... ... ...
-```
-
-If you want to place the J-shaped tetrastick on the board as shown in Fig 1, you have to rotate it once and place it on position 0, 0, therefore your turn output should be exactly:
-J 0 1 0 0
-
-Placing the Z-shaped tetrastick would require a horizontal flip and position 2, 2, so output should look like this:
-Z 1 0 2 2
+At the beginning of each turn, you will receive a complete description of the board, which consists of the placement descriptions of all already placed tetrasticks. At the end of your turn, you must output the placement description of a single tetrastick. 
 
 # Input
 Every turn you will receive current configuration in following format:  
-* Line 1: number n representing amount of remaining tetrasticks to place
-* Line 2: n space separated IDs of remaining tetrasticks
-* Line 3: space separated h - height and w - width of game board (both always 18)
-* Following lines: h strings of length w representing game board consisting of either . for an unoccupied space or a tetrastick id for an occupied space as described in example
+* Line 1: number m representing amount of remaining tetrasticks to place
+* Line 2: m space separated IDs of remaining tetrasticks
+* Line 3: number n representing amount of tetrasticks already placed on board
+* Following n lines: placed tetrasticks as described in example, for example: R 1 2 0 2 (id, flip, rotate, x, y)
   
 # Output
 * 1 Line: 5 Space separated values id, flip, rotations, row, column
