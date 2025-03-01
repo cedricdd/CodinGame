@@ -1,86 +1,70 @@
 <?php
 
 const TETRASTICKS = [
-    'F' => [
-        "0-0" => [[1, 0], [0, 1], [0, 2], [0, 3], [1, 2]],
-        "0-1" => [[1, 0], [2, 0], [3, 0], [2, 1], [4, 1]],
-        "0-2" => [[1, 2], [1, 4], [2, 1], [2, 2], [2, 3]],
-        "0-3" => [[0, 1], [2, 1], [1, 2], [2, 2], [3, 2]],
-        "1-0" => [[1, 0], [1, 2], [2, 1], [2, 2], [2, 3]],
-        "1-1" => [[1, 2], [2, 1], [2, 2], [3, 2], [4, 1]],
-        "1-2" => [[0, 1], [0, 2], [0, 3], [1, 2], [1, 4]],
-        "1-3" => [[0, 1], [1, 0], [2, 0], [3, 0], [2, 1]],
-    ],
-    'I' => [
-        "0-0" => [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7]],
-        "0-1" => [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0]],
-    ],
-    'J' => [
-        "0-0" => [[0, 3], [1, 4], [2, 3], [2, 2], [2, 1]],
-        "0-1" => [[1, 0], [0, 1], [1, 2], [2, 2], [3, 2]],
-        "0-2" => [[1, 0], [2, 1], [0, 1], [0, 2], [0, 3]],
-        "0-3" => [[1, 0], [2, 0], [3, 0], [4, 1], [3, 2]],
-        "1-0" => [[0, 1], [0, 2], [0, 3], [1, 4], [2, 3]],
-        "1-1" => [[1, 0], [2, 0], [3, 0], [0, 1], [1, 2]],
-        "1-2" => [[0, 1], [1, 0], [2, 1], [2, 2], [2, 3]],
-        "1-3" => [[1, 2], [2, 2], [3, 2], [4, 1], [3, 0]],
-    ],
-    'L' => [
-        "0-0" => [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [1, 6]],
-        "0-1" => [[0, 1], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0]],
-        "0-2" => [[1, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5]],
-        "0-3" => [[1, 2], [2, 2], [3, 2], [4, 2], [5, 2], [6, 1]],
-        "1-0" => [[2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [1, 6]],
-        "1-1" => [[0, 1], [1, 2], [2, 2], [3, 2], [4, 2], [5, 2]],
-        "1-2" => [[1, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5]],
-        "1-3" => [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 1]],
-    ],
-    'N' => [
-        "0-0" => [[0, 1], [1, 2], [2, 3], [2, 4], [2, 5]],
-        "0-1" => [[1, 2], [2, 2], [3, 2], [4, 1], [5, 0]],
-        "0-2" => [[0, 1], [0, 2], [0, 3], [1, 4], [2, 5]],
-        "0-3" => [[1, 2], [2, 1], [3, 0], [4, 0], [5, 0]],
-        "1-0" => [[2, 1], [1, 2], [0, 3], [0, 4], [0, 5]],
-        "1-1" => [[1, 0], [2, 0], [3, 0], [4, 1], [5, 2]],
-        "1-2" => [[0, 5], [1, 4], [2, 3], [2, 2], [2, 1]],
-        "1-3" => [[1, 0], [2, 1], [3, 2], [4, 2], [5, 2]],
-    ],
-    'P' => [
-        "0-0" => [[1, 0], [2, 1], [1, 2], [0, 3]],
-        "0-1" => [[1, 0], [2, 1], [3, 2], [4, 1]],
-        "0-2" => [[2, 1], [1, 2], [0, 3], [1, 4]],
-        "0-3" => [[0, 1], [1, 0], [2, 1], [3, 2]],
-        "1-0" => [[1, 0], [0, 1], [1, 2], [2, 3]],
-        "1-1" => [[1, 2], [2, 1], [3, 0], [4, 1]],
-        "1-2" => [[0, 1], [1, 2], [2, 3], [1, 4]],
-        "1-3" => [[0, 1], [1, 2], [2, 1], [3, 0]],
-    ],
-    'R' => [
-        "0-0" => [[1, 0], [2, 1], [2, 2], [2, 3], [3, 3]],
-        "0-1" => [[1, 2], [2, 2], [3, 2], [2, 3], [4, 1]],
-        "0-2" => [[1, 2], [2, 1], [2, 2], [2, 3], [3, 4]],
-        "0-3" => [[0, 3], [1, 2], [2, 2], [3, 2], [2, 1]],
-        "1-0" => [[1, 2], [2, 3], [2, 2], [2, 1], [3, 0]],
-        "1-1" => [[1, 2], [2, 2], [3, 2], [2, 1], [4, 3]],
-        "1-2" => [[1, 4], [2, 1], [2, 2], [2, 3], [3, 2]],
-        "1-3" => [[0, 1], [1, 2], [2, 2], [3, 2], [2, 3]],
-    ],
-    'T' => [
-        "0-0" => [[1, 0], [2, 0], [3, 0], [2, 1], [2, 2], [2, 3]],
-        "0-1" => [[1, 2], [2, 2], [3, 2], [4, 1], [4, 2], [4, 3]],
-        "0-2" => [[1, 4], [2, 4], [3, 4], [2, 1], [2, 2], [2, 3]],
-        "0-3" => [[0, 1], [0, 2], [0, 3], [1, 2], [2, 2], [3, 2]],
-    ],
-    'X' => [
-        "0-0" => [[1, 2], [2, 2], [3, 2], [2, 1], [2, 3]],
-    ],
-    'Z' => [
-        "0-0" => [[1, 0], [2, 1], [2, 2], [2, 3], [3, 4]],
-        "0-1" => [[0, 3], [1, 2], [2, 2], [3, 2], [4, 1]],
-        "1-0" => [[3, 0], [2, 1], [2, 2], [2, 3], [1, 4]],
-        "1-1" => [[0, 1], [1, 2], [2, 2], [3, 2], [4, 3]],
-    ],
+    'F' => [".F.", "F..", "FF.", "F..", "..."],
+    'H' => ["...", "H..", "HH.", "H.H", "..."],
+    'I' => [".", "I", "I", "I", "I", "I", "I", "I", "."],
+    'J' => ["...", "..J", "..J", "J.J", ".J."],
+    'L' => ["...", "L..", "L..", "L..", "L..", "L..", ".L."],
+    'N' => ["...", "N..", ".N.", "..N", "..N", "..N", "..."],
+    'O' => [".O.", "O.O", ".O."],
+    'P' => [".P.", "..P", ".P.", "P..", "..."],
+    'R' => [".R...", "..R..", "..RR.", "..R..", "....."],
+    'T' => [".TTT.", "..T..", "..T..", "..T..", "....."],
+    'U' => [".....", "U...U", ".UUU."],
+    'V' => [".....", "....V", "....V", "....V", ".VVV."],
+    'W' => ["...W.", "..W..", ".W...", "W....", "....."],
+    'X' => [".....", "..X..", ".XXX.", "..X..", "....."],
+    'Y' => ["...", "Y..", "YY.", "Y..", "Y..", "Y..", "..."],
+    'Z' => [".Z...", "..Z..", "..Z..", "..Z..", "...Z."],
 ];
+
+//Rotate an array 90° clockwise
+function rotate90(array $input): array {
+    $h = count($input);
+    $w = strlen($input[0]);
+    $rotated = array_fill(0, $w, "");
+
+   for($x = 0; $x < $w; ++$x) {
+        for($y = $h - 1; $y >= 0; --$y) {
+            $rotated[$x] .= $input[$y][$x];
+        }
+   } 
+
+   return $rotated;
+}
+
+//Generate all the tetraskitcks (rotation & mirror)
+function generateTetrasticks(): array {
+    $tetrasticks = [];
+
+    foreach(TETRASTICKS as $letter => $shape) {
+        $hashes = [];
+
+        for($flip = 0; $flip <= 1; $flip++) {
+            for($rotation = 0; $rotation < 4; ++$rotation) {
+                $hash = implode("-", $shape);
+
+                //Not every rotation/mirror is unique
+                if(!isset($hashes[$hash])) {
+                    foreach($shape as $y => $line) {
+                        foreach(str_split($line) as $x => $c) {
+                            if($c != '.') $tetrasticks[$letter][$flip . "-" . $rotation][] = [$x, $y];
+                        }
+                    }
+                }
+
+                $hashes[$hash] = 1;
+    
+                $shape = rotate90($shape);
+            }
+
+            $shape = array_map("strrev", $shape); //Flip the shape
+        }
+    }
+
+    return $tetrasticks;
+}
 
 //Place all the shapes using Knuth's Algorithm X
 function placeShapes(array $counts, array $shapesByPositions, array $positionsToFill, array $listShapes, $solution = []) {
@@ -98,7 +82,6 @@ function placeShapes(array $counts, array $shapesByPositions, array $positionsTo
             $minPosition = $index;
             $minCount = $counts[$index];
 
-            if($minPosition == 0) return null; //We have a position with no possible shapes
             if($minPosition == 1) break; //Can't do any better
         }
     }
@@ -107,11 +90,11 @@ function placeShapes(array $counts, array $shapesByPositions, array $positionsTo
     foreach($shapesByPositions[$minPosition] as $shapeID1 => $filler) {
         $counts2 = $counts;
         $listShapes2 = $listShapes;
-        $positionsToFill2 = $positionsToFill;
         $shapesByPositions2 = $shapesByPositions;
+        $positionsToFill2 = array_diff_key($positionsToFill, $listShapes[$shapeID1]);
 
         //Loop through all the position occupied by the shape we are adding
-        foreach($listShapes[$shapeID1] as $index1) {
+        foreach($listShapes[$shapeID1] as $index1 => $filler) {
 
             if(!isset($shapesByPositions2[$index1])) continue; //This position has already been removed
 
@@ -120,8 +103,8 @@ function placeShapes(array $counts, array $shapesByPositions, array $positionsTo
 
                 if(!isset($listShapes2[$shapeID2])) continue; //This shape has already been removed
 
-                foreach($listShapes[$shapeID2] as $index2) {
-                    --$counts2[$index2]; 
+                foreach($listShapes[$shapeID2] as $index2 => $filler) {
+                    if(--$counts2[$index2] == 0 && isset($positionsToFill2[$index2])) continue 4; //We have a position with nothing left => invalid
                     unset($shapesByPositions2[$index2][$shapeID2]);
                 }
 
@@ -130,21 +113,20 @@ function placeShapes(array $counts, array $shapesByPositions, array $positionsTo
 
             //We are done with this position
             unset($shapesByPositions2[$index1]);
-            unset($positionsToFill2[$index1]);
             unset($counts2[$index1]);
         }
 
         //We can only use each shape type once
         $type = $listLettersByShape[$shapeID1];
 
-        //loop through all the shapes of this type
+        //Loop through all the shapes of this type
         foreach($listShapesByLetter[$type] as $shapeID) {
 
             if(!isset($listShapes2[$shapeID])) continue; //We have alreade removed this shape
 
             //Update all the positions
-            foreach($listShapes2[$shapeID] as $index) {
-                if(--$counts2[$index] == 0) continue 3; //We have a position with nothing left => invalid
+            foreach($listShapes2[$shapeID] as $index => $filler) {
+                if(--$counts2[$index] == 0 && isset($positionsToFill2[$index])) continue 3; //We have a position with nothing left => invalid
                 unset($shapesByPositions2[$index][$shapeID]);
             }
         }
@@ -158,12 +140,14 @@ function placeShapes(array $counts, array $shapesByPositions, array $positionsTo
 
 $solution = null;
 
+$tetrasticks = generateTetrasticks();
+
 while (TRUE) {
     fscanf(STDIN, "%d", $n);
 
-    $remaining = explode(" ", trim(fgets(STDIN)));
+    $start = microtime(1);
 
-    error_log(var_export($remaining, 1));
+    $remaining = explode(" ", trim(fgets(STDIN)));
 
     fscanf(STDIN, "%d", $n);
 
@@ -172,19 +156,11 @@ while (TRUE) {
     for ($i = 0; $i < $n; ++$i) {
         [$letter, $flip, $rotation, $y, $x] = explode(" ", trim(fgets(STDIN)));
 
-        error_log("$letter $flip $rotation $y $x");
-
-        if(!isset(TETRASTICKS[$letter][$flip . "-" . $rotation])) exit("Undifined Tetrastick!");
+        if(!isset($tetrasticks[$letter][$flip . "-" . $rotation])) exit("Undifined Tetrastick!");
         else {
-            foreach(TETRASTICKS[$letter][$flip . "-" . $rotation] as [$xm, $ym]) $grid[($y * 2) + $ym][($x * 2) + $xm] = $letter;
-
-            error_log(var_export($grid, 1));
+            foreach($tetrasticks[$letter][$flip . "-" . $rotation] as [$xm, $ym]) $grid[($y * 2) + $ym][($x * 2) + $xm] = $letter;
         }
     }
-
-    error_log(var_export($grid, 1));
-
-    exit();
 
     /**
      * Because of how we represent the grid we don't need to fill all the positions.
@@ -193,25 +169,11 @@ while (TRUE) {
      */
     $positionsToFill = []; 
 
-    for($y1 = 0, $y2 = 0; $y1 < $h; $y1 += 3, $y2 += 2) {
-        for($x1 = 0, $x2 = 0; $x1 < $w; $x1 += 3, $x2 += 2) {
-            //Rows
-            if($grid[$y1 + 1][$x1] == $grid[$y1 + 1][$x1 + 2] && $grid[$y1 + 1][$x1] != '.') $formattedGrid[$y2][$x2] = $grid[$y1 + 1][$x1];
-            
-            if($grid[$y1 + 1][$x1 + 2] != '.') $formattedGrid[$y2][$x2 + 1] = $grid[$y1 + 1][$x1 + 2];
-            elseif($x1 != 15) $positionsToFill[$y2 * 11 + $x2 + 1] = 1;
-
-            //Cols
-            if($grid[$y1][$x1 + 1] == $grid[$y1 + 2][$x1 + 1] && $grid[$y1][$x1 + 1] != '.') $formattedGrid[$y2][$x2] = $grid[$y1][$x1 + 1];
-
-            if($grid[$y1 + 2][$x1 + 1] != '.') $formattedGrid[$y2 + 1][$x2] = $grid[$y1 + 2][$x1 + 1];    
-            elseif($y1 != 15) $positionsToFill[($y2 + 1) * 11 + $x2] = 1;
+    for($y = 0; $y < 11; ++$y) {
+        for($x = ($y & 1 ? 0: 1); $x < 11; $x += 2) {
+            if($grid[$y][$x] == '.') $positionsToFill[$y * 11 + $x] = 1;
         }
     }
-
-    foreach($formattedGrid as $line) error_log(var_export($line, 1));
-
-    // error_log(var_export($positionsToFill, 1));
 
     if($solution === null) {
         $shapeIndex = 0;
@@ -224,23 +186,22 @@ while (TRUE) {
             for($y = 0; $y < 11; $y += 2) {
                 for($x = 0; $x < 11; $x += 2) {
                     //Test all the rotations/mirrors
-                    foreach(TETRASTICKS[$letter] as [$flip, $rotation, $tetrastick]) {
+                    foreach($tetrasticks[$letter] as $index => $tetrastick) {
+                        [$flip, $rotation] = explode("-", $index);
                         $positions = [];
         
                         foreach($tetrastick as [$xm, $ym]) {
                             $xp = $x + $xm;
                             $yp = $y + $ym;
         
-                            if(($formattedGrid[$yp][$xp] ?? '#') != '.') {
-                                continue 2; //Shape can't be inserted here
-                            }
+                            if(($grid[$yp][$xp] ?? '#') != '.') continue 2; //Shape can't be inserted here
         
-                            $positions[] = $yp * 11 + $xp;
+                            $positions[$yp * 11 + $xp] = 1;
                         }
         
                         $listShapes[$shapeIndex] = $positions;
                 
-                        foreach($positions as $positionIndex) {
+                        foreach($positions as $positionIndex => $filler) {
                             $counts[$positionIndex]++;
                             $shapesByPositions[$positionIndex][$shapeIndex] = 1;
                         }
@@ -255,19 +216,22 @@ while (TRUE) {
                 }
             }
         }
-    
+        
+        //For each position we sort the possible shapes by number of positions they occupy, from most to least
+        foreach($shapesByPositions as $index => &$list) {
+            uksort($list, function($a, $b) use ($listShapes) {
+                return count($listShapes[$b]) <=> count($listShapes[$a]);
+            });
+        }
+
         $counts = array_filter($counts); //Remove all the positions where we can't put anything
 
-        // error_log(var_export($counts, 1));
-        // error_log(var_export($listShapes, 1));
-        // error_log(var_export($shapesByPositions, 1));
-
         $solution = placeShapes($counts, $shapesByPositions, $positionsToFill, $listShapes);
-
-        error_log(var_export($solution, 1));
     }
 
     echo implode(" ", $shapesInfo[array_key_last($solution)]) . PHP_EOL;
 
     array_pop($solution);
+
+    error_log(microtime(1) - $start);
 }
