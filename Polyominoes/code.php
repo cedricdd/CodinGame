@@ -167,7 +167,7 @@ function placeShapes(array $counts, array $shapesByPositions, array $listShapes,
                 unset($listShapes2[$shapeID2]); //We are done with this shape
             }
 
-            //We are don't with this position
+            //We are done with this position
             unset($shapesByPositions2[$index1]);
             unset($counts2[$index1]);
         }
@@ -194,15 +194,25 @@ function placeShapes(array $counts, array $shapesByPositions, array $listShapes,
     return null;
 }
 
-function solve(array $letters, array $grid): array {
-    global $w, $h, $listShapesByLetter, $listLettersByShape, $listShapes;
+$solution = null;
+
+while (TRUE) {
+    $letters = stream_get_line(STDIN, 15 + 1, "\n");
+
+    fscanf(STDIN, "%d %d", $h, $w);
+
+    error_log($letters . " - " . $w . " - " . $h);
+
+    $start = microtime(1);
+
+    for ($y = 0; $y < $h; ++$y) $grid[] = str_split(trim(fgets(STDIN)));
 
     $listLettersByShape = [];
     $listShapesByLetter = [];
     $shapeIndex = 0;
     $counts = array_fill(0, $w * $h, 0);
 
-    foreach($letters as $letter) {
+    foreach(str_split($letters) as $letter) {
         //Find all the positions where we can put this type of shape
         foreach(findPositions($letter, $grid) as $positions) {
             $listShapes[$shapeIndex] = $positions;
@@ -221,24 +231,10 @@ function solve(array $letters, array $grid): array {
 
     $counts = array_filter($counts); //Remove all the positions where we can't put anything
 
-    return placeShapes($counts, $shapesByPositions, $listShapes);
-}
-
-$solution = null;
-
-while (TRUE) {
-    $remaining = stream_get_line(STDIN, 15 + 1, "\n");
-
-    fscanf(STDIN, "%d %d", $h, $w);
-
-    $start = microtime(1);
-
-    for ($y = 0; $y < $h; ++$y) $grid[] = str_split(trim(fgets(STDIN)));
-
-    $solution = solve(str_split($remaining), $grid);
+    $solution = placeShapes($counts, $shapesByPositions, $listShapes);
     $output = array_fill(0, $h, str_repeat(".", $w));
 
-    foreach(solve(str_split($remaining), $grid) as $shapeID => $filler) {
+    foreach($solution as $shapeID => $filler) {
         foreach($listShapes[$shapeID] as $position) $output[intdiv($position, $w)][$position % $w] = $listLettersByShape[$shapeID];
     }
 
