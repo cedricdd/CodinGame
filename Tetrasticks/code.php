@@ -200,10 +200,11 @@ while (TRUE) {
                         }
         
                         $listShapes[$shapeIndex] = $positions;
+                        $count = count($positions);
                 
                         foreach($positions as $positionIndex => $filler) {
                             $counts[$positionIndex]++;
-                            $shapesByPositions[$positionIndex][$shapeIndex] = 1;
+                            $shapesByPositions[$positionIndex][$shapeIndex] = $count;
                         }
             
                         $listShapesByLetter[$letter][] = $shapeIndex;
@@ -217,12 +218,8 @@ while (TRUE) {
             }
         }
         
-        //For each position we sort the possible shapes by number of positions they occupy, from most to least
-        foreach($shapesByPositions as $index => &$list) {
-            uksort($list, function($a, $b) use ($listShapes) {
-                return count($listShapes[$b]) <=> count($listShapes[$a]);
-            });
-        }
+        //For each positions we sort the possible shapes by number of positions they occupy, from most to least
+        array_walk($shapesByPositions, 'arsort');
 
         $counts = array_filter($counts); //Remove all the positions where we can't put anything
 
