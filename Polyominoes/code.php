@@ -175,7 +175,7 @@ function placeShapes(array $counts, array $shapesByPositions, array $listShapes,
         //We can only use each shape type once
         $type = $listLettersByShape[$shapeID1];
 
-        //Loop through all the shapes of this type
+        //loop through all the shapes of this type
         foreach($listShapesByLetter[$type] as $shapeID) {
 
             if(!isset($listShapes2[$shapeID])) continue; //We have alreade removed this shape
@@ -212,14 +212,15 @@ while (TRUE) {
     $shapeIndex = 0;
     $counts = array_fill(0, $w * $h, 0);
 
-    foreach(str_split($letters) as $letter) {
+    foreach(str_split(strrev($letters)) as $letter) {
         //Find all the positions where we can put this type of shape
         foreach(findPositions($letter, $grid) as $positions) {
             $listShapes[$shapeIndex] = $positions;
+            $count = count($positions);
 
             foreach($positions as $positionIndex) {
                 $counts[$positionIndex]++;
-                $shapesByPositions[$positionIndex][$shapeIndex] = 1;
+                $shapesByPositions[$positionIndex][$shapeIndex] = $count;
             }
 
             $listShapesByLetter[$letter][] = $shapeIndex;
@@ -228,7 +229,7 @@ while (TRUE) {
             ++$shapeIndex;
         }
     }
-
+    
     $counts = array_filter($counts); //Remove all the positions where we can't put anything
 
     $solution = placeShapes($counts, $shapesByPositions, $listShapes);
