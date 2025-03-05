@@ -1,5 +1,5 @@
 # Puzzle
-**Polyominoes** https://www.codingame.com/contribute/view/118617e82691f956c4a6959ea420471eeae900
+**Polyominoes** https://www.codingame.com/training/medium/polyominoes
 
 # Goal
 Your task is to carefully arrange all the given polyominoes to perfectly fill the predefined shape. Rotate and flip the pieces as needed, but make sure everything fits!
