@@ -18,89 +18,36 @@ do {
     $continue = false;
 
     foreach($truths as $index => $thruth) {
-        if(preg_match("/([A-Z]+) can FLY/", $thruth, $match)) {
+        if(preg_match("/^([A-Z]+)( with [A-Z]+)?( and [A-Z]+)?( that can [A-Z]+)? (?:are [A-Z]+(?: with [A-Z]+)? that )?can FLY$/", $thruth, $match)) {
             if(isset($are[$match[1]])) {
-                // error_log(var_export($match, 1));
+                $count = count($match);
 
+                //Make sure all the requirements are met
+                for($i = 2; $i < $count; ++$i) {
+                    if(preg_match("/ with ([A-Z]+)/", $match[$i], $match2) && !isset($have[$match2[1]])) continue 2;
+                    if(preg_match("/ and ([A-Z]+)/", $match[$i], $match2) && !isset($have[$match2[1]])) continue 2;
+                    if(preg_match("/ that can ([A-Z]+)/", $match[$i], $match2) && !isset($can[$match2[1]])) continue 2;
+                }
+
+                //Pigs can fly
                 if($full) echo "All pigs can fly" . PHP_EOL;
                 else echo "Some pigs can fly" . PHP_EOL;
                 exit();
             } 
         }
 
-        if(preg_match("/([A-Z]+) that can ([A-Z]+) can FLY/", $thruth, $match)) {
-            if(isset($are[$match[1]]) && isset($can[$match[2]])) {
-                // error_log(var_export($match, 1));
-
-                if($full) echo "All pigs can fly" . PHP_EOL;
-                else echo "Some pigs can fly" . PHP_EOL;
-                exit();
-            } 
-        }
-
-        if(preg_match("/([A-Z]+) with ([A-Z]+) can FLY/", $thruth, $match)) {
-            if(isset($are[$match[1]]) && isset($have[$match[2]])) {
-                // error_log(var_export($match, 1));
-
-                if($full) echo "All pigs can fly" . PHP_EOL;
-                else echo "Some pigs can fly" . PHP_EOL;
-                exit();
-            } 
-        }
-
-        if(preg_match("/([A-Z]+) with ([A-Z]+) that can ([A-Z]+) can FLY/", $thruth, $match)) {
-            if(isset($are[$match[1]]) && isset($have[$match[2]]) && isset($can[$match[3]])) {
-                // error_log(var_export($match, 1));
-
-                if($full) echo "All pigs can fly" . PHP_EOL;
-                else echo "Some pigs can fly" . PHP_EOL;
-                exit();
-            } 
-        }
-
-        if(preg_match("/([A-Z]+) with ([A-Z]+) are ([A-Z]+) that can FLY/", $thruth, $match)) {
-            if(isset($are[$match[1]]) && isset($have[$match[2]])) {
-                // error_log(var_export($match, 1));
-
-                if($full) echo "All pigs can fly" . PHP_EOL;
-                else echo "Some pigs can fly" . PHP_EOL;
-                exit();
-            } 
-        }
-
-        if(preg_match("/([A-Z]+) with ([A-Z]+) and ([A-Z]+) are ([A-Z]+) that can FLY/", $thruth, $match)) {
-            // error_log(var_export($match, 1));
-
-            if(isset($are[$match[1]]) && isset($have[$match[2]]) && isset($have[$match[3]])) {
-                if($full) echo "All pigs can fly" . PHP_EOL;
-                else echo "Some pigs can fly" . PHP_EOL;
-                exit();
-            } 
-        }
-
-        if(preg_match("/^([A-Z]+) are ([A-Z]+)$/", $thruth, $match)) {
-            if(isset($are[$match[1]])) {
-                $are[$match[2]] = 1;
-                error_log("7 adding are " . $match[2]);
-                $continue = true;
-
-                unset($truths[$index]);
-            }elseif(isset($have[$match[1]])) {
-                $have[$match[2]] = 1;
-                error_log("8 adding have " . $match[2] . " -- " . $match[1]);
-                $continue = true;
-
-                unset($truths[$index]);
-            }
+        if(preg_match("/^([A-Z]+)( with [A-Z]+)?( and [A-Z]+)?( that can [A-Z]+)? are ([A-Z]+)( with [A-Z]+)?( that can [A-Z]+)?$/", $thruth, $match)) {
 
             if(!$full) {
-                if(isset($are[$match[2]])) {
+                //Some pigs are this object
+                if(isset($are[$match[5]])) {
                     $are[$match[1]] = 1;
                     error_log("18 adding are " . $match[1]);
                     $continue = true;
     
                     unset($truths[$index]);
-                } elseif(isset($have[$match[2]])) {
+                } //Some pigs have this trait
+                elseif(isset($have[$match[5]])) {
                     $have[$match[1]] = 1;
                     error_log("18 adding have " . $match[1]);
                     $continue = true;
@@ -108,130 +55,70 @@ do {
                     unset($truths[$index]);
                 }
             }
-        }
 
-        if(preg_match("/^([A-Z]+) are ([A-Z]+) that can ([A-Z]+)$/", $thruth, $match)) {
+            //Make sure all the requirements are met
+            for($i = 2; $i <= 4; ++$i) {
+                if(preg_match("/ with ([A-Z]+)/", $match[$i], $match2) && !isset($have[$match2[1]])) continue 2;
+                if(preg_match("/ and ([A-Z]+)/", $match[$i], $match2) && !isset($have[$match2[1]])) continue 2;
+                if(preg_match("/ that can ([A-Z]+)/", $match[$i], $match2) && !isset($can[$match2[1]])) continue 2;
+            }
+
+            //Adding an object
             if(isset($are[$match[1]])) {
-                $are[$match[2]] = 1;
-                error_log("7 adding are " . $match[2]);
+                $are[$match[5]] = 1;
+                error_log("7 adding are " . $match[5]);
+                $continue = true;
 
-                $can[$match[3]] = 1;
-                error_log("12 adding can " . $match[3]);
-
+                unset($truths[$index]);
+            } //Adding a trait
+            elseif(isset($have[$match[1]])) {
+                $have[$match[5]] = 1;
+                error_log("8 adding have " . $match[5]);
                 $continue = true;
 
                 unset($truths[$index]);
             }
         }
 
-        if(preg_match("/([A-Z]+) have ([A-Z]+)/", $thruth, $match)) {
+        if(preg_match("/^([A-Z]+)( with [A-Z]+)?( and [A-Z]+)?( that can [A-Z]+)? have ([A-Z]+)$/", $thruth, $match)) {
+
+            //Make sure all the requirements are met
+            for($i = 2; $i <= 4; ++$i) {
+                if(preg_match("/ with ([A-Z]+)/", $match[$i], $match2) && !isset($have[$match2[1]])) continue 2;
+                if(preg_match("/ and ([A-Z]+)/", $match[$i], $match2) && !isset($have[$match2[1]])) continue 2;
+                if(preg_match("/ that can ([A-Z]+)/", $match[$i], $match2) && !isset($can[$match2[1]])) continue 2;
+            }
+
+            //Adding a trait
             if(isset($are[$match[1]])) {
-                $have[$match[2]] = 1;
-                error_log("1 adding have " . $match[2]);
+                $have[$match[5]] = 1;
+                error_log("1 adding have " . $match[5]);
                 $continue = true;
 
                 unset($truths[$index]);
             } 
-
-            if(!$full && isset($have[$match[2]])) {
-                $are[$match[1]] = 1;
-                error_log("33 adding are " . $match[1]);
-                $continue = true;
-
-                unset($truths[$index]);
-            }
         }
 
-        if(preg_match("/([A-Z]+) can ([A-Z]+)/", $thruth, $match)) {
+        if(preg_match("/^([A-Z]+)( with [A-Z]+)?( and [A-Z]+)?( that can [A-Z]+)? can ([A-Z]+)$/", $thruth, $match)) {
+
+            // error_log(var_export($match, 1));
+
+            //Make sure all the requirements are met
+            for($i = 2; $i <= 4; ++$i) {
+                if(preg_match("/ with ([A-Z]+)/", $match[$i], $match2) && !isset($have[$match2[1]])) continue 2;
+                if(preg_match("/ and ([A-Z]+)/", $match[$i], $match2) && !isset($have[$match2[1]])) continue 2;
+                if(preg_match("/ that can ([A-Z]+)/", $match[$i], $match2) && !isset($can[$match2[1]])) continue 2;
+            }
+
+            //Adding an abbility
             if(isset($are[$match[1]])) {
-                $can[$match[2]] = 1;
-                error_log("2 adding can " . $match[2]);
+                $can[$match[5]] = 1;
                 $continue = true;
+
+                error_log("3 adding can " . $match[5]);
 
                 unset($truths[$index]);
             }
-        }
-
-        if(preg_match("/([A-Z]+) that can ([A-Z]+) are ([A-Z]+)/", $thruth, $match)) {
-            if(isset($are[$match[1]]) && isset($can[$match[2]])) {
-                $are[$match[3]] = 1;
-                error_log("3 adding are " . $match[3]);
-                $continue = true;
-
-                unset($truths[$index]);
-            }
-        }
-
-        if(preg_match("/([A-Z]+) that can ([A-Z]+) have ([A-Z]+)/", $thruth, $match)) {
-            if(isset($are[$match[1]]) && isset($can[$match[2]])) {
-                $have[$match[3]] = 1;
-                error_log("11 adding have " . $match[3]);
-                $continue = true;
-
-                unset($truths[$index]);
-            }
-        }
-
-        if(preg_match("/([A-Z]+) with ([A-Z]+) can ([A-Z]+)/", $thruth, $match)) {
-            // error_log(var_export($match, 1));
-
-            if(isset($are[$match[1]]) && isset($have[$match[2]])) {
-                $can[$match[3]] = 1;
-                error_log("9 adding can " . $match[3]);
-                $continue = true;
-
-                unset($truths[$index]);
-            } 
-        }
-
-        if(preg_match("/^([A-Z]+) with ([A-Z]+) are ([A-Z]+)$/", $thruth, $match)) {
-            // error_log(var_export($match, 1));
-
-            if(isset($are[$match[1]]) && isset($have[$match[2]])) {
-                $are[$match[3]] = 1;
-                error_log("12 adding are " . $match[3]);
-                $continue = true;
-
-                unset($truths[$index]);
-            } 
-
-            if(!$full && isset($are[$match[3]])) {
-                $are[$match[1]] = 1;
-                error_log("22 adding are " . $match[1]);
-
-                $have[$match[2]] = 1;
-                error_log("22 adding have " . $match[2]);
-                $continue = true;
-
-                unset($truths[$index]);
-            }
-        }
-
-        if(preg_match("/([A-Z]+) with ([A-Z]+) are ([A-Z]+) that can ([A-Z]+)/", $thruth, $match)) {
-            // error_log(var_export($match, 1));
-
-            if(isset($are[$match[1]]) && isset($have[$match[2]])) {
-                $are[$match[3]] = 1;
-                error_log("4 adding are " . $match[3]);
-
-                $can[$match[4]] = 1;
-                error_log("5 adding can " . $match[4]);
-                $continue = true;
-
-                unset($truths[$index]);
-            } 
-        }
-
-        if(preg_match("/([A-Z]+) with ([A-Z]+) that can ([A-Z]+) can ([A-Z]+)/", $thruth, $match)) {
-            // error_log(var_export($match, 1));
-
-            if(isset($are[$match[1]]) && isset($have[$match[2]]) && isset($can[$match[3]])) {
-                $can[$match[4]] = 1;
-                error_log("6 adding can " . $match[4]);
-                $continue = true;
-
-                unset($truths[$index]);
-            } 
         }
     }
 
