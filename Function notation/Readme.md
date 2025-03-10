@@ -1,5 +1,5 @@
 # Puzzle
-**Function notation** https://www.codingame.com/contribute/view/67467b18360c683de95549e76097154928a90
+**Function notation** https://www.codingame.com/training/medium/function-notation
 
 # Goal
 Given a function that is exclusively the outcome of function compositions and function sums, rewrite it by replacing the composition operator . with the reverse composition operator |>.
