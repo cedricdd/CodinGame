@@ -1,5 +1,5 @@
 # Puzzle
-**Tetrasticks** https://www.codingame.com/contribute/view/118881f59230e1500f13bfc4f9138add967b0e
+**Tetrasticks** https://www.codingame.com/training/medium/tetrasticks
 
 # Goal
 After months of struggling, little Jimmy finally solved the Tetrasticks puzzle. Frustrated with how tricky it was, he started gluing the pieces to the game board. But just as he was in the middle of it, he opened a window and went to the bathroom. Suddenly, a gust of wind blew in, knocking the board to the floor! Now, only the glued pieces remain in place, while the rest are scattered.
