@@ -1,93 +1,37 @@
 <?php
 
-function getMinMax(array $moves): array {
-    $x = 0;
-    $y = 0;
-    $xMin = 0;
-    $xMax = 0;
-    $yMin = 0;
-    $yMax = 0;
+//https://en.wikipedia.org/wiki/Shoelace_formula
+function shoelaceFormula(array $vertices): int {
+    $n = count($vertices);
+    $sum = 0;
 
-    foreach($moves as [$direction, $step]) {
-
-        switch($direction) {
-            case '>':   $x += $step;    break;
-            case '<':   $x -= $step;    break;
-            case 'v':   $y += $step;    break;
-            case '^':   $y -= $step;    break;
-        }
-
-        if($x > $xMax) $xMax = $x;
-        if($x < $xMin) $xMin = $x;
-        if($y > $yMax) $yMax = $y;
-        if($y < $yMin) $yMin = $y;
+    for ($i = 0; $i < $n - 1; $i++) {
+        $sum += ($vertices[$i][0] * $vertices[$i + 1][1] - $vertices[$i + 1][0] * $vertices[$i][1]);
     }
 
-    return [$xMin, $xMax, $yMin, $yMax,];
-}
-
-function solve(int &$surface, array $moves, int $level = 1): void {
-    $x = 0;
-    $y = 0;
-    $open = false;
-    $movesInside = [];
-    [$xMin, $xMax, $yMin, $yMax] = getMinMax($moves);
-    $count = (abs($xMax - $xMin) + 1) * (abs($yMax - $yMin) + 1);
-
-    error_log("$xMin $xMax - $yMin $yMax - $count");
-
-    foreach($moves as [$direction, $step]) {
-        switch($direction) {
-            case '>':   $x += $step;    break;
-            case '<':   $x -= $step;    break;
-            case 'v':   $y += $step;    break;
-            case '^':   $y -= $step;    break;
-        }
-
-        $mainBorder = ($x == $xMin || $x == $xMax || $y == $yMin || $y == $yMax);
-    
-        if(!$open && !$mainBorder) {
-            $movesInside[] = [$direction, $step];
-            $open = true;
-        } elseif($open) {
-            $movesInside[] = [$direction, $step];
-
-            if($mainBorder) {
-                $open = false;
-
-                solve($surface, $movesInside, $level + 1);
-
-                error_log(var_export($movesInside, 1));
-
-                $movesInside = [];
-
-                // if($level == 1) ++$surface;
-
-                error_log("surface $surface");
-                if($level == 1)exit();
-            }
-        } elseif($level != 1) {
-            // error_log("adding $step for border");
-            // $surface += $step; //Border is always part of the shape
-        }
-    }
-
-    $temp = $count * ($level & 1 ? 1 : -1);
-
-    error_log("done with " . $temp);
-
-    $surface += $temp;
+    return abs($sum) / 2;
 }
 
 fscanf(STDIN, "%d", $n);
 
+$x = 0;
+$y = 0;
+$border = 0;
+$vertices = [[0, 0]];
+
 for ($i = 0; $i < $n; $i++) {
     fscanf(STDIN, "%s %d", $direction, $step);
 
-    $moves[] = [$direction, $step];
+    switch($direction) {
+        case '>':   $x += $step;    break;
+        case '<':   $x -= $step;    break;
+        case 'v':   $y += $step;    break;
+        case '^':   $y -= $step;    break;
+    }
+
+    $vertices[] = [$x, $y];
+    $border += $step;
 }
 
-$surface = 0;
-solve($surface, $moves);
-
-echo $surface . PHP_EOL;
+//https://en.wikipedia.org/wiki/Pick%27s_theorem
+echo (shoelaceFormula($vertices) + $border / 2 + 1) . PHP_EOL;
