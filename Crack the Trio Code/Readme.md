@@ -1,5 +1,5 @@
 # Puzzle
-**Crack the Trio Code** https://www.codingame.com/contribute/view/1195419439be626d7acb265aa9a54707b75095
+**Crack the Trio Code** https://www.codingame.com/training/easy/crack-the-trio-code
 
 # Goal
 There are three positive integers, called triads. By selecting 1 to 3 of these numbers (with repetitions allowed) and summing them, you obtain what is known as triad sums. You are given a sorted subset L of triad sums. Your task is to determine the original triads.  
