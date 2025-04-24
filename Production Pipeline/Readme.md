@@ -1,5 +1,5 @@
 # Puzzle
-**Production Pipeline** https://www.codingame.com/contribute/view/1207291aeed6e8753edf7cb02613af87c69731
+**Production Pipeline** https://www.codingame.com/training/easy/production-pipeline
 
 # Goal
 There are N different sequential processes in a production pipeline which must be executed, identified by a number from 1 to N, and K constraints given in the form "[process1] < [process2]", which means that the first provided process must run before the second provided process.
