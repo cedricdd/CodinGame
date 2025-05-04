@@ -1,5 +1,5 @@
 # Puzzle
-**Touching Balls** https://www.codingame.com/contribute/view/1207959fd5bf567cc4ed52db17543f0fd27057
+**Touching Balls** https://www.codingame.com/training/easy/touching-balls
 
 # Goal
 You are given N non-overlapping spheres, each centered at (x,y,z) with radiusr. In the same order as they are given, expand the radius of each sphere until it touches any of the other spheres.
