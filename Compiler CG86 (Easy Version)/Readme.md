@@ -1,5 +1,5 @@
 # Puzzle
-**Compiler CG86 (Easy Version)** https://www.codingame.com/contribute/view/123501d1d1cb34651439257e0478bb64d6f2b4
+**Compiler CG86 (Easy Version)** https://www.codingame.com/training/easy/compiler-cg86-easy-version
 
 # Goal
 CG86 is a minimal arithmetic compiler targeting a fictional assembly language. It supports only addition and subtraction, using a single register cgx, initialized to zero.
