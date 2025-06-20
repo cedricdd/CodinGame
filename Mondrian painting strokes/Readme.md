@@ -1,5 +1,5 @@
 # Puzzle
-**Mondrian painting strokes** https://www.codingame.com/contribute/view/124524381d47463d8f9764cdd9253ad6bf98e0
+**Mondrian painting strokes** https://www.codingame.com/training/medium/mondrian-painting-strokes
 
 # Goal
 You are given a 2D grid representing a Mondrian-style painting.
