@@ -9,42 +9,36 @@ const REFLECTION = [
 function explore(int $x, int $y, string $dir, array $visited = [], array $flips = []): void {
     global $room, $bestCount, $bestFlips, $w, $h;
 
-    if(count($flips) + 1 >= $bestCount) return;
+    if(count($flips) >= $bestCount) return; // We can't find a better path
 
-    error_log("at $x $y - $dir " . implode("-", array_keys($flips)));
-
-    if(isset($visited[$y][$x])) return;
-    else $visited[$y][$x] = 1;
+    if(isset($visited[$y][$x][$dir])) return; // We don't want to end up in a loop
+    else $visited[$y][$x][$dir] = 1;
 
     while(true) {
         $x += MOVES[$dir][0];
         $y += MOVES[$dir][1];
 
-        if($x < 0 || $x >= $w || $y < 0 || $y >= $h) {
-            // error_log("break 1");
-            break;
-        }
+        if($x < 0 || $x >= $w || $y < 0 || $y >= $h) break; // Out of the room
 
         if($room[$y][$x] == 'T') {
-            error_log("reached target");
             $bestCount = count($flips);
             $bestFlips = $flips;
 
             break;
         }
 
-        if($room[$y][$x] == '#') {
-            // error_log("break 2");
-            break;
-        }
+        if($room[$y][$x] == '#') break; // Ended up in a wall
 
         if(ctype_digit($room[$y][$x])) {
             $v = intval($room[$y][$x]);
 
-            explore($x, $y, REFLECTION[$v][$dir], $visited, $flips); 
-            if(!isset($flips["$x $y"])) explore($x, $y, REFLECTION[($v + 1) % 2][$dir], $visited, $flips + ["$x $y" => 1]);   
+            explore($x, $y, REFLECTION[$v][$dir], $visited, $flips); // We continue without flipping
 
-            // error_log("break 3");
+            // We continue after flipping
+            if(!isset($visisted[$y][$y])) {
+                $flips[] = [$x, $y];
+                explore($x, $y, REFLECTION[($v + 1) % 2][$dir], $visited, $flips); 
+            }
 
             break;
         }
@@ -69,23 +63,17 @@ for ($y = 0; $y < $h; ++$y) {
 
 fscanf(STDIN, "%s", $dir);
 
-error_log(var_export($room, 1));
-error_log(var_export($dir, 1));
-
 $bestCount = INF;
 $bestFlips = [];
 
 explore($xs, $ys, $dir);
 
-uksort($bestFlips, function($a, $b) {
-    [$xa, $ya] = explode(" ", $a);
-    [$xb, $yb] = explode(" ", $b);
-
-    if($ya == $yb) return $xa <=> $xb;
-    else return $ya <=> $yb;
+// Sort by 'reading order'
+usort($bestFlips, function($a, $b) {
+    if($a[1] == $b[1]) return $a[0] <=> $b[0];
+    else return $a[1] <=> $b[1];
 });
 
-error_log($bestCount);
-echo implode(PHP_EOL, array_keys($bestFlips)) . PHP_EOL;
+echo implode(PHP_EOL, array_map(function($flip) { return implode(" ", $flip); }, $bestFlips)) . PHP_EOL;
 
 error_log(microtime(1) - $start);
