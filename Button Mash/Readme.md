@@ -1,5 +1,5 @@
 # Puzzle
-**Button Mash** https://www.codingame.com/contribute/view/115812cce98ec6afc1bd90fc935bf8946108d8
+**Button Mash** https://www.codingame.com/training/easy/button-mash
 
 # Goal
 You are given a device with a display and three buttons: +1, -1, and ×2. The display starts at 0.
@@ -12,7 +12,7 @@ Rules:
 
 Example:  
 To reach the number 59, the minimum sequence of button presses is:  
-+1, +1, ×2, ×2, ×2, -1, ×2, ×2, -1  
+```+1, +1, ×2, ×2, ×2, -1, ×2, ×2, -1```
 This requires 9 operations in total.
 
 # Input
