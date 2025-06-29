@@ -12,10 +12,8 @@ while(true) {
     $newValues = [];
 
     foreach($values as $value) {
-        foreach(['+ 1', '- 1', '* 2'] as $op) {
-            $value2 = eval("return " . $value . " " . $op . ";");
-
-            if(!isset($history[$value2])) {
+        foreach ([$value + 1, $value - 1, $value * 2] as $value2) {
+            if($value2 >= 0 && !isset($history[$value2])) {
                 $history[$value2] = 1;
                 $newValues[] = $value2;
             }
