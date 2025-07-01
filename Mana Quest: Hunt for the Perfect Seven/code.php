@@ -1,7 +1,7 @@
 <?php
 
-function solve(array $patterns, array $counts, float $percentage, int $left, int $otherCount, bool $debug = false) {
-    global $probablity, $matches;
+function solve(array $patterns, array $categories, float $percentage, int $left, int $noPatternCount) {
+    global $probablity, $matches, $counts;
 
     // We have picked all the cards
     if($left == 53) {
@@ -10,96 +10,78 @@ function solve(array $patterns, array $counts, float $percentage, int $left, int
         return;
     }
 
-    $used = [];
+    // Test by picking any of the categories we are still interested in
+    foreach($categories as $category => $filler) {
+        $patterns2 = $patterns;
+        $categories2 = $categories;
 
-    foreach($patterns as $pattern => $list) {
-        foreach($list as $category) {
-            if(isset($used[$category])) continue;
-            else $used[$category] = 1;
+        foreach($matches[$category] as $pattern2) unset($patterns2[$pattern2]); // Remove all the patterns that match the category
 
-            if($left == 60) {
-                if($category == "C1R") $debug = true;
-                else $debug = false;
-            }
+        unset($categories2[$category]);
+        $newNoPatternCount = $counts[$category];
 
-            error_log("at $left using $category for $pattern -- $left - $otherCount");
-
-            $patterns2 = $patterns;
-            $counts2 = $counts;
-
-            foreach($matches[$category] as $pattern2) unset($patterns2[$pattern2]);
-
-            $total = 0;
-
-            foreach($list as $category2) {
-                if($category == $category2) {
-                    $total += $counts[$category2];
-                    $counts2[$category2] = 0;
+        // Potentially we now don't need some of the other categories if they were only matching a pattern that match the category we used
+        if(count($matches[$category]) > 1) {
+            foreach($categories2 as $category2 => $filler) {
+                foreach($matches[$category2] as $pattern2) {
+                    if(isset($patterns2[$pattern2])) continue 2;
                 }
-                else {
-                    foreach($matches[$category2] as $pattern2) {
-                        if(isset($patterns2[$pattern2])) continue 2;
-                    }
 
-                    $total += $counts[$category2];
-                    $counts2[$category2] = 0;
-                }
+                // We don't need that category anymore
+                unset($categories2[$category2]);
+                $newNoPatternCount += $counts[$category2];
+                $counts2[$category2] = 0;
             }
-
-            // error_log(var_export($patterns2, 1));
-
-            solve($patterns2, $counts2, $percentage * ($counts[$category] / $left), $left - 1, $otherCount + $total - 1, $debug);
         }
+
+        solve($patterns2, $categories2, $percentage * ($counts[$category] / $left), $left - 1, $noPatternCount + $newNoPatternCount - 1);
     }
     
-    solve($patterns, $counts, $percentage * ($otherCount / $left), $left - 1, $otherCount - 1, $debug);
+    // We pick a card not matching any pattern we still need
+    solve($patterns, $categories, $percentage * ($noPatternCount / $left), $left - 1, $noPatternCount - 1);
 }
 
-$total = 0;
 $start = microtime(1);
 
 fscanf(STDIN, "%d", $c);
 for ($i = 0; $i < $c; $i++) {
     fscanf(STDIN, "%s %d", $category, $count);
 
-    $total += $count;
-    $categories[$category] = $count;
+    $counts[$category] = $count;
 }
 
-$patterns = [];
 $matches = [];
-$test2 = [];
+$patterns = [];
+$categories = [];
 
 fscanf(STDIN, "%d", $q);
 for ($i = 0; $i < $q; $i++) {
     fscanf(STDIN, "%s", $pattern);
 
-    if($pattern === "xxx") continue;
+    if($pattern === "xxx") continue; // Any card will match, skipping
 
-    foreach($categories as $category => $count) {
+    $patterns[$pattern] = 1;
+
+    //Find all the categories that match the pattern
+    foreach($counts as $category => $count) {
         if(preg_match("/" . str_replace("x", ".", $pattern) . "/", $category)) {
-            $patterns[$pattern][] = $category;
+            $categories[$category] = 1;
 
             $matches[$category][] = $pattern;
         }
     }
-
-    if(!isset($patterns[$pattern])) exit("0.0000");
 }
 
-$otherCount = 0;
+$noPatternCount = 0;
 
-foreach($categories as $category => $count) {
-    if(!isset($matches[$category])) $otherCount += $count;
+// Get how many cards don't match any patterns
+foreach($counts as $category => $count) {
+    if(!isset($matches[$category])) $noPatternCount += $count;
 }
-
-error_log(var_export($categories, 1));
-error_log(var_export($patterns, 1));
-error_log(var_export($matches, 1));
 
 $probablity = 0.0;
 
-solve($patterns, $categories, 1.0, 60, $otherCount);
+solve($patterns, $categories, 1.0, 60, $noPatternCount);
 
 echo number_format($probablity, 4) . PHP_EOL;
 
