@@ -1,5 +1,5 @@
 # Puzzle
-**Find the Shortest Path Home** https://www.codingame.com/ide/demo/1252392a6ee6bf75f55e68ce66af00a2bc308a3
+**Find the Shortest Path Home** https://www.codingame.com/training/medium/find-the-shortest-path-home
 
 # Goal
 You are given a route that consists of directions represented by the characters N (North), W (West) and E (East). This route describes how you traveled from your starting point to your current location. Your task is to find the all shortest paths to return to your starting point without retracing any part of your original route or following the reverse order.
@@ -8,9 +8,9 @@ You can visit the same vertex multiple times, but you must avoid using any segme
 
 For example:
 ```
-4 - 1 - 2
-|   |   |
-5 - P - 3
+4 ← 1 → 2
+↓    ↑   ↓
+5 → P ← 3
 ```
 
 P: Starting Point  
@@ -27,4 +27,4 @@ Invalid return: S (1 → P)
 * If multiple shortest paths exist, the output should display each path on a separate line, sorted alphabetically.
 
 # Constraints
-* 1 ≤ length of route ≤ 50
+* 1 ≤ length of route ≤ 25
