@@ -1,48 +1,56 @@
 <?php
 
-fscanf(STDIN, "%d %d", $h, $w);
-for ($i = 0; $i < $h; $i++) {
-    $map[] = stream_get_line(STDIN, $w + 1, "\n");
+class MiPriorityQueue extends SplPriorityQueue {
+    public function compare($a, $b) {
+        return $b <=> $a;
+    }
 }
 
-error_log(var_export($map, 1));
+fscanf(STDIN, "%d %d", $h, $w);
+for ($y = 0; $y < $h; $y++) {
+    $line = stream_get_line(STDIN, $w + 1, "\n");
 
-$i = implode('', $map);
+    if(($x = strpos($line, 'B')) !== false) [$xB, $yB] = [$x, $y];
+    if(($x = strpos($line, 'M')) !== false) [$xM, $yM] = [$x, $y];
 
-$pB = strpos($i, 'B');
-$pM = strpos($i, 'M');
+    $map[] = str_split($line);
 
-[$xB, $yB] = [$pB % $w, intdiv($pB, $w)];
-[$xM, $yM] = [$pM % $w, intdiv($pM, $w)];
+    error_log(var_export($line, 1));
+}
 
-$toCheck = [[$xB, $yB]];
+$start = microtime(1);
+
 $history = [];
-$distance = 0;
 
-while($toCheck) {
-    $newCheck = [];
+$queue = new MiPriorityQueue();
+$queue->insert([$xB, $yB, 0], abs($xB - $xM) + abs($yB - $yM));
 
-    foreach($toCheck as [$x, $y]) {
-        if($x == $xM && $y == $yM) exit($distance . " " . ($distance > 1 ? "leagues" : "league"));
+while(true) {
+    [$x, $y, $distance] = $queue->extract();
 
-        if(isset($history[$y][$x])) continue;
-        else $history[$y][$x] = 1;
-
-        foreach([[1, 0], [0, 1], [-1, 0], [0, -1]] as [$xm, $ym]) {
-            $xu = $x + $xm;
-            $yu = $y + $ym;
-
-            if($map[$yu][$xu] != '^') $newCheck[] = [$xu, $yu];
-        }
-
-        foreach([[-1, -1, -1, 0, 0, -1], [1, -1, 0, -1, 1, 0], [-1, 1, -1, 0, 0, 1], [1, 1, 0, 1, 1, 0]] as [$xm, $ym, $x1, $y1, $x2, $y2]) {
-            $xu = $x + $xm;
-            $yu = $y + $ym;
-
-            if($map[$yu][$xu] != '^' && ($map[$y + $y1][$x + $x1] != $map[$y + $y2][$x + $x2] || $map[$y + $y1][$x + $x1] != '^')) $newCheck[] = [$xu, $yu];
-        }
+    if($x == $xM && $y == $yM) {
+        error_log(microtime(1) - $start);
+        exit($distance . " " . ($distance > 1 ? "leagues" : "league"));
     }
 
-    ++$distance;
-    $toCheck = $newCheck;
+    if(isset($history[$y][$x])) continue;
+    else $history[$y][$x] = $distance;
+
+    // Cardinal directions
+    foreach([[1, 0], [0, 1], [-1, 0], [0, -1]] as [$xm, $ym]) {
+        $xu = $x + $xm;
+        $yu = $y + $ym;
+
+        if(($map[$yu][$xu] ?? ' ') != '^') $queue->insert([$xu, $yu, $distance + 1], abs($xu - $xM) + abs($yu - $yM) + $distance);
+
+    }
+
+    // Ordinal directions, we can't move diagonally between two mountains
+    foreach([[-1, -1, -1, 0, 0, -1], [1, -1, 0, -1, 1, 0], [-1, 1, -1, 0, 0, 1], [1, 1, 0, 1, 1, 0]] as [$xm, $ym, $x1, $y1, $x2, $y2]) {
+        $xu = $x + $xm;
+        $yu = $y + $ym;
+
+        if(($map[$yu][$xu] ?? ' ') != '^' && (($map[$y + $y1][$x + $x1] ?? ' ') != ($map[$y + $y2][$x + $x2] ?? ' ') || ($map[$y + $y1][$x + $x1] ?? ' ') != '^')) 
+            $queue->insert([$xu, $yu, $distance + 1], abs($xu - $xM) + abs($yu - $yM) + $distance);
+    }
 }
