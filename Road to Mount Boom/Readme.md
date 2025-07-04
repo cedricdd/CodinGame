@@ -1,5 +1,5 @@
 # Puzzle
-**Road to Mount Boom** https://www.codingame.com/contribute/view/122709f7be9039cee0847f60b6f6fcf8faa8ba
+**Road to Mount Boom** https://www.codingame.com/training/easy/road-to-mount-boom
 
 # Goal
 A legendary item has been rediscovered by Brodo and must be destroyed to prevent the Dark Lord's return to power. The only way to destroy the item is for Brodo to travel to Mount Boom and to cast it into the flames. The goal is to find the SHORTEST DISTANCE for Brodo to reach Mount Boom.
