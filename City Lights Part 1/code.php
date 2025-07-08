@@ -3,8 +3,8 @@
 $toCharacters = array_merge(range(0, 9), range('A', 'Z'));
 $toValues = array_flip($toCharacters);
 
-fscanf(STDIN, "%d", $w);
 fscanf(STDIN, "%d", $h);
+fscanf(STDIN, "%d", $w);
 
 $output = array_fill(0, $h, array_fill(0, $w, 0));
 
