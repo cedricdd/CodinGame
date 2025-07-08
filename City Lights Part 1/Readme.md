@@ -1,14 +1,13 @@
 # Puzzle
-**City Lights Part 1** https://www.codingame.com/contribute/view/126966610dab8fbeecaf504817bea918282596
+**City Lights Part 1** https://www.codingame.com/training/easy/city-lights-part-1
 
 # Goal
-The 3D city of Bobville can be displayed as a 2D grid with length l and width w.  
+The 3D city of Bobville can be displayed as a 2D grid with height h and width w.  
 Each cell contains either a . or a single character representing a light source radius:  
 - 1 to 9 represent radius 1 to 9
 - A to Z represent radius 10 to 35 (A=10, B=11, ..., Z=35)
 
 If lit, the brightness from that source on the cell is:
-
 ```brightness = radius - d```
 
 where d is the Euclidean distance from the source cell center to the target cell center, rounded to the nearest integer.
@@ -25,12 +24,12 @@ Note: For a value above Z (like 36), it is still Z.
 Note: The brightness applies uniformly to a whole cell.  
 
 # Input
-* Line 1: An integer l representing the length of the grid.
+* Line 1: An integer h representing the height of the grid.
 * Line 2: An integer w representing the width of the grid.
-* Next w lines: A string s with length l representing 1 line of Bobville.
+* Next h lines: A string s with length w representing 1 line of Bobville.
 
 # Output
-* w lines: A line of Bobville's brightness.
+* h lines: A line of Bobville's brightness.
 
 # Constraints
-* 1 ≤ l, w ≤ 20
+* 1 ≤ h, w ≤ 20
