@@ -1,5 +1,5 @@
 # Puzzle
-**Takuzu Solver (Easy mode)** https://www.codingame.com/contribute/view/1201357bc6caad8a49cde8b385593250094a50
+**Takuzu Solver (Easy mode)** https://www.codingame.com/training/easy/takuzu-solver-easy-mode
 
 # Goal
 Takuzu (aka 'Binary Sudoku' or 'Binairo') is a variant of Sudoku that only allows the numbers 0 and 1. The following three rules must be met for a valid solution:  
@@ -11,7 +11,7 @@ Given an integer n and an incomplete nxn binary grid of 0s and 1s, with . symbol
 
 There will only be one valid solution.
 
-Hard version: https://www.codingame.com/training/hard/takuzu-solver (Hint: you will need to include a backtracking algorithm)
+Hard version: https://www.codingame.com/training/hard/takuzu-solver (Hint: you will need to include a backtracking algorithm and use all three rules)
 
 # Input
 * Line 1 : An integer n, the size of the grid (always even)
