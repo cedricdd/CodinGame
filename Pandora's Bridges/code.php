@@ -50,7 +50,7 @@ for ($i = 1; $i <= $n; $i++) {
             else $angle = atan(($z2 - $z) / $d) * 180 / pi();
 
             //Angle isn't too steep to add a bridge
-            if(abs(round($angle, 2)) <= 45) {
+            if(abs($angle) < 45) {
                 $links[] = [$i, $j, $distance];
             }
         }
@@ -64,20 +64,24 @@ usort($links, function($a, $b) {
 });
 
 $trees = kruskal(count($islands), $links);
+$sum = array_sum($trees);
 
-echo number_format(array_sum($trees), 2, '.', '') . PHP_EOL;
+echo number_format(intval($sum * 100) / 100, 2, '.', '') . PHP_EOL;
 
-$groupIndex = 0;
-$groups = [0];
+$groups = [];
 
-//Greedily add the bridges in groups without exceeding 1000
-foreach($trees as $tree) {
-    if($tree + $groups[$groupIndex] <= 1000) $groups[$groupIndex] += $tree;
-    else {
-        $groupIndex++;
-        $groups[$groupIndex] = $tree;
+//Build the bridges
+while($trees) {
+    $tree = array_pop($trees);
+
+    foreach($groups as &$length) {
+        if($length >= $tree) {
+            $length -= $tree;
+            continue 2;
+        }
     }
+
+    $groups[] = 1000 - $tree;
 }
 
-echo number_format(count($groups) * 1000 - array_sum($groups), 2, '.', '') . PHP_EOL;
-echo ($groupIndex + 1) . PHP_EOL;
+echo count($groups) . PHP_EOL;
