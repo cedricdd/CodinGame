@@ -1,5 +1,5 @@
 # Puzzle
-**Pandora's Bridges** https://www.codingame.com/contribute/view/1125124d840255a7846f001fd017947c5535b8
+**Pandora's Bridges** https://www.codingame.com/training/hard/pandoras-bridges
 
 # Goal
 Pandora is in crisis!  
