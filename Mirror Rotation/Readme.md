@@ -1,12 +1,12 @@
 # Puzzle
-**Mirror Rotation** https://www.codingame.com/contribute/view/128220d7d48cf1b3296d0820b26b3c5ff42fbe
+**Mirror Rotation** https://www.codingame.com/training/medium/mirror-rotation
 
 # Goal
 You’re trapped in a room and need to escape by hitting a target with a laser. The laser can’t reach the target directly—you must use mirrors to reflect the beam toward the target.
 
 You are given:  
-- w: the room's length (left to right)
-- h: the room's width (top to bottom)
+- l: the room's length (left to right)
+- w: the room's width (top to bottom)
 - A map of the room, like this:
 
 ```
@@ -20,18 +20,18 @@ Each character in the map represents:
 - L: the laser’s starting position
 - T: the target
 - .: empty space
-- \#: wall (blocks beam)
+- #: wall (blocks beam)
 - /: a mirror from top-right to bottom-left
 - \: a mirror from top-left to bottom-right
 
 The top-left corner is coordinate (0, 0).  
-You are also given the laser’s initial direction:  
+You are also given the laser’s initial direction:
 - N (north = up)
 - E (east = right)
 - S (south = down)
 - W (west = left)
 
-When the beam hits a mirror, it reflects at a 90-degree angle:  
+When the beam hits a mirror, it reflects at a 90-degree angle:
 - / turns N ↔ E and S ↔ W
 - \ turns N ↔ W and S ↔ E
 The beam can pass through the laser.
@@ -57,5 +57,5 @@ The solution for the given example is:
 
 # Constraints
 * 2 ≤ l, w ≤ 10
-* 1 ≤ number of mirrors ≤ 16
+* ≤ number of mirrors ≤ 16
 * The beam will always be able to reach the target after flipping at least one mirror.
