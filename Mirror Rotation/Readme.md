@@ -5,8 +5,8 @@
 You’re trapped in a room and need to escape by hitting a target with a laser. The laser can’t reach the target directly—you must use mirrors to reflect the beam toward the target.
 
 You are given:  
-- l: the room's length (left to right)
-- w: the room's width (top to bottom)
+- w: the room's length (left to right)
+- h: the room's width (top to bottom)
 - A map of the room, like this:
 
 ```
@@ -57,5 +57,5 @@ The solution for the given example is:
 
 # Constraints
 * 2 ≤ l, w ≤ 10
-* ≤ number of mirrors ≤ 16
+* 1 ≤ number of mirrors ≤ 16
 * The beam will always be able to reach the target after flipping at least one mirror.
