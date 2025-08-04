@@ -1,10 +1,10 @@
 # Puzzle
-**Swapping Elements** https://www.codingame.com/contribute/view/125613847b4245e22dede34ffe50808607fe6b
+**Swapping Elements** https://www.codingame.com/training/medium/swapping-elements
 
 # Goal
 Given n - the number of elements - and the elements themselves, find the minimum number of swaps needed to make the elements strictly increasing.
 
-Each element can be:  
+Each element can be:
 - A float, or
 - A string
 
@@ -13,7 +13,7 @@ The value of the float is itself, while the value of the string is the sum of al
 If it is not possible to swap elements to make them strictly increasing, output -1.
 
 The order of the elements is the order the element is given.  
-For example, if the input is:  
+For example, if the input is:
 ```
 3
 a
