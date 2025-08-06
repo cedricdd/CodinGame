@@ -1,60 +1,13 @@
 <?php
 
-function getPosibilities(int $vampireCount, int $zombieCount, int $ghostCount, array $positions, int $count): array {
-    $posibilities = [[$vampireCount, $zombieCount, $ghostCount, $count, []]];
-
-    // error_log("we start with $vampireCount, $zombieCount, $ghostCount, $count");
-
-    foreach($positions as [$position, $mirror]) {
-        $newPosibilites = [];
-        
-        foreach($posibilities as [$vp, $zC, $gC, $count, $monsters]) {
-            if(isset($monsters[$position])) {
-                if($monsters[$position] == 'G' && ($mirror || $count)) $newPosibilites[] = [$vp, $zC, $gC, $count - ($mirror ? 1 : 0), $monsters];
-                elseif($monsters[$position] == 'Z' && $count) $newPosibilites[] = [$vp, $zC, $gC, $count - 1, $monsters];
-                elseif($monsters[$position] == 'V' && (!$mirror || $count)) $newPosibilites[] = [$vp, $zC, $gC, $count - (!$mirror ? 1 : 0), $monsters];
-            } else {
-                //We place a Vampire
-                if($vp && ($mirror || $count)) {
-                    $newPosibilites[] = [$vp - 1, $zC, $gC, $count - (!$mirror ? 1 : 0), $monsters + [$position => 'V']];
-                }
-
-                //We place a Zombie
-                if($zC && $count) {
-                    $newPosibilites[] = [$vp, $zC  - 1, $gC, $count - 1, $monsters + [$position => 'Z']];
-                }
-
-                //We place a Ghost
-                if($gC && (!$mirror || $count)) {
-                    $newPosibilites[] = [$vp, $zC, $gC  - 1, $count - ($mirror ? 1 : 0), $monsters + [$position => 'G']];
-                }
-            }
-        }
-
-        $posibilities = $newPosibilites;
-        unset($newPosibilites);
-    }
-
-    // error_log(var_export($posibilities, 1));
-
-    foreach($posibilities as $i => [, , , $count, $monsters]) {
-        if($count != 0) unset($posibilities[$i]);
-    }
-
-    return $posibilities;
-}
-
-function getPosibilities2(array $positions, int $count): array {
-    global $vampireCount, $zombieCount, $ghostCount, $hash;
-
-    $posibilities[$hash] = [$vampireCount, $zombieCount, $ghostCount, $count, []];
-
-    // error_log("we start with $vampireCount, $zombieCount, $ghostCount, $count");
+function getPosibilities(int $vampireCount, int $zombieCount, int $ghostCount, array $positions, int $count, string $manor): array {
+    $posibilities = [$manor => [$vampireCount, $zombieCount, $ghostCount, $count, []]];
 
     foreach($positions as [$position, $mirror]) {
         $newPosibilites = [];
         
         foreach($posibilities as $hash => [$vp, $zC, $gC, $count, $monsters]) {
+            //We have already placed a monster on this position
             if(isset($monsters[$position])) {
                 if($monsters[$position] == 'G' && ($mirror || $count)) $newPosibilites[$hash] = [$vp, $zC, $gC, $count - ($mirror ? 1 : 0), $monsters];
                 elseif($monsters[$position] == 'Z' && $count) $newPosibilites[$hash] = [$vp, $zC, $gC, $count - 1, $monsters];
@@ -84,8 +37,7 @@ function getPosibilities2(array $positions, int $count): array {
         unset($newPosibilites);
     }
 
-    // error_log(var_export($posibilities, 1));
-
+    //Remove everything that doesn't reach the desired count
     foreach($posibilities as $i => [, , , $count, $monsters]) {
         if($count != 0) unset($posibilities[$i]);
     }
@@ -93,77 +45,21 @@ function getPosibilities2(array $positions, int $count): array {
     return $posibilities;
 }
 
-function getPositions(int $vampireCount, int $zombieCount, int $ghostCount, array $manor, int $index): array {
-    global $n, $clues;
-
-    [$x, $y, $d, ] = $clues[$index];
-    $mirror = 0;
-    $seen = 0;
-    $positions = [];
-
-    // error_log("starting at $x $y - $d");
-
-    while($x >= 0 && $x < $n && $y >= 0 && $y < $n) {
-        $c = $manor[$y][$x];
-
-        // error_log("at $x $y - $d - " . $manor[$y][$x]);
-        if($c == '.') {
-            $index = $y * $n + $x;
-
-            $positions[] = [$index, $mirror];
-        } elseif($c == '/') {
-            switch($d) {
-                case 'U': $d = 'L'; break;
-                case 'D': $d = 'R'; break;
-                case 'L': $d = 'U'; break;
-                case 'R': $d = 'D'; break;
-            }
-
-            $mirror = 1;
-        } elseif($c == '\\') {
-            switch($d) {
-                case 'U': $d = 'R'; break;
-                case 'D': $d = 'L'; break;
-                case 'L': $d = 'D'; break;
-                case 'R': $d = 'U'; break;
-            }
-
-            $mirror = 1;
-        }
-        elseif($c == 'V' && !$mirror) ++$seen;
-        elseif($c == 'G' && $mirror) ++$seen;
-        elseif($c == 'Z') ++$seen;
-
-        switch($d) {
-            case 'U': --$y; break;
-            case 'D': ++$y; break;
-            case 'L': ++$x; break;
-            case 'R': --$x; break;
-        }
-
-        // error_log("end $x $y - $d - " . $manor[$y][$x]);
-    }
-
-    return [$positions, $seen];
-}
-
-function getPositions2(int $x, int $y, string $d): array {
-    global $n, $manor;
+function getPositions(int $x, int $y, string $d, string $manor): array {
+    global $n;
 
     $mirror = 0;
-    $positions = [];
+    $toSet = [];
+    $toCheck = [];
 
-    // error_log("starting at $x $y - $d");
-
+    //Until we leave the manor
     while($x >= 0 && $x < $n && $y >= 0 && $y < $n) {
-        $c = $manor[$y][$x];
+        $index = $y * $n + $x;
+        $c = $manor[$index];
 
-        // error_log("at $x $y - $d - " . $manor[$y][$x]);
-        if($c == '.') {
-            $index = $y * $n + $x;
-
-            $positions[] = [$index, $mirror];
-        } elseif($c == '/') {
+        if($c == '.') $toSet[] = [$index, $mirror]; //Position where we need to set a monster
+        elseif($c == 'X') $toCheck[] = [$index, $mirror]; //Position where we already have set a monster
+        elseif($c == '/') {
             switch($d) {
                 case 'U': $d = 'L'; break;
                 case 'D': $d = 'R'; break;
@@ -183,127 +79,112 @@ function getPositions2(int $x, int $y, string $d): array {
             $mirror = 1;
         }
 
+        //Move to the next position
         switch($d) {
             case 'U': --$y; break;
             case 'D': ++$y; break;
             case 'L': ++$x; break;
             case 'R': --$x; break;
         }
-
-        // error_log("end $x $y - $d - " . $manor[$y][$x]);
     }
 
-    return [$positions, $x, $y];
+    return [$toSet, $toCheck, $x, $y];
 }
 
-function solve(int $vampireCount, int $zombieCount, int $ghostCount, array $manor, int $index) {
-    global $n, $clues, $start;
-    static $reverse = [];
+function getCount(string $manor, array $positions): int {
+    $count = 0;
 
-    if(isset($reverse[$index])) solve($vampireCount, $zombieCount, $ghostCount, $manor, $index + 1);
+    foreach($positions as [$index, $mirror]) {
+        switch($manor[$index]) {
+            case 'V': $count += !$mirror; break;
+            case 'Z': $count++; break;
+            case 'G': $count += $mirror; break;
+        }
+    }
 
-    if($index == $n * 4) {
-        if($vampireCount || $zombieCount || $ghostCount) {
-            foreach($manor as $y => $line) {
-                if(($x = strpos($line, '.')) !== false) {
-                    $manor[$y][$x] = $vampireCount ? 'V' : ($zombieCount ? 'Z' : ($ghostCount ? 'G' : ''));
-                    break;
-                }
-            }
+    return $count;
+}
+
+function solve(int $vampireCount, int $zombieCount, int $ghostCount, string $manor, int $index) {
+    global $n, $groups, $groupsCount, $start;
+
+    //We have found a solution
+    if($index == $groupsCount) {
+        //There is a position that isn't reached by any of the clues, set it to the last monster we have
+        if(($i = strpos($manor, '.')) !== false) {
+            $manor[$i] = $vampireCount ? 'V' : ($zombieCount ? 'Z' : ($ghostCount ? 'G' : ''));
         }
 
-        echo implode(PHP_EOL, $manor) . PHP_EOL;
+        echo implode(PHP_EOL, str_split($manor, $n)) . PHP_EOL;
         error_log(microtime(1) - $start);
         exit();
     }
 
-    $count = $clues[$index][3];
+    [[$toSet1, $toCheck1, $count1], [$toSet2, $toCheck2, $count2]] = $groups[$index];
 
-    // error_log("Working on $index ($count) with: $vampireCount - $zombieCount - $ghostCount");
-    // error_log(var_export($manor, 1));
+    $left = count($toSet1);
+    $current1 = getCount($manor, $toCheck1);
+    $current2 = getCount($manor, $toCheck2);
 
-    [$positions, $seen] = getPositions($vampireCount, $zombieCount, $ghostCount, $manor, $index);
+    //Invalid solution, we see more monster than we shound
+    if($current1 > $count1 || $current2 > $count2) return;
+    
+    //Invalid solution, we can't see enough monsters
+    if($current1 + $left < $count1 || $current2 + $left < $count2) return;
 
-    $countPositions = count($positions);
-
-    // Impossible solution
-    if($seen > $count) {
-        // error_log("already seeing too much");
-        return;
-    }
-    if($seen + $countPositions < $count) {
-        // error_log("can't seen enough anymore");
-        return;
-    }
-
-    // error_log("we have $countPositions positions & we already see: " . $seen);
-
-    if($countPositions == 0) {
+    //We have no monster to place this turn
+    if($left == 0) {
         solve($vampireCount, $zombieCount, $ghostCount, $manor, $index + 1);
         return;
     }
 
-    $posibilities = getPosibilities($vampireCount, $zombieCount, $ghostCount, $positions, $count - $seen);
+    $posibilities1 = getPosibilities($vampireCount, $zombieCount, $ghostCount, $toSet1, $count1 - $current1, $manor);
+    $posibilities2 = getPosibilities($vampireCount, $zombieCount, $ghostCount, $toSet2, $count2 - $current2, $manor);
+    $posibilities = array_intersect_key($posibilities1, $posibilities2); //We only want solutions that satisfy both directions.
 
     foreach($posibilities as [$vc, $zc, $gc, , $monsters]) {
-        // error_log("we need to test:");
-        // error_log(var_export($monsters, 1));
+        foreach($monsters as $i => $monster) $manor[$i] = $monster;
 
-        $manorUpdated = $manor;
-
-        foreach($monsters as $i => $monster) {
-            $manorUpdated[intdiv($i, $n)][$i % $n] = $monster;
-        }
-
-        solve($vc, $zc, $gc, $manorUpdated, $index + 1);
+        solve($vc, $zc, $gc, $manor, $index + 1);
     }
 }
 
-function generateGroups(): array {
-    global $n, $clues;
+function checkClues(string $manor, array $clues): array {
+    global $n;
 
     $groups = [];
 
     foreach($clues as $id => $filler) {
         if(!isset($clues[$id])) continue; 
 
-        [$x, $y, $d, $count] = $clues[$id];
-        [$positions, $x, $y] = getPositions2($x, $y, $d);
+        [$x, $y, $d, $count1] = $clues[$id];
+        [$toSet1, $toCheck1, $x, $y] = getPositions($x, $y, $d, $manor);
 
-        error_log("Clue ID: $id - $x $y");
-        // error_log(var_export($positions, 1));
-
-        $posibilities1 = getPosibilities2($positions, $count);
-
-        error_log(var_export(count($posibilities1), 1));
-        // error_log(var_export($posibilities1, 1));
-
+        //Every clues work in pair, where we enter and where we leave the manor
         if($x == -1) $reverseID = 2 * $n + $y;
         elseif($x == $n) $reverseID = 3 * $n + $y;
         elseif($y == -1) $reverseID = $x;
-        elseif($y == $n) $reverseID = $n + $y;
+        elseif($y == $n) $reverseID = $n + $x;
 
-        [$x, $y, $d, $count] = $clues[$reverseID];
-        [$positions, $x, $y] = getPositions2($x, $y, $d);
+        [$x, $y, $d, $count2] = $clues[$reverseID];
 
-        error_log("Clue reverseID: $reverseID - $x $y");
-        // error_log(var_export($positions, 1));
+        unset($clues[$reverseID]);
 
-        $posibilities2 = getPosibilities2($positions, $count);
+        if(!$toSet1 && !$toCheck1) continue; //We only crossed mirrors in the manor, clues can be ignored
 
-        error_log(var_export(count($posibilities2), 1));
-        // error_log(var_export($posibilities2, 1));
+        [$toSet2, $toCheck2, $x, $y] = getPositions($x, $y, $d, $manor);
 
-        $both = array_intersect_key($posibilities1, $posibilities2);
-
-        error_log(var_export(count($both), 1));
-        error_log(var_export($both, 1));
-
-        exit();
+        $groups[] = [
+            [$toSet1, $toCheck1, $count1],
+            [$toSet2, $toCheck2, $count2],
+        ];
+        
+        foreach($toSet1 as [$index, ]) $manor[$index] = 'X'; //If we reach position with other clues the monsters would already be set
     }
 
     return $groups;
 }
+
 
 fscanf(STDIN, "%d %d %d", $vampireCount, $zombieCount, $ghostCount);
 
@@ -311,27 +192,18 @@ fscanf(STDIN, "%d", $n);
 
 $start = microtime(1);
 
-foreach(explode(" ", fgets(STDIN)) as $i => $value) {
-    $clues[] = [$i, 0, 'D', intval($value)];
-}
-foreach(explode(" ", fgets(STDIN)) as $i => $value) {
-    $clues[] = [$i, $n - 1, 'U', intval($value)];
-}
-foreach(explode(" ", fgets(STDIN)) as $i => $value) {
-    $clues[] = [0, $i, 'L', intval($value)];
-}
-foreach(explode(" ", fgets(STDIN)) as $i => $value) {
-    $clues[] = [$n - 1, $i, 'R', intval($value)];
-}
+foreach(explode(" ", fgets(STDIN)) as $i => $value) $clues[] = [$i, 0, 'D', intval($value)];
+foreach(explode(" ", fgets(STDIN)) as $i => $value) $clues[] = [$i, $n - 1, 'U', intval($value)];
+foreach(explode(" ", fgets(STDIN)) as $i => $value) $clues[] = [0, $i, 'L', intval($value)];
+foreach(explode(" ", fgets(STDIN)) as $i => $value)  $clues[] = [$n - 1, $i, 'R', intval($value)];
 
-for ($i = 0; $i < $n; $i++) {
-    $manor[] = trim(fgets(STDIN));
-}
+$manor = "";
 
-$hash = implode("", $manor);
+for ($i = 0; $i < $n; $i++) $manor .= trim(fgets(STDIN));
 
-error_log(var_export($manor, 1));
+$groups = checkClues($manor, $clues);
+$groupsCount = count($groups);
 
-$groups = generateGroups();
+error_log(var_export(str_split($manor, $n), 1));
 
 solve($vampireCount, $zombieCount, $ghostCount, $manor, 0);
