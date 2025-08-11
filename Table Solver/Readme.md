@@ -1,5 +1,5 @@
 # Puzzle
-**Table Solver** https://www.codingame.com/contribute/view/130266db6c6333748aadb210c9a144deaf8fa6
+**Table Solver** https://www.codingame.com/training/medium/table-solver
 
 # Goal
 You are given a table like this:
