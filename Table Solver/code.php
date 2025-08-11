@@ -19,7 +19,7 @@ for ($y = 0; $y < $h; $y++) {
     if($y % 2 == 0)  {
         $inputs = explode('|', $output[$y]);
 
-        if($y == 0) $op = trim($inputs[0]);
+        if($y == 0) $op = str_replace("x", "*", trim($inputs[0]));
 
         foreach($inputs as $x => $input) {
             if(strlen($input) > $size) $size = strlen($input);
@@ -34,20 +34,16 @@ for ($y = 0; $y < $h; $y++) {
 $w = count($table[0]);
 $h = ceil($h / 2);
 
-/**
- * We use eval so we make sure we don't use any substraction since we have negative numbers as eval(return x - -y;); doesn't work.
- */
 while($unknown) {
     foreach($unknown as $i => [$x, $y]) {
-        //topmost row
+        //Topmost row
         if($y == 0) {
             for($y2 = 1; $y2 < $h; ++$y2) {
                 if($table[$y2][$x] != 0 && $table[$y2][0] != 0) {
-
                     switch($op) {
-                        case '+': $value = eval("return " . $table[$y2][$x] . "+" . ($table[$y2][0] * -1) . ";"); break;
-                        case '-': $value = eval("return " . $table[$y2][$x] . "+" . $table[$y2][0] . ";"); break;
-                        case 'x': $value = eval("return " . $table[$y2][$x] . "/" . $table[$y2][0] . ";"); break;
+                        case '+': $value = $table[$y2][$x] - $table[$y2][0]; break;
+                        case '-': $value = $table[$y2][$x] + $table[$y2][0]; break;
+                        case '*': $value = $table[$y2][$x] / $table[$y2][0]; break;
                         default: exit("invalid operation");
                     }
                     
@@ -58,15 +54,14 @@ while($unknown) {
                 }
             }
         }
-        //leftmost column
+        //Leftmost column
         elseif($x == 0) {
             for($x2 = 1; $x2 < $w; ++$x2) {
                 if($table[$y][$x2] != 0 && $table[0][$x2] != 0) {
-
                     switch($op) {
-                        case '+': $value = eval("return " . $table[$y][$x2] . "+" . ($table[0][$x2] * -1) . ";"); break;
-                        case '-': $value = eval("return " . $table[0][$x2] . "+" . ($table[$y][$x2] * -1) . ";"); break;
-                        case 'x': $value = eval("return " . $table[$y][$x2] . "/" . $table[0][$x2] . ";"); break;
+                        case '+': $value = $table[$y][$x2] - $table[0][$x2]; break;
+                        case '-': $value = $table[0][$x2] - $table[$y][$x2]; break;
+                        case '*': $value = $table[$y][$x2] / $table[0][$x2]; break;
                         default: exit("invalid operation");
                     }
                     
@@ -79,15 +74,7 @@ while($unknown) {
         }
         else {
             if($table[0][$x] != 0 && $table[$y][0] != 0) {
-                
-                switch($op) {
-                        case '+': $value = eval("return " . $table[0][$x] . "+" . $table[$y][0] . ";"); break;
-                        case '-': $value = eval("return " . $table[0][$x] . "+" . ($table[$y][0] * -1) . ";"); break;
-                        case 'x': $value = eval("return " . $table[0][$x] . "*" . $table[$y][0] . ";"); break;
-                        default: exit("invalid operation");
-                    }
-                    
-                setValue($table, $output, $x, $y, $value);
+                setValue($table, $output, $x, $y, eval("return {$table[0][$x]} $op {$table[$y][0]};"));
 
                 unset($unknown[$i]);
             }
