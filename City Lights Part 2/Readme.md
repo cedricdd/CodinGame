@@ -1,5 +1,5 @@
 # Puzzle
-**City Lights Part 2** https://www.codingame.com/contribute/view/127197ad85ee44865c2ef7066eddaf68b858d7
+**City Lights Part 2** https://www.codingame.com/training/easy/city-lights-part-2
 
 # Goal
 Great news! Bob from Bobville discovered the 4th Dimension and found a way to move there!  
