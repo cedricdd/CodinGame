@@ -1,5 +1,6 @@
 <?php
 
+// Get all the sections of a path, each time we switch from horizontal/vertical we start a new section
 function getSections(array $path, int $color): array {
     global $coordinates;
 
@@ -10,18 +11,14 @@ function getSections(array $path, int $color): array {
     $ex = null;
     $ey = null;
 
-    // error_log(var_export($path, 1));
-
     foreach($path as $index) {
         [$x, $y] = $coordinates[$index];
 
-        // error_log("at $x $y");
-
+        // First position
         if($xs === null || $ys === null) [$xs, $ys] = [$x, $y];
 
+        // We need to 'turn'
         if($x != $xs && $y != $ys) {
-            // error_log("$x != $xs && $y != $ys");
-
             $sections[] = "$xs $ys $ex $ey $color";
             [$xs, $ys] = [$ex, $ey];
         } 
@@ -29,17 +26,19 @@ function getSections(array $path, int $color): array {
         [$ex, $ey] = [$x, $y];
     }
 
-    $sections[] = "$xs $ys $ex $ey $color";
+    $sections[] = "$xs $ys $ex $ey $color"; // Add the last section to the final position
 
     return $sections;
 }
 
-function checkEmptyPositions(string $grid): array {
+// We have linked all the colors, we get all the empty positions left.
+function getEmptyPositions(string $grid): array {
     global $size, $neighbors;
 
     $groups = [];
 
     for($index = 0; $index < $size; ++$index) {
+        // We found an empty position
         if($grid[$index] == '.') {
             $queue = [$index];
             $group = [];
@@ -57,12 +56,6 @@ function checkEmptyPositions(string $grid): array {
                 }
             }
 
-            $count = count($group);
-
-            // error_log("we have a $count empty zone");
-
-            if($count % 2 != 0) return [];
-
             $groups[] = $group;
         }
     }
@@ -70,89 +63,72 @@ function checkEmptyPositions(string $grid): array {
     return $groups;
 }
 
-function cleanPairs(array &$pairs, int $index, int $neighbor) {
-    $pairs[$neighbor] = [$index => 1];
+function cleanPairs(array &$pairs, int $index, int $neighbor, array &$toCheck) {
+    $toCheck[] = [min($index, $neighbor), max($index, $neighbor)];
+
+    unset($pairs[$index]);
+    unset($pairs[$neighbor]);
 
     foreach($pairs as $index2 => $filler) {
-        if($index2 == $index || $index2 == $neighbor) continue;
-
         if(isset($pairs[$index2][$neighbor])) {
             unset($pairs[$index2][$neighbor]);
 
-            if(count($pairs[$index2]) == 1) cleanPairs($pairs, $index2, array_key_last($pairs[$index2]));
+            if(count($pairs[$index2]) == 1) cleanPairs($pairs, $index2, array_key_last($pairs[$index2]), $toCheck);
         } 
     } 
 }
 
+// We have connected all the colors but there are some positions that are not used, we try to add them to an existing path
 function assignEmptyPositions(array $groups, string $grid, array $paths) {
     global $neighbors;
-    static $calls = 0;
 
-    // error_log("calls: " . (++$calls));
-
-    while(true) {
-        $groupID = array_key_last($groups);
-
-        if($groupID === null) return $paths;
-
-        if(count($groups[$groupID]) == 0) unset($groups[$groupID]);
-        else break;
+    //Get the next group we need to work on
+    while (($groupID = array_key_last($groups)) !== null && count($groups[$groupID]) == 0) {
+        unset($groups[$groupID]);
     }
+
+    if ($groupID === null) return $paths;
 
     $pairs = [];
     $toCheck = [];
     $toCheck2 = [];
 
+    // For each positions find all it's neighbors that are also not occupied
     foreach($groups[$groupID] as $index => $filler) {
         foreach($neighbors[$index] as $neighbor) {
             if($grid[$neighbor] == '.') $pairs[$index][$neighbor] = 1;
         }
     }
 
+    // If a position only has one empty neighbor, the neighbor is forced to be associated with the position
     foreach($pairs as $index => &$list) {
         if(count($list) == 1) {
-            cleanPairs($pairs, $index, array_key_first($list));
+            cleanPairs($pairs, $index, array_key_first($list), $toCheck);
         }
     }
-
-    // error_log(var_export($pairs, 1));
 
     foreach($pairs as $index1 => &$list) {
-        if(count($list) == 1) {
-            $index2 = array_key_last($list);
-
-            $toCheck[] = [min($index1, $index2), max($index1, $index2)];
-
-            unset($pairs[$index1]);
-            unset($pairs[$index2]);
-        } else {
-            foreach($list as $index2 => $filler) {
-                if($index1 < $index2) $toCheck2[] = [$index1, $index2];
-            }
+        foreach($list as $index2 => $filler) {
+            if($index1 < $index2) $toCheck[] = [$index1, $index2];
         }
     }
 
-    $toCheck += $toCheck2;
-
-    // error_log(var_export($toCheck, 1));
-
     foreach($toCheck as [$index1, $index2]) {
-        if($grid[$index1] != '.' || $grid[$index2] != '.') continue;
-
         // Horizontal
         if($index2 - $index1 == 1) $dirs = ['U', 'D'];
         // Vertical
         else $dirs = ['L', 'R'];
 
-        // error_log("working on $index1 & $index2");
-
         foreach($dirs as $dir) {
-            if(isset($neighbors[$index1][$dir]) && isset($neighbors[$index2][$dir]) && ($c1 = $grid[$neighbors[$index1][$dir]]) == ($c2 = $grid[$neighbors[$index2][$dir]]) && ctype_digit($c1)) {
-                
-                $p1 = array_search($neighbors[$index1][$dir], $paths[$c1]);
-                $p2 = array_search($neighbors[$index2][$dir], $paths[$c1]);
+            $n1 = $neighbors[$index1][$dir] ?? null;
+            $n2 = $neighbors[$index2][$dir] ?? null;
 
-                if(abs($p1 - $p2) != 1) continue;
+            if($n1 && $n2 && ($c1 = $grid[$n1]) == $grid[$n2] && ctype_digit($c1)) {
+                
+                $p1 = array_search($n1, $paths[$c1]);
+                $p2 = array_search($n2, $paths[$c1]);
+
+                if(abs($p1 - $p2) != 1) continue; //They don't follow each other in the path, we can't insert there
 
                 $grid2 = $grid;
                 $grid2[$index1] = $grid2[$index2] = $c1;
@@ -161,12 +137,10 @@ function assignEmptyPositions(array $groups, string $grid, array $paths) {
                 unset($groups2[$groupID][$index1]);
                 unset($groups2[$groupID][$index2]);
 
-                // error_log("we can add them to $c1 - $p1 $p2");
-
                 $paths2 = $paths;
                 array_splice($paths2[$c1], max($p1, $p2), 0, ($p1 < $p2 ? [$index1, $index2] : [$index2, $index1]));
 
-                if(($solution = assignEmptyPositions($groups2, $grid2, $paths2)) != null) return $solution;
+                if(($solution = assignEmptyPositions($groups2, $grid2, $paths2))) return $solution;
             }
         }
     }
@@ -174,71 +148,65 @@ function assignEmptyPositions(array $groups, string $grid, array $paths) {
     return null;
 }
 
-function test(string $grid, array $colorsUsed): bool {
-    global $size, $neighbors, $w;
-
-    // error_log("TEST");
-    // error_log(var_export(str_split($grid, $w), 1));
-    // error_log(var_export($colorsUsed, 1));
+// When we add empty positions to existing path we can only do it 2 by 2, if we have a group of odd size 
+// and we are sure no positions will be occupied by another path we know we won't be able to assign all the empty positions.
+function checkEmptyPositions(string $grid, array $colorsUsed): bool {
+    global $size, $neighbors;
 
     for($index = 0; $index < $size; ++$index) {
-        if($grid[$index] == '.') {
-            // error_log("start at $index");
+        if ($grid[$index] !== '.') continue;
+        
+        $count = 0;
+        $colors = [];
+        $visited = [];
+        $queue = [$index];
 
-            $count = 0;
-            $colors = [];
-            $visited = [];
-            $queue = [$index];
+        while($queue) {
+            $index2 = array_pop($queue);
 
-            while($queue) {
-                $index2 = array_pop($queue);
+            if(isset($visited[$index2])) continue;
 
-                if(isset($visited[$index2])) continue;
+            $visited[$index2] = true;
+            
+            if(ctype_digit($grid[$index2])) {
+                $colors[$grid[$index2]] = ($colors[$grid[$index2]] ?? 0) + 1;
 
-                $visited[$index2] = true;
-                
-                if(ctype_digit($grid[$index2])) {
-                    // error_log("we found: {$grid[$index2]}");
-                    $colors[$grid[$index2]] = ($colors[$grid[$index2]] ?? 0) + 1;
+                continue;
+            } else {
+                ++$count;
+                $grid[$index2] = '#';
+            }
+            
+            foreach($neighbors[$index2] as $neighbor) $queue[] = $neighbor;
+        }
 
-                    continue;
-                } else {
-                    ++$count;
-                    $grid[$index2] = '#';
-                }
-                
-                foreach($neighbors[$index2] as $neighbor) $queue[] = $neighbor;
+        if($count & 1) {
+            foreach($colors as $color => $value) {
+                if(!isset($colorsUsed[$color]) && $value == 2) continue 2;
             }
 
-            if($count & 1) {
-                foreach($colors as $color => $value) {
-                    if(array_search($color, $colorsUsed) === false && $value == 2) continue 2;
-                }
-
-                return false;
-            }
+            return false;
         }
     }
 
     return true;
 }
 
+// We are search for a path to link all the colors, we don't care if all the positions are used or not
 function findPaths(array $colors, string $grid, int $filled = 0, array $paths = []): bool {
     global $neighbors, $values, $size;
 
     $color = array_key_last($colors);
 
+    // We have linked all the colors
     if($color === null) {
-        // error_log(var_export($paths, 1));
-
-        // error_log("We have a solution, there are " . ($size - $filled) . " empty left.");
-
+        //We have some positions that are not used by any paths
         if($size - $filled) {
-            $groups = checkEmptyPositions($grid);
+            $groups = getEmptyPositions($grid);
 
-            if(!$groups) return false;
+            $paths = assignEmptyPositions($groups, $grid, $paths);
 
-            $paths = assignEmptyPositions($groups, $grid, $paths) ?? $paths;
+            if(!$paths) return false; // We could not assign all the positions to an existing path
         }
 
         foreach($paths as $color => $path) {
@@ -252,25 +220,21 @@ function findPaths(array $colors, string $grid, int $filled = 0, array $paths = 
 
     $pq = new SplPriorityQueue();
 
-    // visited[i][dir] = min turns to reach
-    $hashes = [];
     $grid[$end] = '.';
      
-    $pq->insert([$start, null, 0, 0, 0, [$start => 1]], 0); 
+    $pq->insert([$start, null, 0, 0, [$start => 1]], 0); 
 
     while (!$pq->isEmpty()) {
-        [$index, $dir, $turns, $steps, $hash, $path] = $pq->extract();
+        [$index, $dir, $turns, $steps, $path] = $pq->extract();
 
-        // error_log("$index $dir - $turns $steps");
-        
+        // We have connected the color
         if ($index == $end) {
-            // error_log(var_export($path, 1));
             $paths[$color] = array_keys($path);
             $gridWithPath = $grid;
 
             foreach($paths[$color] as $index) $gridWithPath[$index] = $color;
 
-            if(test($gridWithPath, array_keys($paths))) {
+            if(checkEmptyPositions($gridWithPath, array_flip(array_keys($paths)))) {
                 if(findPaths($colors, $gridWithPath, $filled + count($path), $paths)) return true;
             }
 
@@ -281,10 +245,9 @@ function findPaths(array $colors, string $grid, int $filled = 0, array $paths = 
             if ($grid[$neighbor] === '.') {
                 if (!isset($path[$neighbor])) {
                     $newTurns = $turns + (($dir != $ndir) ? 1 : 0);
-                    $newHash = $hash | ($values[$neighbor] ?? 0);
    
-                    // PriorityQueue is max-heap, so use negative priority
-                    $pq->insert([$neighbor, $ndir, $newTurns, $steps + 1, $newHash, $path + [$neighbor => 1]], -($newTurns * 1000 + $steps));
+                    // PriorityQueue is max-heap, so use negative priority, we proritize paths with the less 'turns' 
+                    $pq->insert([$neighbor, $ndir, $newTurns, $steps + 1, $path + [$neighbor => 1]], -($newTurns * 1000 + $steps));
                 }
             }
         }
@@ -293,26 +256,19 @@ function findPaths(array $colors, string $grid, int $filled = 0, array $paths = 
     return false;
 }
 
-$grid = "";
-$index = 0;
-$indexHash = 0;
-$neighbors = [];
-
 fscanf(STDIN, "%d %d", $h, $w);
 
+$grid = "";
+$index = 0;
+$neighbors = [];
 $size = $h * $w;
-$empty = 0;
-
 $start = microtime(1);
 
 for ($y = 0; $y < $h; ++$y) {
     $line = stream_get_line(STDIN, $w + 1, "\n");
 
     foreach(str_split($line) as $x => $c) {
-        if($c == '.') {
-            $values[$index] = 2 ** $indexHash;
-            ++$indexHash;
-        } else $colors[$c] = [];
+        if($c != '.') $colors[$c] = [];
 
         if($x > 0) $neighbors[$index]['L'] = $index - 1;
         if($x < $w - 1) $neighbors[$index]['R'] = $index + 1;
@@ -327,9 +283,9 @@ for ($y = 0; $y < $h; ++$y) {
     $grid .= $line;
 }
 
-error_log(var_export($grid, 1));
-// error_log(var_export($coordinates, 1));
+error_log(var_export(str_split($grid, $w), 1));
 
+//We search for the start & end of each colors and sort them by they there Manhattan distance
 foreach($colors as $id => &$info) {
     $val = strval($id);
     $sp = strpos($grid, $val);
@@ -346,8 +302,6 @@ foreach($colors as $id => &$info) {
 uasort($colors, function($a, $b) {
     return $a[2] <=> $b[2];
 });
-
-// error_log(var_export($colors, 1));
 
 findPaths($colors, $grid);
 
