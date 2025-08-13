@@ -1,105 +1,5 @@
 <?php
 
-function findHamiltonianPath(string $grid, int $start, int $end, int $goal) {
-    global $neighbors, $size;
-
-    // $visited = array_fill(0, $rows, array_fill(0, $cols, false));
-    $path = [];
-    $grid[$end] = '.';
-
-    $dfs = function(int $position, int $count) use (&$dfs, &$path, &$neighbors, $grid, $end, $goal, $size) {
-        $path[$position] = 1;
-        ++$count;
-
-        // error_log("we are at $position with $count");
-
-        if ($position === $end) {
-            if ($count === $goal) {
-                return true; // Found valid path
-            }
-
-            error_log("backtrack - end too early");
-
-            // Can't continue if reached end too early
-            array_pop($path);
-            return false;
-        }
-
-        $start = null;
-
-        for ($index = 0; $index < $size; ++$index) {
-            if (!isset($path[$index]) && $grid[$index] == ".") {
-                $start = $index;
-                break;
-            }
-        }
-
-        $countEmpty = 0;
-        $queue = [$start];
-        $gridFlood = $grid;
-
-        while ($queue) {
-            $index = array_pop($queue);
-
-            if($gridFlood[$index] != '.') continue;
-            else $gridFlood[$index] = '#';
-
-            $countEmpty++;
-
-            // error_log("adding $index");
-
-            foreach ($neighbors[$index] as $neighbor) {
-                if ($gridFlood[$neighbor] == '.' && !isset($path[$neighbor])) {
-                    $queue[] = $neighbor;
-                }
-            }
-        }
-
-        if ($countEmpty != ($goal - $count)) {
-            error_log("backtrack is connected - $countEmpty != " . ($goal - $count));
-
-            array_pop($path);
-            return false;
-        }
-
-        // Order neighbors by Warnsdorff's rule
-        $possibilities = [];
-
-        foreach ($neighbors[$position] as $neighbor) {
-
-            if (!isset($path[$neighbor]) && $grid[$neighbor] === '.') {
-
-                $possibilities[$neighbor] = 0;
-
-                foreach ($neighbors[$neighbor] as $neighbor2) {
-                    if (!isset($path[$neighbor2]) && $grid[$neighbor2] === '.') ++$possibilities[$neighbor];
-                }
-            }
-        }
-        uasort($possibilities, function($a, $b) {
-            return $a <=> $b;
-        });
-
-        foreach ($possibilities as $neighbor => $filler) {
-            if ($dfs($neighbor, $count)) {
-                return true;
-            }
-        }
-
-        error_log("backtrack");
-
-        // Backtrack
-        array_pop($path);
-        return false;
-    };
-
-    if ($dfs($start, 0)) {
-        return $path;
-    }
-
-    return null;
-}
-
 function getSections(array $path, int $color): array {
     global $coordinates;
 
@@ -110,7 +10,7 @@ function getSections(array $path, int $color): array {
     $ex = null;
     $ey = null;
 
-    error_log(var_export($path, 1));
+    // error_log(var_export($path, 1));
 
     foreach($path as $index) {
         [$x, $y] = $coordinates[$index];
@@ -159,7 +59,7 @@ function checkEmptyPositions(string $grid): array {
 
             $count = count($group);
 
-            error_log("we have a $count empty zone");
+            // error_log("we have a $count empty zone");
 
             if($count % 2 != 0) return [];
 
@@ -170,62 +70,157 @@ function checkEmptyPositions(string $grid): array {
     return $groups;
 }
 
-function assignEmptyPositions(array $groups, string &$grid, array &$paths) {
+function cleanPairs(array &$pairs, int $index, int $neighbor) {
+    $pairs[$neighbor] = [$index => 1];
+
+    foreach($pairs as $index2 => $filler) {
+        if($index2 == $index || $index2 == $neighbor) continue;
+
+        if(isset($pairs[$index2][$neighbor])) {
+            unset($pairs[$index2][$neighbor]);
+
+            if(count($pairs[$index2]) == 1) cleanPairs($pairs, $index2, array_key_last($pairs[$index2]));
+        } 
+    } 
+}
+
+function assignEmptyPositions(array $groups, string $grid, array $paths) {
     global $neighbors;
+    static $calls = 0;
 
-    foreach($groups as $group) {
-        error_log(var_export($group, 1));
+    // error_log("calls: " . (++$calls));
 
-        while($group) {
-            foreach($group as $index => $filler) {
-                //Vertical
-                $indexDown = $neighbors[$index]['D'] ?? -1;
+    while(true) {
+        $groupID = array_key_last($groups);
 
-                if(isset($group[$indexDown])) {
-                    error_log("working on $index & $indexDown");
+        if($groupID === null) return $paths;
 
-                    foreach(['L', 'R'] as $dir) {
-                        if(isset($neighbors[$index][$dir]) && isset($neighbors[$indexDown][$dir]) && ($c1 = $grid[$neighbors[$index][$dir]]) == ($c2 = $grid[$neighbors[$indexDown][$dir]])) {
-                            $grid[$index] = $grid[$indexDown] = $c1;
+        if(count($groups[$groupID]) == 0) unset($groups[$groupID]);
+        else break;
+    }
 
-                            unset($group[$index]);
-                            unset($group[$indexDown]);
+    $pairs = [];
+    $toCheck = [];
+    $toCheck2 = [];
 
-                            $p1 = array_search($neighbors[$index][$dir], $paths[$c1]);
-                            $p2 = array_search($neighbors[$indexDown][$dir], $paths[$c1]);
+    foreach($groups[$groupID] as $index => $filler) {
+        foreach($neighbors[$index] as $neighbor) {
+            if($grid[$neighbor] == '.') $pairs[$index][$neighbor] = 1;
+        }
+    }
 
-                            error_log("we can add them to $c1 - $p1 $p2");
+    foreach($pairs as $index => &$list) {
+        if(count($list) == 1) {
+            cleanPairs($pairs, $index, array_key_first($list));
+        }
+    }
 
-                            array_splice($paths[$c1], max($p1, $p2), 0, ($p1 < $p2 ? [$index, $indexDown] : [$indexDown, $index]));
-                        }
-                    }
-                }
+    // error_log(var_export($pairs, 1));
 
-                //Horizontal
-                $indexRight = $neighbors[$index]['R'] ?? -1;
+    foreach($pairs as $index1 => &$list) {
+        if(count($list) == 1) {
+            $index2 = array_key_last($list);
 
-                if(isset($group[$indexRight])) {
-                    error_log("working on $index & $indexRight");
+            $toCheck[] = [min($index1, $index2), max($index1, $index2)];
 
-                    foreach(['U', 'D'] as $dir) {
-                        if(isset($neighbors[$index][$dir]) && isset($neighbors[$indexRight][$dir]) && ($c1 = $grid[$neighbors[$index][$dir]]) == ($c2 = $grid[$neighbors[$indexRight][$dir]])) {
-                            $grid[$index] = $grid[$indexRight] = $c1;
-
-                            unset($group[$index]);
-                            unset($group[$indexRight]);
-
-                            $p1 = array_search($neighbors[$index][$dir], $paths[$c1]);
-                            $p2 = array_search($neighbors[$indexRight][$dir], $paths[$c1]);
-
-                            error_log("we can add them to $c1 - $p1 $p2");
-
-                            array_splice($paths[$c1], max($p1, $p2), 0, ($p1 < $p2 ? [$index, $indexRight] : [$indexRight, $index]));
-                        }
-                    }
-                }
+            unset($pairs[$index1]);
+            unset($pairs[$index2]);
+        } else {
+            foreach($list as $index2 => $filler) {
+                if($index1 < $index2) $toCheck2[] = [$index1, $index2];
             }
         }
     }
+
+    $toCheck += $toCheck2;
+
+    // error_log(var_export($toCheck, 1));
+
+    foreach($toCheck as [$index1, $index2]) {
+        if($grid[$index1] != '.' || $grid[$index2] != '.') continue;
+
+        // Horizontal
+        if($index2 - $index1 == 1) $dirs = ['U', 'D'];
+        // Vertical
+        else $dirs = ['L', 'R'];
+
+        // error_log("working on $index1 & $index2");
+
+        foreach($dirs as $dir) {
+            if(isset($neighbors[$index1][$dir]) && isset($neighbors[$index2][$dir]) && ($c1 = $grid[$neighbors[$index1][$dir]]) == ($c2 = $grid[$neighbors[$index2][$dir]]) && ctype_digit($c1)) {
+                
+                $p1 = array_search($neighbors[$index1][$dir], $paths[$c1]);
+                $p2 = array_search($neighbors[$index2][$dir], $paths[$c1]);
+
+                if(abs($p1 - $p2) != 1) continue;
+
+                $grid2 = $grid;
+                $grid2[$index1] = $grid2[$index2] = $c1;
+
+                $groups2 = $groups;
+                unset($groups2[$groupID][$index1]);
+                unset($groups2[$groupID][$index2]);
+
+                // error_log("we can add them to $c1 - $p1 $p2");
+
+                $paths2 = $paths;
+                array_splice($paths2[$c1], max($p1, $p2), 0, ($p1 < $p2 ? [$index1, $index2] : [$index2, $index1]));
+
+                if(($solution = assignEmptyPositions($groups2, $grid2, $paths2)) != null) return $solution;
+            }
+        }
+    }
+
+    return null;
+}
+
+function test(string $grid, array $colorsUsed): bool {
+    global $size, $neighbors, $w;
+
+    // error_log("TEST");
+    // error_log(var_export(str_split($grid, $w), 1));
+    // error_log(var_export($colorsUsed, 1));
+
+    for($index = 0; $index < $size; ++$index) {
+        if($grid[$index] == '.') {
+            // error_log("start at $index");
+
+            $count = 0;
+            $colors = [];
+            $visited = [];
+            $queue = [$index];
+
+            while($queue) {
+                $index2 = array_pop($queue);
+
+                if(isset($visited[$index2])) continue;
+
+                $visited[$index2] = true;
+                
+                if(ctype_digit($grid[$index2])) {
+                    // error_log("we found: {$grid[$index2]}");
+                    $colors[$grid[$index2]] = ($colors[$grid[$index2]] ?? 0) + 1;
+
+                    continue;
+                } else {
+                    ++$count;
+                    $grid[$index2] = '#';
+                }
+                
+                foreach($neighbors[$index2] as $neighbor) $queue[] = $neighbor;
+            }
+
+            if($count & 1) {
+                foreach($colors as $color => $value) {
+                    if(array_search($color, $colorsUsed) === false && $value == 2) continue 2;
+                }
+
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 function findPaths(array $colors, string $grid, int $filled = 0, array $paths = []): bool {
@@ -236,14 +231,14 @@ function findPaths(array $colors, string $grid, int $filled = 0, array $paths = 
     if($color === null) {
         // error_log(var_export($paths, 1));
 
-        error_log("We have a solution, there are " . ($size - $filled) . " empty left.");
+        // error_log("We have a solution, there are " . ($size - $filled) . " empty left.");
 
         if($size - $filled) {
             $groups = checkEmptyPositions($grid);
 
             if(!$groups) return false;
 
-            // assignEmptyPositions($groups, $grid, $paths);
+            $paths = assignEmptyPositions($groups, $grid, $paths) ?? $paths;
         }
 
         foreach($paths as $color => $path) {
@@ -275,7 +270,9 @@ function findPaths(array $colors, string $grid, int $filled = 0, array $paths = 
 
             foreach($paths[$color] as $index) $gridWithPath[$index] = $color;
 
-            if(findPaths($colors, $gridWithPath, $filled + count($path), $paths)) return true;
+            if(test($gridWithPath, array_keys($paths))) {
+                if(findPaths($colors, $gridWithPath, $filled + count($path), $paths)) return true;
+            }
 
             continue;
         }
