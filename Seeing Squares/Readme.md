@@ -2,28 +2,28 @@
 **Seeing Squares** https://www.codingame.com/contribute/view/131619994b5ea1cb546e665f881c6f9a83e83b
 
 # Goal
-Squares are regular geometric structures made up of 4 visually equal-length sides, where each pair of adjacent sides are orthogonal to each other. This puzzle introduces two types of squares: a small square (3 x 5) and a large square (5 x 9).
+
+Squares are regular geometric structures made up of 4 visually equal-length sides, where each pair of adjacent sides are orthogonal to each other. In this puzzle, your task is to identify ("see") the number of squares in any given figure.
+
+This puzzle uses ASCII characters to "draw" figures containing squares. Specifically, horizontal lines are denoted by -, while vertical lines are denoted by |. A + character denotes the meeting point of - and | characters, which represent a connection in both the horizontal and vertical directions.
+
+To ensure visual "equal-ness" of square sides, a square of (vertical) height h must have a (horizontal) length of 2h - 1; h > 1.
+
+Different square sizes  
+(These are just examples; squares can grow as big as the grid allows them to)
 ```
-        +-------+
-        |       |
-+---+   |       |
-|   |   |       |
-+---+   +-------+
+                           +-------+
+                 +-----+   |       |
+         +---+   |     |   |       |
+   +-+   |   |   |     |   |       |
+   +-+   +---+   +-----+   +-------+
+h   2      3        4          5
 ```
 
-In each given figure, there will be a certain number of squares. Some squares may be adjacent to one another and may therefore have intersecting sides. An intersecting - and | character will always result in a + character.
-
-Example figures and their corresponding number of squares
-```
-        +-------+       +-------+   +---+---+
-        |       |       |       |   |   |   |
-+---+   |       |   +---+       |   +---+---+
-|   |   |       |   |   |       |   |   |   |
-+---+   +-------+   +---+-------+   +---+---+
-  1         1             2             5
-```
-
-Note that each side of a square must be clearly demarcated by characters |, -, and/or +.
+To count squares that are fully enclosed:
+- The corners of squares must be + characters.
+- Each horizontal side of a square must be made up of -/+ characters.
+- Each vertical side of a square must be made up of |/+ characters.
 
 Examples of non-squares
 ```
@@ -34,15 +34,26 @@ Examples of non-squares
 +---+   +-------+
 ```
 
-Given any figure, can you "see" how many squares it contains?
+Note that some squares may be adjacent to / overlap one another, and may therefore have intersecting sides.
+
+Example figures and their corresponding number of squares
+```
++-------+       +-------+   +---+---+   +-+           +-----+
+|       |       |       |   |   |   |   +-+-+-+       |  +--+--+
+|       |   +---+       |   +---+---+     +-+ +---+   |  |  |  |
+|       |   |   |       |   |   |   |     +---+   |   +--+--+  |
++-------+   +---+-------+   +---+---+         +---+      +-----+
+    1             2             5            4             2
+```
 
 # Input
 * Line 1: Two space-separated integers R and C for the number of rows and columns of input.
 * Next R lines: A single row of length C of the input figure.
 
 # Output
-* A single integer representing the total number of small and large squares in the figure.
+* A single integer representing the total number of squares (of all sizes) in the figure.
 
 # Constraints
+* 1 ≤ R,C ≤ 100
 * The input will only be made up of characters |, -, +, spaces, and newlines.
-* There will only be at most two types of visually-equal squares in each figure: the small and large square.
+
