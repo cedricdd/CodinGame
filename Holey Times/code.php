@@ -7,7 +7,7 @@ function generatePossibleValues(string $input, int $i = 0): array {
     global $digits, $digitsNoZero;
 
     $values = ["" => 1];
-    $l = $i > 0 ? $i * - 1 : PHP_INT_MAX;
+    $l = $i > 0 ? $i * - 1 : PHP_INT_MAX; //In the partial we skip the '0' at the end
 
     foreach(str_split(substr(trim($input), 0, $l)) as $x => $d) {
         $newValues = [];
@@ -25,19 +25,6 @@ function generatePossibleValues(string $input, int $i = 0): array {
     return $values;
 }
 
-function generatePossibleValuesSplit(string $input): array {
-    global $digits, $digitsNoZero;
-
-    $values = [];
-
-    foreach(str_split(trim(ltrim($input, 'x'))) as $x => $d) {
-        if($d == '*') $values[] = ($x != 0 ? $digits : $digitsNoZero);
-        else $values[] = [$d];
-    }
-
-    return $values;
-}
-
 $start = microtime(1);
 
 fscanf(STDIN, "%d", $n);
@@ -48,116 +35,81 @@ $partialsList = [];
 $resultList = [];
 
 $number1List = generatePossibleValues(fgets(STDIN));
-// $number2List = generatePossibleValuesSplit(fgets(STDIN));
 $number2List = generatePossibleValues(ltrim(fgets(STDIN), 'x'));
-// $nbrPartials = count($number2List);
 
-$size = strlen(array_key_first($number2List));
-
-// error_log(var_export($number2List, 1));
-// error_log(var_export($number2List, 1));
+$size1 = strlen(array_key_first($number1List));
+$size2 = strlen(array_key_first($number2List));
 
 $outputSize = strlen(trim(fgets(STDIN)));
+$sizePartials = [];
 
-for($i = 0; $i < $size; ++$i) {
-    $partialsList[$i] = generatePossibleValues(fgets(STDIN), $i);
+for($i = 0; $i < $size2; ++$i) {
+    $input = trim(fgets(STDIN));
 
-    error_log(count($partialsList[$i]));
+    //Based on the size of the partial we know that the digit is a 0
+    if($size1 > strlen($input) - $i) {
+        $index = $size2 - $i - 1;
+
+        //Remove all the possible numbers that don't have a '0' at the this position
+        foreach($number2List as $number => $filler) {
+            if(substr($number, $index, 1) !== '0') {
+                unset($number2List[$number]);
+            }
+        }
+
+        $partialsList[$i] = [0];
+    } else {
+        $partialsList[$i] = generatePossibleValues($input, $i);
+    }
 }
 
 fgets(STDIN);
 
-$resultList = generatePossibleValues(fgets(STDIN));
+$input = trim(fgets(STDIN));
+$resultSize = strlen($input);
+$checkResults = false;
 
-error_log(var_export("size is $size", 1));
-// error_log(var_export($partialsList, 1));
+//We have contraints on the result
+if(!empty(trim($input, '*'))) { 
+    $checkResults = true;
+    $resultList = generatePossibleValues($input);
+}
 
 foreach($number1List as $number1 => $filler1) {
+
+    $min = max(10 ** ($size2 - 1), (10 ** ($resultSize - 1)) / $number1); //The min value of number2 to have the right number of digits in the multiplication
+    $max = min(10 ** $size2 - 1, (10 ** $resultSize - 1) / $number1); //The max value of number2 to have the right number of digits in the multiplication
+
     foreach($number2List as $number2 => $filler2) {
-        // error_log("$number1 * $number2");
+        if($number2 < $min) continue; // Too small
+        if($number2 > $max) continue 2; // Too big
 
-        $partials = array_fill(0, $size, 0);
+        $number2 = strval($number2);
 
-        for($i = 0; $i < $size; ++$i) {
-            $partialIndex = ($size - 1 - $i);
-            $digit = strval($number2)[$i];
+        for($i = 0; $i < $size2; ++$i) {
+            $partialIndex = ($size2 - 1 - $i);
+            $digit = $number2[$i];
 
-            // error_log("testing $digit - $partialIndex");
-
-            //TODO stop it too big
-
-            if(!isset($partialsList[$partialIndex][$number1 * $digit])) {
-                // error_log("we can't use '$digit' -- " . ($number1 * $digit));
-                continue 2;
-            }
-
-            $partials[$partialIndex] = $number1 * $digit * (10 ** $partialIndex);
+            if(!isset($partialsList[$partialIndex][$number1 * $digit])) continue 2;
         }
 
-        $total = array_sum($partials);
+        $total = $number1 * $number2;
 
-        if(!isset($resultList[$total])) continue;
+        if($checkResults && !isset($resultList[$total])) continue;
+
+        for($i = 0; $i < $size2; ++$i) {
+            $partials[] = str_pad(($number1 * $number2[$i]) . str_repeat('0', $size2 - $i - 1), $outputSize, ' ', STR_PAD_LEFT);
+        }
 
         echo str_pad($number1, $outputSize, ' ', STR_PAD_LEFT) . PHP_EOL;
         echo 'x' . str_pad($number2, $outputSize - 1, ' ', STR_PAD_LEFT) . PHP_EOL;
         echo str_repeat('-', $outputSize) . PHP_EOL;
-        echo implode(PHP_EOL, array_map(function($partial) use ($outputSize) { return str_pad($partial, $outputSize, ' ', STR_PAD_LEFT); }, $partials)) . PHP_EOL;
+        echo implode(PHP_EOL, array_reverse($partials)) . PHP_EOL;
         echo str_repeat('-', $outputSize) . PHP_EOL;
         echo str_pad($total, $outputSize, ' ', STR_PAD_LEFT) . PHP_EOL;
-        error_log(microtime(1) - $start);
-        exit();
+
+        break 2;
     }
 }
 
-exit();
-
-foreach($number2List as $i => $list) {
-    $partialIndex = ($nbrPartials - 1 - $i);
-
-    error_log("Working at $i - $partialIndex");
-    error_log(var_export($list, 1));
-
-
-    if(count($list) > 1) {
-        if(count($number1List) == 1 && count($partialsList[$partialIndex]) == 1) {
-            $value = reset($partialsList[$partialIndex]) / reset($number1List);
-
-            error_log("for number2 at $i we have $value");
-
-            $number2List[$i] = [$value];
-
-            continue;
-        }
-
-        $partial = reset($partialsList[$partialIndex]);
-
-        error_log("Looking for $partial");
-        foreach($list as $possibleDigit) {
-            foreach($number1List as $n1) {
-                if($n1 * $possibleDigit == $partial) error_log("$n1 * $possibleDigit = $partial");
-            }
-        }
-    } else {
-        if(count($number1List) == 1 && count($partialsList[$partialIndex]) > 1) {
-            // error_log("setting partial $partialIndex to " . (reset($number1List) * reset($list)));
-            $partialsList[$partialIndex] = [reset($number1List) * reset($list)];
-        }
-    }
-}
-
-// error_log(var_export($partialsList, 1));
-
-if(count($resultList) > 1) {
-    $result = 0;
-
-    foreach($partialsList as $i => $list) $result += reset($list) * (10 ** $i);
-
-    $resultList = [$result];
-}
-
-echo str_pad(reset($number1List), $outputSize, ' ', STR_PAD_LEFT) . PHP_EOL;
-echo 'x' . str_pad(implode('', array_map('array_pop', $number2List)), $outputSize - 1, ' ', STR_PAD_LEFT) . PHP_EOL;
-echo str_repeat('-', $outputSize) . PHP_EOL;
-for($i = 0; $i < $nbrPartials; ++$i) echo str_pad(reset($partialsList[$i]) * (10 ** $i), $outputSize, ' ', STR_PAD_LEFT) . PHP_EOL;
-echo str_repeat('-', $outputSize) . PHP_EOL;
-echo str_pad(reset($resultList), $outputSize, ' ', STR_PAD_LEFT) . PHP_EOL;
+error_log(microtime(1) - $start);
