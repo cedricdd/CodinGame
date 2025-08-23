@@ -12,13 +12,21 @@ for ($y = 0; $y < $h; ++$y) {
     $line = stream_get_line(STDIN, $w + 1, "\n");
 
     foreach(str_split($line) as $c) {
-        if($c != '.' && $c != 'H' && $c != 'V' && $c != 'X') $colors[$c] = [];
+        if($c != '.' && $c != 'H' && $c != 'V' && $c != 'X' && !isset($colors[$c])) $colors[$c] = 2;
     }
 
     $grid[] = $line;
 }
 
-error_log(var_export($grid, 1));
+fscanf(STDIN, "%d", $k);
+for ($i = 0; $i < $k; $i++) {
+    fscanf(STDIN, "%d %d %s", $x, $y, $c);
+
+    error_log("$x $y $c");
+
+    $grid[$y][$x] = $c;
+    $colors[$c]++;
+}
 
 for($index = 0, $y = 0; $y < $h; ++$y) {
     for($x = 0; $x < $w; ++$x, ++$index) {
@@ -43,20 +51,9 @@ for($index = 0, $y = 0; $y < $h; ++$y) {
     }
 }
 
-// error_log(var_export($neighbors, 1));
-
-$checkpoints = [];
-
-fscanf(STDIN, "%d", $k);
-for ($i = 0; $i < $k; $i++) {
-    fscanf(STDIN, "%d %d %d", $x, $y, $c);
-
-    error_log("$x $y $c");
-
-    $checkpoints[$y * $w + $x] = $c;
-}
-
-error_log(var_export($checkpoints, 1));
+error_log(var_export($grid, 1));
+error_log(var_export($colors, 1));
+error_log(var_export($neighbors, 1));
 
 while (TRUE) {
     echo("x1 y1 x2 y2 colour_identifier\n");
