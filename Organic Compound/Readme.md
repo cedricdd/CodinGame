@@ -1,5 +1,5 @@
 # Puzzle
-**Organic Compound** https://www.codingame.com/contribute/view/125118491192c0f39633e7bd638caedf52179a
+**Organic Compound** https://www.codingame.com/training/easy/organic-compound
 
 # Goal
 This problem aims to determine the chemical name of an organic compound, given a chemical formula.
