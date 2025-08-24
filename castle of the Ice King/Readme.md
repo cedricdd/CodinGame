@@ -1,0 +1,26 @@
+# Puzzle
+**castle of the Ice King** https://www.codingame.com/contribute/view/83344cfcb6a96a02d55d0fe120a451b6de757
+
+# Goal
+You are trying to storm the Ice King's castle and climb the throne, but all the floors are made of ice! So you cannot run through the castle's halls and hallways whichever way you like, but you can only push yourself off a wall and slide all the way until you hit another wall. Can you still reach the throne room?
+
+The castle is a square grid of walls and ice floor tiles. You can enter the castle from any floor tile in the leftmost column.
+
+Whenever you stand next to a wall, you can push yourself off that wall, moving into the opposite direction at a constant speed of one tile per second. Moreover, when you are at the edge of the castle, you can push yourself inwards.  
+You can only move in the cardinal directions (up, down, left, right) and you cannot stop your movement before you bump into a wall.
+
+All floor tiles in the rightmost column are entrances to the throne room.
+
+# Input
+* Line 1: A positive integer height for the height of the grid.
+* Line 2: A positive integer width for the width of the grid.
+* Next height lines: Strings of length width forming the castle grid. The strings are made of wall tiles (#) and floor tiles (spaces).
+
+# Output
+* Line 1: The minimal time in seconds needed to reach the castle entrance, or 0 if the entrance cannot be reached.
+* If the entrance can be reached:
+  * Next height lines: A copy of the castle floor, where each step along the shortest path to the exit is marked by *
+
+# Constraints
+* 0 < height,width < 50
+* If there are any paths to the throne room, the shortest path is unique.
