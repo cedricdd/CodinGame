@@ -16,6 +16,13 @@ function cleanPairs(array &$pairs, int $index, int $neighbor, array &$toCheck) {
 }
 
 function setPositions(array $groups, string $grid, array $paths, int $groupID, string $color, array $positions, int $c1, int $c2) {
+    global $V, $H;
+
+    if(isset($V[$c1]) || isset($V[$c2]) || isset($H[$c1]) || isset($H[$c2])) {
+        // error_log("can't use because of HV");
+        return null;
+    }
+
     $p1 = array_search($c1, $paths[$color]);
     $p2 = array_search($c2, $paths[$color]);
 
@@ -26,6 +33,8 @@ function setPositions(array $groups, string $grid, array $paths, int $groupID, s
 
         unset($groups[$groupID][$position]);
     }
+
+    // error_log("adding " . implode("-", $positions) . " to $c1 $c2");
 
     array_splice($paths[$color], max($p1, $p2), 0, ($p1 < $p2 ? $positions : array_reverse($positions)));
 
@@ -43,7 +52,7 @@ function assignEmptyPositions(array $groups, string $grid, array $paths) {
 
     if ($groupID === null) return $paths;
 
-    error_log("working on group ID $groupID");
+    // error_log("working on group ID $groupID");
     // error_log(var_export($groups[$groupID], 1));
 
     $pairs = [];
@@ -73,48 +82,259 @@ function assignEmptyPositions(array $groups, string $grid, array $paths) {
     // error_log(var_export($toCheck, 1));
 
     foreach($toCheck as [$index1, $index2]) {
-        error_log("wokring on $index1 - $index2 - " . count($groups[$groupID]));
+        // error_log("wokring on $index1 - $index2 - " . count($groups[$groupID]));
 
         // Horizontal
         if($index2 - $index1 == 1) {
+            $dirs = ['U', 'D'];
+            
             if(isset($H[$index1])) {
-                error_log("index1 is H");
+                /**
+                 * CH.
+                 * C..
+                 */
 
                 $p1 = $neighbors[$index1]['L'] ?? null;
-                $index3 = $neighbors[$index2]['D'] ?? null;
-                $index4 = $neighbors[$index3]['L'] ?? null;
-                $p2 = $neighbors[$index4]['L'] ?? null;
+                $p2 = $neighbors[$p1]['D'] ?? null;
+                $index4 = $neighbors[$p2]['R'] ?? null;
+                $index3 = $neighbors[$index4]['R'] ?? null;
+                
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index1, $index2, $index3, $index4], $p1, $p2))) return $solution;
+                }
 
-                error_log("$index1 - $index2 -- $p1 - $p2 -- $index3 - $index4");
+                /**
+                 * C..
+                 * CH.
+                 */
+                $p1 = $neighbors[$index1]['L'] ?? null;
+                $p2 = $neighbors[$p1]['U'] ?? null;
+                $index4 = $neighbors[$p2]['R'] ?? null;
+                $index3 = $neighbors[$index4]['R'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index1, $index2, $index3, $index4], $p1, $p2))) return $solution; 
+                }
+
+                /**
+                 * .CC
+                 * .H.
+                 */
+                $p2 = $neighbors[$index2]['U'] ?? null;
+                $p1 = $neighbors[$p1]['L'] ?? null;
+                $index3 = $neighbors[$p1]['L'] ?? null;
+                $index4 = $neighbors[$index3]['D'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index3, $index4, $index1, $index2], $p1, $p2))) return $solution; 
+                }
+
+                /**
+                 * .H.
+                 * .CC
+                 */
+                $p2 = $neighbors[$index2]['D'] ?? null;
+                $p1 = $neighbors[$p1]['L'] ?? null;
+                $index3 = $neighbors[$p1]['L'] ?? null;
+                $index4 = $neighbors[$index3]['U'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index3, $index4, $index1, $index2], $p1, $p2))) return $solution; 
+                }
+
+                continue;
+            }
+            if(isset($H[$index2])) {
+                /**
+                 * .HC
+                 * ..C
+                 */
+                $p1 = $neighbors[$index2]['R'] ?? null;
+                $p2 = $neighbors[$p1]['U'] ?? null;
+                $index3 = $neighbors[$p2]['L'] ?? null;
+                $index4 = $neighbors[$index3]['L'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index2, $index1, $index4, $index3], $p1, $p2))) return $solution;
+                }
+
+                /**
+                 * ..C
+                 * .HC
+                 */
+                $p1 = $neighbors[$index2]['R'] ?? null;
+                $p2 = $neighbors[$p1]['D'] ?? null;
+                $index3 = $neighbors[$p2]['L'] ?? null;
+                $index4 = $neighbors[$index3]['L'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') { 
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index2, $index1, $index4, $index3], $p1, $p2))) return $solution;
+                }
+
+                /**
+                 * CC.
+                 * .H.
+                 */
+                $p2 = $neighbors[$index1]['U'] ?? null;
+                $p1 = $neighbors[$p2]['R'] ?? null;
+                $index4 = $neighbors[$p2]['R'] ?? null;
+                $index3 = $neighbors[$index4]['D'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index4, $index3, $index2, $index1], $p1, $p2))) return $solution;
+                }
+
+                /**
+                 * .H.
+                 * CC.
+                 */
+                $p2 = $neighbors[$index1]['D'] ?? null;
+                $p1 = $neighbors[$p2]['R'] ?? null;
+                $index4 = $neighbors[$p2]['R'] ?? null;
+                $index3 = $neighbors[$index4]['U'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index4, $index3, $index2, $index1], $p1, $p2))) return $solution;
+                }
+
+                continue;
+            }
+        }
+        // Vertical
+        else {
+            $dirs = ['L', 'R'];
+
+            if(isset($V[$index1])) {
+                /**
+                 * ..
+                 * CV
+                 * C.
+                 */
+                $p2 = $neighbors[$index2]['L'] ?? null;
+                $p1 = $neighbors[$p2]['U'] ?? null;
+                $index3 = $neighbors[$index1]['U'] ?? null;
+                $index4 = $neighbors[$index3]['L'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index4, $index3, $index1, $index2], $p1, $p2))) return $solution;
+                }
+
+                /**
+                 * ..
+                 * VC
+                 * .C
+                 */
+                $p2 = $neighbors[$index2]['R'] ?? null;
+                $p1 = $neighbors[$p2]['U'] ?? null;
+                $index3 = $neighbors[$index1]['U'] ?? null;
+                $index4 = $neighbors[$index3]['R'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index4, $index3, $index1, $index2], $p1, $p2))) return $solution;
+                }
+
+                /**
+                 * CC
+                 * .V
+                 * ..
+                 */
+                $p1 = $neighbors[$index1]['U'] ?? null;
+                $p2 = $neighbors[$p1]['L'] ?? null;
+                $index3 = $neighbors[$index2]['L'] ?? null;
+                $index4 = $neighbors[$index3]['U'] ?? null;
 
                 if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
                     if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index1, $index2, $index3, $index4], $p1, $p2))) return $solution;
                 }
-   
-                continue;
-            }
-            if(isset($H[$index2])) {
+
+                /**
+                 * CC
+                 * V.
+                 * ..
+                 */
+                $p1 = $neighbors[$index1]['U'] ?? null;
+                $p2 = $neighbors[$p1]['R'] ?? null;
+                $index3 = $neighbors[$index2]['R'] ?? null;
+                $index4 = $neighbors[$index3]['U'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index1, $index2, $index3, $index4], $p1, $p2))) return $solution;
+                }
+
                 continue;
             }
 
-            $dirs = ['U', 'D'];
+            if(isset($V[$index2])) {
+
+                /**
+                 * C.
+                 * CV
+                 * ..
+                 */
+                $p1 = $neighbors[$index1]['L'] ?? null;
+                $p2 = $neighbors[$p1]['D'] ?? null;
+                $index4 = $neighbors[$p2]['D'] ?? null;
+                $index3 = $neighbors[$index4]['R'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index1, $index2, $index3, $index4], $p1, $p2))) return $solution;
+                }
+
+                /**
+                 * .C
+                 * VC
+                 * ..
+                 */
+                $p1 = $neighbors[$index1]['R'] ?? null;
+                $p2 = $neighbors[$p1]['D'] ?? null;
+                $index4 = $neighbors[$p2]['D'] ?? null;
+                $index3 = $neighbors[$index4]['R'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index1, $index2, $index3, $index4], $p1, $p2))) return $solution;
+                }
+
+                /**
+                 * ..
+                 * V.
+                 * CC
+                 */
+                $p1 = $neighbors[$index2]['D'] ?? null;
+                $p2 = $neighbors[$p1]['R'] ?? null;
+                $index3 = $neighbors[$p2]['U'] ?? null;
+                $index4 = $neighbors[$index3]['U'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index2, $index1, $index4, $index3], $p1, $p2))) return $solution;
+                }
+
+                /**
+                 * ..
+                 * .V
+                 * CC
+                 */
+                $p1 = $neighbors[$index2]['D'] ?? null;
+                $p2 = $neighbors[$p1]['L'] ?? null;
+                $index3 = $neighbors[$p2]['U'] ?? null;
+                $index4 = $neighbors[$index3]['U'] ?? null;
+
+                if($p1 && $p2 && $index3 && $index4 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.' && $grid[$index3] == '.' && $grid[$index4] == '.') {
+                    if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index2, $index1, $index4, $index3], $p1, $p2))) return $solution;
+                }
+
+                continue;
+            }
         }
-        // Vertical
-        else $dirs = ['L', 'R'];
 
         foreach($dirs as $dir) {
             $p1 = $neighbors[$index1][$dir] ?? null;
             $p2 = $neighbors[$index2][$dir] ?? null;
-
-            error_log("$p1 - $p2 - $dir");
 
             if($p1 && $p2 && ($color = $grid[$p1]) == $grid[$p2] && $color != 'X' && $color != '.') {
                 if(($solution = setPositions($groups, $grid, $paths, $groupID, $color, [$index1, $index2], $p1, $p2))) return $solution;
             }
         }
     }
-
-    // error_log("end group ID $groupID");
 
     return null;
 }
@@ -185,7 +405,7 @@ function getEmptyPositions(string $grid): array {
 // When we add empty positions to existing path we can only do it 2 by 2, if we have a group of odd size 
 // and we are sure no positions will be occupied by another path we know we won't be able to assign all the empty positions.
 function checkEmptyPositions(string $grid, array $colorsUsed): bool {
-    global $size, $neighbors, $w;
+    global $size, $neighbors, $w, $V, $H;
 
     // error_log(var_export(str_split($grid, $w), 1));
 
@@ -193,6 +413,7 @@ function checkEmptyPositions(string $grid, array $colorsUsed): bool {
         if ($grid[$index] !== '.') continue;
         
         $count = 0;
+        $countRestricted = 0;
         $colors = [];
         $visited = [];
         $queue = [$index];
@@ -206,6 +427,9 @@ function checkEmptyPositions(string $grid, array $colorsUsed): bool {
             
             if($grid[$index2] == '.') {
                 ++$count;
+
+                if(isset($V[$index2]) || isset($H[$index2])) ++$countRestricted;
+
                 $grid[$index2] = '#';
             } elseif($grid[$index2] != 'X') {
                 $colors[$grid[$index2]] = ($colors[$grid[$index2]] ?? 0) + 1;
@@ -224,6 +448,15 @@ function checkEmptyPositions(string $grid, array $colorsUsed): bool {
             }
 
             return false;
+        }
+
+        // To assign a position that is forced vertical or horizontal we need 4 empty positions.
+        if($countRestricted * 4 > $count) {
+            foreach($colors as $color => $value) {
+                if(!isset($colorsUsed[$color]) && $value >= 2) continue 2;
+            }
+
+            return false; 
         }
     }
 
@@ -247,11 +480,11 @@ function findPaths(array $colors, string $grid, array $paths = []): bool {
             $paths2 = assignEmptyPositions($groups, $grid, $paths);
 
             if(!$paths2) {
-                foreach($paths as $color => $path) {
-                    foreach(getSections($path, $color) as $section) echo $section . PHP_EOL;
-                }
+                // foreach($paths as $color => $path) {
+                //     foreach(getSections($path, $color) as $section) echo $section . PHP_EOL;
+                // }
 
-                exit("Impossible to assign!!!!!!!");
+                error_log("Impossible to assign!!!!!!!");
                 return false;
             } // We could not assign all the positions to an existing path
             else $paths = $paths2;
@@ -286,7 +519,7 @@ function findPaths(array $colors, string $grid, array $paths = []): bool {
 
             unset($colors[$color]);
             
-            // error_log("$color: " . implode("-", array_keys($path)));
+            error_log("$color: " . implode("-", array_keys($path)));
             
             foreach($paths[$color] as $index) $gridWithPath[$index] = $color;
 
