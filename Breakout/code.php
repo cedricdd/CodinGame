@@ -1,16 +1,17 @@
 <?php
 
+$start = microtime(1);
+
 fscanf(STDIN, "%d %d", $bX, $bY);
 fscanf(STDIN, "%d %d", $vX, $vY);
 fscanf(STDIN, "%d", $pN);
 fscanf(STDIN, "%d", $kN);
+
 for ($i = 0; $i < $pN; $i++) {
     fscanf(STDIN, "%d %d", $pX, $pY);
 
     $paddles[] = [$pX, $pY];
 }
-
-// error_log(var_export($paddle, 1));
 
 for ($i = 0; $i < $kN; $i++) {
     fscanf(STDIN, "%d %d %d %d", $kX, $kY, $kStrength, $kPoints);
@@ -18,93 +19,51 @@ for ($i = 0; $i < $kN; $i++) {
     $bricks[] = [$kX, $kY, $kStrength, $kPoints];
 }
 
-ksort($bricks);
-
-error_log(var_export($bricks, 1));
-
 $paddle = array_shift($paddles);
 $score = 0;
 
 while(true) {
-    error_log("Ball $bX $bY - $vX $vY");
-    error_log("Paddle {$paddle[0]} {$paddle[1]}");
-
     $hit = [null, 0, 0, INF, ""];
 
-    if($vY < 0) {
-        error_log("Moving UP");
-
-        //Checking the bottom of bricks
-        foreach($bricks as $ID => [$xBrick, $yBrick]) {
-            if($yBrick + 30 >= $bY) continue; //Can't hit there
-
+    /**
+     * For the distance there's no need to bother with the sqrt, we just want to compare them, we don't need the real value
+     */
+    foreach($bricks as $ID => [$xBrick, $yBrick]) {
+        //Checking the bottom of the brick
+        if($vY < 0 && $yBrick + 30 < $bY) {
             $x = $bX + ($vX / $vY) * ($yBrick + 30 - $bY);
 
-            // error_log("Birck at $xBrick $yBrick => $x");
-
             if($x >= $xBrick && $x <= $xBrick + 100) {
-                error_log("Ball is hitting brick ID $ID");
-
-                $d = (($bX - $x) ** 2) + (($bY - $yBrick + 30) ** 2);
+                $d = (($bX - $x) ** 2) + (($bY - $yBrick - 30) ** 2);
 
                 if($d < $hit[3]) $hit = [$ID, $x, $yBrick + 30, $d, 'B'];
             }
         }
-    }
-    if($vY > 0) {
-        error_log("Moving DOWN");
-
-        //Checking the top of bricks
-        foreach($bricks as $ID => [$xBrick, $yBrick]) {
-            if($yBrick <= $bY) continue; //Can't hit there
-
+        //Checking the top of the brick
+        if($vY > 0 && $yBrick > $bY) {
             $x = $bX + ($vX / $vY) * ($yBrick - $bY);
 
-            // error_log("Birck at $xBrick $yBrick => $x");
-
             if($x >= $xBrick && $x <= $xBrick + 100) {
-                error_log("Ball is hitting brick ID $ID");
-
                 $d = (($bX - $x) ** 2) + (($bY - $yBrick) ** 2);
 
                 if($d < $hit[3]) $hit = [$ID, $x, $yBrick, $d, 'T'];
             }
         }
-    }
-    if($vX < 0) {
-        error_log("Moving LEFT");
-
-        //Checking the right of bricks
-        foreach($bricks as $ID => [$xBrick, $yBrick]) {
-            if($xBrick + 100 >= $bX) continue; //Can't hit there
-
-            $y = $bY + ($vX / $vY) * ($xBrick + 100 - $bX);
-
-            // error_log("Birck at $xBrick $yBrick => $x");
+        //Checking the right of the brick
+        if($vX < 0 && $xBrick + 100 < $bX) {
+            $y = $bY + ($vY / $vX) * ($xBrick + 100 - $bX);
 
             if($y >= $yBrick && $y <= $yBrick + 30) {
-                error_log("Ball is hitting brick ID $ID");
-
-                $d = (($bX - $xBrick + 100) ** 2) + (($bY - $y) ** 2);
+                $d = (($bX - $xBrick - 100) ** 2) + (($bY - $y) ** 2);
 
                 if($d < $hit[3]) $hit = [$ID, $xBrick + 100, $y, $d, 'R'];
             }
         }
-    }
-    if($vX > 0) {
-        error_log("Moving RIGHT");
-
-        //Checking the left of bricks
-        foreach($bricks as $ID => [$xBrick, $yBrick]) {
-            if($xBrick <= $bX) continue; //Can't hit there
-
-            $y = $bY + ($vX / $vY) * ($xBrick - $bX);
-
-            // error_log("Birck at $xBrick $yBrick => $x");
+        //Checking the left of the brick
+        if($vX > 0 && $xBrick > $bX) {
+            $y = $bY + ($vY / $vX) * ($xBrick - $bX);
 
             if($y >= $yBrick && $y <= $yBrick + 30) {
-                error_log("Ball is hitting brick ID $ID");
-
                 $d = (($bX - $xBrick) ** 2) + (($bY - $y) ** 2);
 
                 if($d < $hit[3]) $hit = [$ID, $xBrick, $y, $d, 'L'];
@@ -112,18 +71,13 @@ while(true) {
         }
     }
 
-    error_log(var_export($hit, 1));
-
+    //Not hitting any brick!
     if($hit[0] === null) {
-        error_log("Not hitting any brick!");
-
         //Check top border
         if($vY < 0) {
             $xTop = $bX + ($vX / $vY) * (0 - $bY);
 
             if($xTop >= 0 && $xTop <= 1600) {
-                error_log("Bouncing off Top - $xTop");
-
                 $bX = $xTop;
                 $bY = 0;
                 $vY *= -1;
@@ -131,13 +85,27 @@ while(true) {
             }
         }
 
+        //Check paddle
+        if($vY > 0) {
+            $xPaddle = $bX + ($vX / $vY) * (2300 - $bY);
+
+            //Ball bounce off paddle
+            if($xPaddle >= $paddle[0] && $xPaddle <= $paddle[0] + 200) {
+                $bX = $xPaddle;
+                $bY= $paddle[1];
+                $vY *= -1;
+
+                if($paddles) $paddle = array_shift($paddles); //Paddle moves
+
+                continue;
+            } 
+        }
+
         //Check left border
         if($vX < 0) {
-            $yLeft = $bY + ($vX / $vY) * (0 - $bX);
+            $yLeft = $bY + ($vY / $vX) * (0 - $bX);
 
             if($yLeft >= 0 && $yLeft <= 2400) {
-                error_log("Bouncing off Left - $yLeft");
-
                 $bX = 0;
                 $bY = $yLeft;
                 $vX *= -1;
@@ -147,11 +115,9 @@ while(true) {
 
         //Check right border
         if($vX > 0) {
-            $yRight = $bY + ($vX / $vY) * (1600 - $bX);
+            $yRight = $bY + ($vY / $vX) * (1600 - $bX);
 
             if($yRight >= 0 && $yRight <= 2400) {
-                error_log("Bouncing off Right - $yRight");
-
                 $bX = 1600;
                 $bY = $yRight;
                 $vX *= -1;
@@ -159,25 +125,9 @@ while(true) {
             }
         }
 
-        //Check paddle
-        if($vY > 0) {
-            $xPaddle = $bX + ($vX / $vY) * ($paddle[1] - $bY);
-
-            if($xPaddle >= $paddle[0] && $xPaddle <= $paddle[0] + 200) {
-                error_log("Ball bounde off paddle");
-
-                $bX = $xPaddle;
-                $bY= $paddle[1];
-                $vY *= -1;
-
-                if($paddles) $paddle = array_shift($paddles); //Paddle moves
-            } else {
-                error_log("Ball miss the paddle, it's out");
-
-                break;
-            }
-        }
-    } else {
+        break; //Ball miss the paddle, it's out.
+    } //We are hitting a brick
+    else {
         //Brick isn't destroyed
         if($bricks[$hit[0]][2] > 1) $bricks[$hit[0]][2]--;
         else {
@@ -185,9 +135,11 @@ while(true) {
             unset($bricks[$hit[0]]);
         }
 
+        //Move ball
         $bX = $hit[1];
         $bY = $hit[2];
 
+        //Update direction vector
         switch($hit[4]) {
             case 'T':
             case 'B': $vY *= -1; break;
@@ -199,3 +151,4 @@ while(true) {
 }
 
 echo $score . PHP_EOL;
+error_log(microtime(1) - $start);
