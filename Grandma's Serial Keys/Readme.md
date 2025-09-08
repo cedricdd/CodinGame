@@ -1,5 +1,5 @@
 # Puzzle
-**Grandma's Serial Keys** https://www.codingame.com/contribute/view/13224641c8eee6994e91f9021f903d4e85000b
+**Grandma's Serial Keys** https://www.codingame.com/training/easy/grandmas-serial-keys
 
 # Goal
 * This puzzle is just for fun, and does not encourage piracy or the use of keygen software.
