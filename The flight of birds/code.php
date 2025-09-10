@@ -1,6 +1,5 @@
 <?php
 
-const PRECISION = 12;
 const THRESHOLD = 10 ** -12;
 
 /**
