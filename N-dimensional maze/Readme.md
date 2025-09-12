@@ -1,5 +1,5 @@
 # Puzzle
-**N-dimensional maze** https://www.codingame.com/contribute/view/1258448ac16376b47315eb1baa28acc378862b
+**N-dimensional maze** https://www.codingame.com/training/medium/n-dimensional-maze
 
 # Goal
 While travelling with your spacetime machine, you accidentally discover new dimensions to explore. The n-dimensional space is represented by an n-dimensional grid of cells. You can move to any free neighboring cell, in any direction. Two cells are neighbors if their coordinates differ by one, in exactly one direction. For example, (1, 4, 6, 2, 0) and (1, 4, 6, 1, 0) are neighbors. A cell has 2 neighbors in 1D, 4 in 2D, 6 in 3D, and 2n in nD.
@@ -20,7 +20,7 @@ Example :
 1,1,0 2,1,2
 ```
 
-Let's represent this maze (. is a free space, # is an obstacle, S and D are your start position and destination). It is a cube of size 3. We can see it as a three-floor maze (z=0 to z=2), with a wall at position x=1, with only one free cell (1,0,1).
+Let's represent this maze (. is a free space, # is an obstacle, S and D are your start position and destination). It is a cube of size 3. We can see it as a three-floor maze (z=0 to z=2), with a wall at position y=1, with only one free cell (0,1,1).
 ```
    z=0   z=1   z=2
 
