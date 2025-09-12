@@ -83,6 +83,7 @@ while($toCheck) {
     if($e < 0) continue; //Out of energy
 
     $index = $y * $w + $x;
+    $moves[$index] = [];
 
     //We only continue if we reach a position we have previously reached if we have more energy left
     if(isset($visited[$index]) && $visited[$index] >= $e) continue; 
