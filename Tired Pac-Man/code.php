@@ -28,7 +28,7 @@ function solve(int $index, int $energy, string $hash): int {
     $max = 0;
 
     //Test each moves possible at this position
-    foreach($moves[$index] as [$neighbor, $cost]) {
+    foreach($moves[$index] ?? [] as [$neighbor, $cost]) {
         $result = solve($neighbor, $energy - $cost, $hash);
 
         if($result > $max) $max = $result;
@@ -83,7 +83,6 @@ while($toCheck) {
     if($e < 0) continue; //Out of energy
 
     $index = $y * $w + $x;
-    $moves[$index] = [];
 
     //We only continue if we reach a position we have previously reached if we have more energy left
     if(isset($visited[$index]) && $visited[$index] >= $e) continue; 
