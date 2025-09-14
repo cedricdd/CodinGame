@@ -61,70 +61,107 @@ for ($i = 0; $i < $deadCount; $i++) {
     $board[$y + 1][$x + 1] = "#";
 }
 
+$listInstructions = [];
+
 while (TRUE) {
     // $cellCount: number of cells currently occupied by molecules
     fscanf(STDIN, "%d", $cellCount);
 
+    $start = microtime(1);
+
     for ($i = 0; $i < $cellCount; $i++) {
         fscanf(STDIN, "%d %d %d", $moleculeId, $x, $y);
 
-        $molecules[$moleculeId][] = ($y + 1) * 9 + ($x + 1);
-        $board[$y + 1][$x + 1] = $moleculeId;
+        if(!$listInstructions) {
+            $molecules[$moleculeId][] = ($y + 1) * 9 + ($x + 1);
+            $board[$y + 1][$x + 1] = $moleculeId;
+        }
     }
 
-    error_log(var_export($board, 1));
-    // error_log(var_export($molecules, 1));
+    if(!$listInstructions) {
+        error_log(var_export($board, 1));
+        // error_log(var_export($molecules, 1));
 
-    $queue = [[implode("", $board), $molecules]];
-    $history = [];
-    $turn = 1;
+        $queue = [[implode("", $board), $molecules, []]];
+        $history = [];
+        $turn = 1;
 
-    while($queue) {
-        $newQueue = [];
+        while($queue) {
+            $newQueue = [];
 
-        foreach($queue as $i => [$board, $molecules]) {
-            if($board[36] === 0) exit("SUCCESS");
-
-            $history[$board] = 1;
-
-            $moves = getPossibleMoves($board, $molecules);
-
-            // error_log(var_export($moves, 1));
-
-            foreach($moves as $ID => $list) {
-                foreach($list as $d => $IDs) {
-                    if($IDs !== null) {
-                        $board2 = $board;
-                        $molecules2 = $molecules;
-
-                        foreach(array_reverse($IDs, true) as $IDtoMove => $filler) {
-                            $molecules2[$IDtoMove] = [];
-
-                            foreach($molecules[$IDtoMove] as $position) {
-                                $newPosition = $position + MOVES[$d];
-
-                                $board2[$newPosition] = $ID;
-                                $board2[$position] = '.';
-
-                                $molecules2[$IDtoMove][] = $newPosition;
-                            }
+            error_log("at turn $turn we have " . count($queue));
+            
+            foreach($queue as $i => [$board, $molecules, $instructions]) {
+                if($board[36] === '0') {
+                    // error_log(var_export($instructions, 1));
+                    
+                    foreach($instructions as [$ID, $d]) {
+                        switch($d) {
+                            case 'L': $direction = 'LEFT'; break;
+                            case 'R': $direction = 'RIGHT'; break;
+                            case 'U': $direction = 'UP'; break;
+                            case 'D': $direction = 'DOWN'; break;
+                            default: exit("Invalid Direction");
                         }
 
-                        if(!isset($history[$board2])) {
-                            // $newQueue[] = [$board2, $molecules2];
+                        $listInstructions[] = "$ID $direction";
+                    }
 
-                            error_log(var_export(str_split($board2, 9), 1));
+                    error_log(var_export($listInstructions, 1));
+
+                    break 2;
+                }
+
+                $history[$board] = 1;
+
+                $moves = getPossibleMoves($board, $molecules);
+
+                // error_log(var_export($moves, 1));
+
+                foreach($moves as $ID => $list) {
+                    foreach($list as $d => $IDs) {
+                        if($IDs !== null) {
+                            $board2 = $board;
+                            $molecules2 = $molecules;
+
+                            // Set all the positions that are going to move to un-occupied
+                            foreach($IDs as $IDtoMove => $filler) {
+                                foreach($molecules[$IDtoMove] as $position) {
+                                    $board2[$position] = '.';
+                                }
+                            }
+
+                            // Set all the positions that are now occupied to the proper value
+                            foreach($IDs as $IDtoMove => $filler) {
+                                $molecules2[$IDtoMove] = [];
+
+                                foreach($molecules[$IDtoMove] as $position) {
+                                    $newPosition = $position + MOVES[$d];
+
+                                    $board2[$newPosition] = $IDtoMove;
+
+                                    $molecules2[$IDtoMove][] = $newPosition;
+                                }
+                            }
+
+                            if(!isset($history[$board2])) {
+                                $newQueue[] = [$board2, $molecules2, $instructions + [$turn => [$ID, $d]]];
+
+                                // error_log(var_export(str_split($board2, 9), 1));
+                            }
                         }
                     }
                 }
-            }
-        }
 
-        $queue = $newQueue;
-        ++$turn;
+                // exit("!!!!!!!!!!");
+            }
+
+            $queue = $newQueue;
+            ++$turn;
+        }
     }
 
-    exit();
+    echo array_shift($listInstructions) . PHP_EOL;
 
-    echo("0 LEFT\n");
+    error_log(microtime(1) - $start);
 }
