@@ -1,5 +1,5 @@
 # Puzzle
-**Seeing Squares** https://www.codingame.com/contribute/view/131619994b5ea1cb546e665f881c6f9a83e83b
+**Seeing Squares** https://www.codingame.com/training/easy/seeing-squares
 
 # Goal
 
