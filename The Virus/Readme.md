@@ -1,5 +1,5 @@
 # Puzzle
-**The Virus** https://www.codingame.com/contribute/view/132906b107d01e504de47845786d671b81cd9d
+**The Virus** https://www.codingame.com/ide/puzzle/the-virus
 
 Goal
 
