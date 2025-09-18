@@ -1,8 +1,5 @@
 <?php
 
-/**
- * We are just testing all the possible ways to open the jars
- */
 function solve(array $jars, int $total): int {
     $best = $total;
 
@@ -49,15 +46,29 @@ foreach($jars as $i => [$L, $H, $T]) {
     if($T > ($max - max($L, $H))) {
         $additional += $L;
     } else {
-        if($L > $H) $bestFirst[] = [$L, $H, $T]; //The L value is better we want to try to open it early
-        else $bestAfter[] = [$L, $H, $T]; //The H value is better we want to try to open it late
+        if($L > $H) $bestFirst[] = [$L, $H, $T];
+        else $bestAfter[] = [$L, $H, $T];
     }
 }
 
 unset($jars);
 
-$total = solve($bestFirst, 0); //Find the best solution for the jars where L is better
-$total += $additional; //Add everything that is forced
-$total = solve($bestAfter, $total); //Find the best solution for the jars where H is better
+$total = solve($bestFirst, 0);
+$total += $additional;
+
+usort($bestAfter, function($a, $b) {
+    return $a[2] <=> $b[2];
+});
+
+//Directly add all the jars that we are already above threshold
+foreach($bestAfter as $i => [, $H, $T]) {
+    if($total >= $T) {
+        $total += $H;
+        unset($bestAfter[$i]);
+    } else break;
+}
+
+//If there are some jars left, find the best combinaison
+$total = solve($bestAfter, $total);
 
 echo $total . PHP_EOL;
