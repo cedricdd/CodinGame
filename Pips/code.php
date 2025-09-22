@@ -26,8 +26,13 @@ function checkDoubleRule(?array $rule, int $value1, int $value2): bool {
         else return $value1 + $value2 <= $rule[1] && $value1 + $value2 >= ($rule[1] - (($rule[3] - 2) * 6)); //TEST using real values
     } elseif($rule[0] == "==") {
         if($rule[1] == -1) return $value1 == $value2;
-        else return $value1 = $rule[1] && $value2 == $rule[1];
-    } else exit("Rule double no supported yet - " . $rule[0]);
+        else return $value1 == $rule[1] && $value2 == $rule[1];
+    } elseif($rule[0] == "!=") {
+        return $value1 != $value2;
+    } elseif($rule[0] == '>') {
+        return $value1 + $value2 > ($rule[1] - (($rule[3] - 2) * 6));
+    }
+    else exit("Rule double no supported yet - " . $rule[0]);
 }
 
 function updateRule(array &$rules, int $ruleID, int $index, int $value) {
@@ -39,7 +44,7 @@ function updateRule(array &$rules, int $ruleID, int $index, int $value) {
         $count--;
         unset($positions[$index]);
 
-        if($rule == '=') {
+        if($rule == '=' || $rule == '>') {
             $ruleValue -= $value;
         } elseif($rule == "==") {
             $ruleValue = $value;
@@ -114,11 +119,13 @@ function setDomino(array $info, array &$neighbors, array &$dominoes, array &$rul
 
 //If an index only has one neighbor we are that these two will contain a domino so the neighbor can't be associated with anything else
 function reduceNeighbors(array &$neighbors, array &$positionsToFind, int $index) {
+    global $width;
+
     $neighbor = array_key_first($neighbors[$index]);
 
     unset($positionsToFind[max($index, $neighbor)]);
 
-    error_log("$index is sure to be associated with $neighbor");
+    error_log(($index % $width) . ";" . intdiv($index, $width) . " is sure to be associated with " . ($neighbor % $width) . ";" . intdiv($neighbor, $width));
 
     foreach($neighbors[$neighbor] as $n => $filler) {
         if($n == $index) continue;
@@ -127,6 +134,137 @@ function reduceNeighbors(array &$neighbors, array &$positionsToFind, int $index)
         unset($neighbors[$neighbor][$n]);
 
         if(count($neighbors[$n]) == 1) reduceNeighbors($neighbors, $positionsToFind, $n);
+    }
+}
+
+function solve(array $positionsToFind, array $neighbors, array $dominoes, array $rules, array $actions) {
+    global $start;
+    static $guessMade = 0;
+
+    while(true) {
+        $dominoFound = false;
+        $bestGuessCount = INF;
+        $bestGuess = null;
+
+        if(!$positionsToFind) {
+            error_log("Guesses Made: $guessMade");
+            error_log(microtime(1) - $start);
+
+            echo implode(PHP_EOL, $actions) . PHP_EOL;
+            exit();
+        }
+
+        foreach($positionsToFind as $index => $filler) {
+            if(!isset($positionsToFind[$index])) continue; //Already found
+
+            $countNeighbors = count($neighbors[$index]);
+
+            //We know for sure that a domino goes here
+            if($countNeighbors == 1) {
+                $neighbor = array_key_first($neighbors[$index]);
+
+                error_log("testing position: $index with $neighbor");
+
+                [$count, $possibilities] = getPossibleDominoes($dominoes, $rules, $index, $neighbor);
+
+                error_log("For $index we have $count");
+
+                if($count == 0) {
+                    error_log("no possible domino for $index");
+                    return;
+                }
+
+                if($count == 1) {
+                    error_log("We are sure we need to set at $index - " . $possibilities[0][0]);
+                    // error_log(var_export(array_pop($possibilities), 1));
+
+                    $actions[] = setDomino(array_pop($possibilities), $neighbors, $dominoes, $rules, $positionsToFind);
+
+                    // error_log(var_export($neighbors, 1));
+                    $dominoFound = true;
+                } elseif($bestGuessCount > $count) {
+                    $bestGuessCount = $count;
+                    $bestGuess = $possibilities;
+                }
+            } elseif($countNeighbors == 0) {
+                error_log("no neighbor left for $index");
+                return;
+            }
+        }
+
+        if($dominoFound) continue;
+
+        //We need to make a guess
+        if($bestGuess !== null) {
+            error_log("making a guess 1");
+
+            ++$guessMade;
+
+            $count = count($actions);
+            
+            foreach($bestGuess as $guess) {
+                $positionsToFind2 = $positionsToFind;
+                $neighbors2 = $neighbors;
+                $dominoes2 = $dominoes;
+                $rules2 = $rules;
+
+                $actions[$count] = setDomino($guess, $neighbors2, $dominoes2, $rules2, $positionsToFind2);
+
+                solve($positionsToFind2, $neighbors2, $dominoes2, $rules2, $actions);
+            }
+
+            return;
+        } else {
+            $test = [];
+
+            //We don't have any spots where we are sure a domino should go, check everything
+            foreach($positionsToFind as $index => $filler1) {
+                if(!isset($test[$index])) $test[$index] = [0, []];
+
+                foreach($neighbors[$index] as $neighbor => $filler2) {
+                    if($neighbor < $index) continue;
+
+                    if(!isset($test[$neighbor])) $test[$neighbor] = [0, []];
+
+                    // error_log("testing position: $index with $neighbor");
+
+                    [$count, $possibilities] = getPossibleDominoes($dominoes, $rules, $index, $neighbor);
+
+                    $test[$index][0] += $count;
+                    $test[$neighbor][0] += $count;
+
+                    $test[$index][1] = array_merge($test[$index][1], $possibilities);
+                    $test[$neighbor][1] = array_merge($test[$neighbor][1], $possibilities);
+                }
+            }
+
+            uasort($test, function($a, $b) {
+                return $b[0] <=> $a[0];
+            });
+
+            error_log("making a guess at " . array_key_last($test));
+            // error_log(var_export(end($test), 1));
+            // exit();
+
+            ++$guessMade;
+
+            $count = count($actions);
+
+            [, $possibilities] = array_pop($test);
+
+            foreach($possibilities as $guess) {
+                $positionsToFind2 = $positionsToFind;
+                $neighbors2 = $neighbors;
+                $dominoes2 = $dominoes;
+                $rules2 = $rules;
+
+                $actions[$count] = setDomino($guess, $neighbors2, $dominoes2, $rules2, $positionsToFind2);
+
+                solve($positionsToFind2, $neighbors2, $dominoes2, $rules2, $actions);
+            }
+
+            return;
+        }
     }
 }
 
@@ -184,7 +322,11 @@ for ($i = 0; $i < $rulesCount; $i++) {
 
     if(($rule == "==" || $rule == "!=") && count($rules[$ruleID][2]) == 1) {
         error_log("useless rule $ruleID = with 1");
+        
+        foreach($rules[$ruleID][2] as $index => $filler) unset($ruleByPositions[$index]);
+
         unset($rules[$ruleID]);
+
         continue;
     }
     if($rule == "!=") $ruleValue = range(0, 6);
@@ -207,43 +349,4 @@ for ($i = 0; $i < $dominoesCount; $i++) {
     else $dominoes[$key][3]++;
 }
 
-// error_log(var_export($neighbors, 1));
-
-$actions = [];
-
-do {
-    $dominoFound = false;
-
-    foreach($positionsToFind as $index => $filler) {
-        if(!isset($positionsToFind[$index])) continue; //Already found
-
-        //We know for sure that a domino goes here
-        if(count($neighbors[$index]) == 1) {
-            $neighbor = array_key_first($neighbors[$index]);
-
-            error_log("testing position: $index with $neighbor");
-
-            [$count, $possibilities] = getPossibleDominoes($dominoes, $rules, $index, $neighbor);
-
-            error_log("For $index we have $count");
-
-            if($count == 0) exit("no possible domino for $index");
-
-            if($count == 1) {
-                error_log("We are sure we need to set at $index");
-                // error_log(var_export(array_pop($possibilities), 1));
-
-                $actions[] = setDomino(array_pop($possibilities), $neighbors, $dominoes, $rules, $positionsToFind);
-
-                // error_log(var_export($neighbors, 1));
-                $dominoFound = true;
-            }
-        }
-    }
-} while($dominoFound);
-
-// error_log(var_export($actions, 1));
-
-error_log(microtime(1) - $start);
-
-echo implode(PHP_EOL, $actions) . PHP_EOL;
+solve($positionsToFind, $neighbors, $dominoes, $rules, []);
