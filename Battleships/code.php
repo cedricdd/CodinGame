@@ -30,8 +30,8 @@ function setNeighbor(array &$board, array &$rows, array &$cols, array &$rowMarke
     global $size;
 
     switch($board[$y][$x]) {
-        case 's':
-        case 'S':
+        case '#':
+        case 'O':
             //No ship possible in the 4 diagonals
             foreach([[-1, -1], [-1, 1], [1, -1], [1, 1]] as [$xm, $ym]) {
                 $xu = $x + $xm;
@@ -100,7 +100,7 @@ function setNeighbor(array &$board, array &$rows, array &$cols, array &$rowMarke
 function setShip(array &$board, array &$rows, array &$cols, array &$rowMarker, array &$columnMarker, int $x, int $y) {
     if($board[$y][$x] != '.') return;
 
-    $board[$y][$x] = 'S';
+    $board[$y][$x] = 'O';
 
     $cols[$x]--;
     $rows[$y]--;
@@ -141,6 +141,8 @@ for ($y = 0; $y < $size; ++$y) {
             $columnMarker[$x]--;
             $rowMarker[$y]--;
         }
+
+        if($c == 'o') $ships[1]--;
 
         $board[$y][$x] = $c;
     }
@@ -192,7 +194,7 @@ while($ships) {
     for($y = 0; $y < $size; ++$y) {
         for($x = 0; $x < $size; ++$x) {
             //We know this isn't the end of a ship, if there can only be one direction, we can extend the ship
-            if($board[$y][$x] == 's') {
+            if($board[$y][$x] == '#') {
                 //The ship can only be vertical
                 if($x == 0 || $x == $size - 1 || $board[$y][$x - 1] == 'x' || $board[$y][$x + 1] == 'x') {
                     if($board[$y - 1][$x] == '.') setShip($board, $rows, $cols, $rowMarker, $columnMarker, $x, $y - 1); 
@@ -208,7 +210,7 @@ while($ships) {
     }
 
     for($y = 0; $y < $size; ++$y) {
-        preg_match_all("/[\<\>osS]+/", $board[$y], $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all("/[\<\>O#]+/", $board[$y], $matches, PREG_OFFSET_CAPTURE);
 
         foreach($matches[0] as [$match, $offset]) {
             $len = strlen($match);
@@ -227,7 +229,7 @@ while($ships) {
                     if($ships[$len] > 1) --$ships[$len];
                     else unset($ships[$len]);
 
-                    for($i = 0; $i < $len; ++$i) $board[$y][$offset + $i] = '#'; //We use '#' to represent the ships fully discovered
+                    for($i = 0; $i < $len; ++$i) $board[$y][$offset + $i] = 'o'; 
                 }
             } //We don't need the current ship, we need to increase the size
             elseif(!isset($ships[$len])) {
@@ -243,7 +245,7 @@ while($ships) {
     $rotatedBoard = rotateBoard($board);
 
     for($y = 0; $y < $size; ++$y) {
-        preg_match_all("/[\^vosS]+/", $rotatedBoard[$y], $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all("/[\^v\^O#]+/", $rotatedBoard[$y], $matches, PREG_OFFSET_CAPTURE);
 
         foreach($matches[0] as [$match, $offset]) {
             $len = strlen($match);
@@ -262,7 +264,7 @@ while($ships) {
                     if($ships[$len] > 1) --$ships[$len];
                     else unset($ships[$len]);
 
-                    for($i = 0; $i < $len; ++$i) $board[$offset + $i][$y] = '#'; //We use '#' to represent the ships fully discovered
+                    for($i = 0; $i < $len; ++$i) $board[$offset + $i][$y] = 'o'; 
                 }
             } //We don't need the current ship, we need to increase the size
             elseif(!isset($ships[$len])) {
@@ -284,7 +286,7 @@ while($ships) {
     for($y = 0; $y < $size; ++$y) {
         //We still have some positions to find in that row
         if(isset($rowMarker[$y])) {
-            preg_match_all("/[\.\<\>osS]+/", $board[$y], $matches, PREG_OFFSET_CAPTURE);
+            preg_match_all("/[\.\<\>O#]+/", $board[$y], $matches, PREG_OFFSET_CAPTURE);
 
             foreach($matches[0] as [$match, $offset]) {
                 $len = strlen($match);
@@ -324,7 +326,7 @@ while($ships) {
             }
         }
 
-        preg_match_all("/[\.\^vosS]+/", $rotatedBoard[$y], $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all("/[\.\^v\^O#]+/", $rotatedBoard[$y], $matches, PREG_OFFSET_CAPTURE);
 
         foreach($matches[0] as [$match, $offset]) {
             //We still have some positions to find in that col
@@ -400,7 +402,7 @@ while($ships) {
 }
 
 echo implode(PHP_EOL, array_map(function($line) {
-    return strtr($line, "#.", "ox");
+    return str_replace('.', 'x', $line);
 }, $board)) . PHP_EOL;
 
 error_log(microtime(1) - $start);
