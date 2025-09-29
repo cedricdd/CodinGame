@@ -1,21 +1,23 @@
-https://www.codingame.com/training/easy/zhiwei-sun-squares
+# Puzzle
+**Zhiwei Sun Squares** https://www.codingame.com/training/easy/zhiwei-sun-squares
 
-Goal
+# Goal
 Given a positive integer n, find the number of ordered tuples (a, b, c, d, e) over non-negative integers for which a² + b² + c² + d² = n and b + 3c + 5d = e².
 
 Note: A conjecture by 孙智伟 (Sūn, Zhìwěi) states that this count is always at least 1.
 
 For example, if n is 9, there are 3 solutions, namely:
-
+```
 (0, 0, 3, 0, 3)
 (1, 0, 2, 2, 4)
 (3, 0, 0, 0, 0)
+```
 
-Input
-Line 1: An integer n
+# Input
+* Line 1: An integer n
 
-Output
-Line 1: A count of solutions
+# Output
+* Line 1: A count of solutions
 
-Constraints
-0 < n < 30 000
+# Constraints
+* 0 < n < 30 000
