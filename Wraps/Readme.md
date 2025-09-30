@@ -1,0 +1,16 @@
+# Puzzle
+**Wraps** https://www.codingame.com/contribute/view/854520cb216c8061d5febf465775f4fb47269
+
+# Goal
+There are n items of different volumes. In order to deliver them, you have to wrap them in packing wraps. You only have 1 type of packing wraps which can hold a maximum volume of k. Given an infinite number of those packing wraps, what is the minimum number of packing wraps required to pack all items?
+
+# Input
+* Line 1: 2 space-separated integers n and k for the number of items and the volume of the packing wraps
+* Line 2: n space-separated integers v for the volume of each item
+
+# Output
+* The minimum number of packing wraps required to pack all items
+
+# Constraints
+* 1 <= n <= 17
+* 1 <= v <= k <= 10^9
