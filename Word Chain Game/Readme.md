@@ -1,6 +1,7 @@
-https://www.codingame.com/training/medium/word-chain-game
+# Puzzle
+**Word Chain Game** https://www.codingame.com/training/medium/word-chain-game
 
-Goal
+# Goal
 Alice and Bob are going to play a word chain game. The two players take alternating turns, with Alice going first.
 
 In this game, the players are given a shared word list consisting of N words. All words in the word list are distinct.
@@ -13,14 +14,14 @@ If a player is unable to choose a word satisfying the above conditions, that pla
 
 Determine who wins, if both players play optimally.
 
-Input
-Line 1: An integer N: the number of words in the word list.
-Next N lines: A single string - a word in the word list.
+# Input
+* Line 1: An integer N: the number of words in the word list.
+* Next N lines: A single string - a word in the word list.
 
-Output
-Print Alice or Bob, the winner of the game.
+# Output
+* Print Alice or Bob, the winner of the game.
 
-Constraints
-1 ≤ N ≤ 16
-The words in the word list are at most 12 letters long.
-The words in the word list are all distinct.
+# Constraints
+* 1 ≤ N ≤ 16
+* The words in the word list are at most 12 letters long.
+* The words in the word list are all distinct.
