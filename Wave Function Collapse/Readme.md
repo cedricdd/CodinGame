@@ -1,17 +1,17 @@
-https://www.codingame.com/training/hard/wave-function-collapse-sans-shannon
+# Puzzle
+**Wave Function Collapse** https://www.codingame.com/training/hard/wave-function-collapse-sans-shannon
 
-Goal
+# Goal
 This is not ASCII art! For this in/out puzzle pixels are not available, so instead we will use characters to represent colours. Imagine each character as a pixel of a specific colour.
 
 Procedural generation via wave function collapse (WFC) is a way of generating content based off of a few "prototypical" examples". Given an image prototype of something as small as 16x16 pixels, WFC can make a 30x300 image with very similar structures drawn from the single prototype. This is not limited to flowers or maps but anything with small repeating patterns. After completing this puzzle you will be able to use this same code to generate a wide variety of content, from dungeon maps, to pixel art.
 
-See cover art and
-https://github.com/mxgmn/WaveFunctionCollapse/blob/master/images/wfc.gif
+See cover art and https://github.com/mxgmn/WaveFunctionCollapse/blob/master/images/wfc.gif
 
 The task is to read in a prototype image as well as a partially filled solution. Use the prototype image and WFC (kernel size of 3) to fill in the missing parts of the solution. The prototype and partial solution will both be printable characters. The missing parts are designated with the ? character.
 
 Example
-
+```
 Prototype
 12 x 8
 +----------+
@@ -22,8 +22,8 @@ Prototype
 |  |    |  |
 | \|    |  |
 +----------+
-
-
+```
+```
 Partial          Expected
 Solution          Output
 +----------+    +----------+
@@ -36,8 +36,8 @@ Solution          Output
 |  ?/   ?  |    |  |/   |  |
 |??????\???|    |  |   \|  |
 +----------+    +----------+
-
-
+```
+```
 Partial                     Expected
 Solution                     Output
 +--------------------+   +--------------------+
@@ -51,62 +51,59 @@ Solution                     Output
 |  |   ?|??  ?    ?  |   |  |    |/   |    |  |
 | \??   |?  \|?   ?? |   | \|    |   \|    |  |
 +--------------------+   +--------------------+
-
+```
 
 NOTE There are three features to this puzzle that make this easier than a full WFC implementation. First, the border will always be included in the partial solution and it will be identical to the prototypes border. Second, the procedure outlined by mxgmn (link below) includes using Shannon Entropy. Skip that step for this puzzle and only collapse states that are certain. Third, no reflection or rotation is used in this puzzle.
 
-RESOURCES
-Github repo https://github.com/mxgmn/WaveFunctionCollapse
-youtube video https://www.youtube.com/watch?v=fnFj3dOKcIQ
-and https://www.youtube.com/watch?v=t1O0_yHe-6Y
-and suggested by ninjadip https://www.youtube.com/watch?v=2SuvO4Gi7uY
+RESOURCES  
+Github repo https://github.com/mxgmn/WaveFunctionCollapse  
+youtube video https://www.youtube.com/watch?v=fnFj3dOKcIQ  
+and https://www.youtube.com/watch?v=t1O0_yHe-6Y  
+and suggested by ninjadip https://www.youtube.com/watch?v=2SuvO4Gi7uY  
 
 REPRODUCIBILITY In order to achieve full reproducibility of the test and validation output, process the image in these steps. These steps will make more sense once you've read the background resources.
-1 * Calculate possible 3x3 patches. A 5x6 prototype would generate 12 patches
-2 * Constrain patches from left to right, then from top to bottom
-3 * After a patch has been constrained, constrain all symbols that are covered by the 3x3 patch
-4 * If there are still uncertain symbols goto step 2
+* Calculate possible 3x3 patches. A 5x6 prototype would generate 12 patches
+* Constrain patches from left to right, then from top to bottom
+* After a patch has been constrained, constrain all symbols that are covered by the 3x3 patch
+* If there are still uncertain symbols goto step 2
 
 A symbol is something like "#" or "|".
 
 Constraining in step 2 means reduce the list of possible patches to only those patches that are possible given the symbols in the blocks they cover. For example, if all the blocks are unknown (can be any symbol) except the centre block is known to be either '#' or "|" and the lower right is known to be '*' or '/', then reduce the possible patches to be only patches that have the centre as either '#' or '|' and the lower right to be '*' or '/'.
 
 Constraining in step 3 means if, for example, all remaining possible overlapping 3x3 patches are the following 2
-
+```
 Patch   Patch
 #..    .*.
 #..    .|.
 ###    ###
-
+```
 
 then the blocks are reduced to these lists
-
+```
 [#.] [.*] [.]
 [#.] [.|] [.]
 [#]  [#]  [#]
+```
 
-
-We now know for certain that the bottom is all '#' and the right side is '.'
+We now know for certain that the bottom is all '#' and the right side is '.'  
 And the other positions are constrained to [#.] [.*] and [.|]
 
-HINT The hint is ROT13 encoded so it won't spoil your fun. This site can decode them for you https://rot13.com
-
-Hint 1 : "Xrrc gjb 2q qngnfrgf, bar sbe gur erznvavat yrtny flzobyf sbe rnpu fdhner, bar sbe gur erznvavat yrtny 3k3 cngpurf pragrerq ng rnpu fdhner."
-
-Hint 2 : "Sbe qrohttvat vg vf urycshy gb ercynpr gur "?" jvgu gur ahzore bs cbffvoyr flzobyf (be cbffvoyr cngpurf). Rnpu vgrengvba bs gur pbafgenvagf fubhyq erfhygf va n erqhpgvba fbzr bs gur ahzore bs cbffvoyr flzobyf naq cngpurf."
-
-Hint 3 : "Gur svefg grfg pnfr unf 47 havdhr cngpurf"
-
+HINT The hint is ROT13 encoded so it won't spoil your fun. This site can decode them for you https://rot13.com  
+Hint 1 : "Xrrc gjb 2q qngnfrgf, bar sbe gur erznvavat yrtny flzobyf sbe rnpu fdhner, bar sbe gur erznvavat yrtny 3k3 cngpurf pragrerq ng rnpu fdhner."  
+Hint 2 : "Sbe qrohttvat vg vf urycshy gb ercynpr gur "?" jvgu gur ahzore bs cbffvoyr flzobyf (be cbffvoyr cngpurf). Rnpu vgrengvba bs gur pbafgenvagf fubhyq erfhygf va n erqhpgvba fbzr bs gur ahzore bs cbffvoyr flzobyf naq cngpurf."  
+Hint 3 : "Gur svefg grfg pnfr unf 47 havdhr cngpurf"  
 Hint 4 : "Gur rqtrf ner vzcbegnag. Vapyhqr gur rqtrf va gur perngvba bs naq hfr bs cngpurf"
-Input
-Line 1 : width and height of the prototype
-Next height lines : text of prototype
-Next Line : height and width of partial solution
-Next height lines : text of partial solution
 
-Output
-Lines of output
+# Input
+* Line 1 : width and height of the prototype
+* Next height lines : text of prototype
+* Next Line : height and width of partial solution
+* Next height lines : text of partial solution
 
-Constraints
-5 < W,H < 20
-kernel size < W,H < 200
+# Output
+* Lines of output
+
+# Constraints
+* 5 < W,H < 20
+* kernel size < W,H < 200
