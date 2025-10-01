@@ -1,0 +1,39 @@
+# Puzzle
+**What else can I plug in?** https://www.codingame.com/contribute/view/820212cea7630d9be23fb6d25f94633e03775
+
+# Goal
+In your tiny student apartment you are blessed with limited amount of outlets/circuits.  
+Only one socket is visible for you and easy to reach.  
+When you moved in, several appliances have already been placed for you. They occupy some of the circuits and cannot be unplugged.  
+But you have your own things that need electricity too. So, you grab an extension and now face a problem:  
+
+What is the most consuming thing that you can add without burning that precious place down?
+
+There are conditions to respect:
+- Total power used by appliances cannot exceed the capacity of the circuit.
+- Appliances equal to / over 1000W occupy one socket and cannot have anything else plugged in.
+- Appliances that are plugged in from the start cannot be unplugged.
+
+The active appliances have been plugged in in the most optimal way. For example, appliances won't be plugged in to an empty socket when a socket used still has spare capacity for such appliances.
+
+*Commentary*  
+In this level, maximum one electrical supply will be required as an output. A greedy approach is sufficient to find an answer. Level 2, if you fancy, will dive into combinatorics deeper as the opportunity to reorganize objects and the system of points will be introduced to measure your efficiency
+
+# Input
+* Line 1: An integer CP for circuit capacity. Represents the power limit one socket can push through.
+* Line 2: An integer NS for the number of available sockets.
+* Line 3: An integer AP for the number of active appliances already plugged in.
+* Next AP lines: A string pin for the details of an active appliance already plugged in, in the format of appliance_name:appliance_wattage. appliance_wattage is always an integer.
+* Next Line: An integer AL for the number of possessed appliances.
+* Next AL lines: A string appl for the details of an appliance you possess, in the format of appliance_name:appliance_wattage. appliance_wattage is always an integer.
+
+# Output
+* Line 1:The name of the most consuming appliance you can plug in. If it is not possible to add any appliance to the socket,output 0.
+
+# Constraints
+* 1500 ≤ CP ≤ 2000
+* 1 ≤ NS ≤ 3
+* 1 ≤ AP ≤ 20
+* 1 ≤ appliance_wattage ≤ 1400
+* 1 ≤ AL ≤ 20
+* The cases have been designed such that a greedy approach is sufficient to solve them. It is not necessary to consider all the possible ways of plugging in the appliances.
