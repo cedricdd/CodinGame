@@ -1,0 +1,26 @@
+# Puzzle
+**Weather Forecast** https://www.codingame.com/contribute/view/68853ed9e373707089df57c30315c0d07589d
+
+# Goal
+Note: please complete Hunger before completing this puzzle.
+
+Bob is trying to implement a more advanced feature into his weather forecasting system: the longest time that's valid for camping.   
+A day is considered to be a good day for camping if the average temperature of that day is between A and B degrees (inclusive).   
+All other days are considered to be bad days for camping.  
+
+Bob considers a range of days from L to R (inclusive) to be valid camping days if the number of good days within that interval is strictly greater than the number of bad days within the same interval.
+
+Bob's weather forecasting system can forecast N days forward into the future. Please help Bob implement his new feature.
+
+# Input
+* Line 1: 3 space-separated integers N, A, B.
+* Line 2: N space-separated integers t1, t2, ... , tN. representing the temperatures of day 1 to day N
+
+# Output
+* 2 space-separated integers L and R such that the range of days from L to R (inclusive) is the longest possible camping interval that is considered to be valid.
+
+# Constraints
+* 1 ≤ N ≤ 3.2 × 104
+* -9 ≤ A ≤ B ≤ 50
+* -9 ≤ ti ≤ 50 for all i where 1 ≤ i ≤ N
+* It's guaranteed that there exists at least one good day.
