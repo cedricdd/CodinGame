@@ -1,9 +1,10 @@
-https://www.codingame.com/training/hard/wall-street
+# Puzzle
+**Wall Street** https://www.codingame.com/training/hard/wall-street
 
-Goal
-On Wall Street people buy and people sell.
-When a buyer and a seller's prices match a trade is created.
-When there is no match the order is “put in the book”.
+# Goal
+On Wall Street people buy and people sell.  
+When a buyer and a seller's prices match a trade is created.  
+When there is no match the order is “put in the book”.  
 
 Some special cases that must be considered:
 - If the buyer's price is higher than the seller's price: the price used is the one already in the system.
@@ -14,15 +15,15 @@ Some special cases that must be considered:
 
 An order consist of a symbol that represents the stock to trade, a verb that indicates whether it's a BUY or a SELL, a quantity qty and a price.
 
-Input
-Line 1: N number of orders
-N following lines: an order as space-separated values: symbol verb qty price
+# Input
+* Line 1: N number of orders
+* N following lines: an order as space-separated values: symbol verb qty price
 
-Output
-All trades in order of occurrence: symbol qty price
-If no trade at all takes place, write NO TRADE
+# Output
+* All trades in order of occurrence: symbol qty price
+* If no trade at all takes place, write NO TRADE
 
-Constraints
-2 ≤ N ≤ 1000
-1 ≤ qty ≤ 1000
-All prices are fixed-point decimals. They must be formatted with minimal integral figures and exactly two fractional figures. (one cent as 0.01)
+# Constraints
+* 2 ≤ N ≤ 1000
+* 1 ≤ qty ≤ 1000
+* All prices are fixed-point decimals. They must be formatted with minimal integral figures and exactly two fractional figures. (one cent as 0.01)
