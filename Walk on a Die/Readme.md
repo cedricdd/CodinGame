@@ -1,20 +1,21 @@
-https://www.codingame.com/training/easy/walk-on-a-die
+# Puzzle
+**Walk on a Die** https://www.codingame.com/training/easy/walk-on-a-die
 
-Goal
+# Goal
 You are walking on a 6-sided die one side per step. Your initial position on this cube is described by a 3-line string such as
-
+```
  1
 2354
  6
+```
 
-where
-1. the first line has one whitespace and then the number on the side in front of you
-2. the second line has four numbers of the sides
-a. to your left
-b. that you're on
-c. to your right
-d. opposite you and
-3. the third line has one whitespace and then the number on the side behind you.
+1) the first line has one whitespace and then the number on the side in front of you
+2) the second line has four numbers of the sides
+ * to your left
+ * that you're on
+ * to your right
+ * opposite you and
+3) the third line has one whitespace and then the number on the side behind you.
 
 That is, in this example, you are standing on 3, going forward takes you to 1, left to 2, right to 5 and backward to 6.
 
@@ -24,12 +25,12 @@ Left and right turns and moving backward also change your orientation. That is, 
 
 For example, with the starting position given above, if you are given commands="DLU", then first you move backward to 6, then left to 5 and finally forward to 1.
 
-Input
-Lines 1-3: The starting position described in 3 lines as above.
-Line 4: The string commands of steps you need to perform.
+# Input
+* Lines 1-3: The starting position described in 3 lines as above.
+* Line 4: The string commands of steps you need to perform.
 
-Output
-The number on the side you are on after having performed commands.
+# Output
+* The number on the side you are on after having performed commands.
 
-Constraints
-The string commands is at most 12 characters long.
+# Constraints
+* The string commands is at most 12 characters long.
