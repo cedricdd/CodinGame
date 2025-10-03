@@ -13,22 +13,29 @@ function findPowerPrime(int $fact, int $p): int {
 } 
 
 //Return the prime factor decomposition of an integer $n
-function primeFactors(int $n): array {
+function primeFactors($n) {
     $factors = [];
 
-    while($n % 2 == 0) {
+    // Handle factor 2 separately
+    while ($n % 2 == 0) {
         $factors[2] = ($factors[2] ?? 0) + 1;
-        $n /= 2;
-    }
- 
-    for ($i = 3; $i <= sqrt($n); $i += 2) {
-        while ($n % $i == 0) {
-            $factors[$i] = ($factors[$i] ?? 0) + 1;
-            $n /= $i;
-        }
+        $n = $n / 2;
     }
 
-    if($n > 2) $factors[$n] = 1;
+    // Only check odd divisors up to sqrt(n)
+    $divisor = 3;
+    $sqrt = sqrt($n);
+
+    while ($divisor <= $sqrt) {
+        while ($n % $divisor == 0) {
+            $factors[$divisor] = ($factors[$divisor] ?? 0) + 1;
+            $n = $n / $divisor;
+        }
+        $divisor += 2;
+    }
+
+    // If n is still > 1, it's prime
+    if ($n > 1)  $factors[$n] = 1;
 
     return $factors;
 }
@@ -41,7 +48,7 @@ $largestPower = INF;
 
 //https://en.wikipedia.org/wiki/Legendre%27s_formula
 foreach($factors as $prime => $exponent) {
-    $largestPower = min($largestPower, intval(findPowerPrime($B, $prime) / $exponent));
+$largestPower = min($largestPower, intval(findPowerPrime($B, $prime) / $exponent));
 }
 
 echo $largestPower . PHP_EOL;
