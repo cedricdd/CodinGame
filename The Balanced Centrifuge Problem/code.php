@@ -1,25 +1,33 @@
 <?php
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
 
 //For given N total holes, and K test tube, it can be balanced if and only if both K and N-K can be expressed as sum of prime number factors of N.
 
 function primeFactors($n) {
     $factors = [];
-    $divisor = 2;
-  
-    while ($n >= 2) {
-      if ($n % $divisor == 0) {
-        $factors[$divisor] = 1;
-        $n /= $divisor;
-      } else {
-        $divisor++;
-      }
+
+    // Handle factor 2 separately
+    while ($n % 2 == 0) {
+        $factors[2] = ($factors[2] ?? 0) + 1;
+        $n = $n / 2;
     }
+
+    // Only check odd divisors up to sqrt(n)
+    $divisor = 3;
+    $sqrt = sqrt($n);
+
+    while ($divisor <= $sqrt) {
+        while ($n % $divisor == 0) {
+            $factors[$divisor] = ($factors[$divisor] ?? 0) + 1;
+            $n = $n / $divisor;
+        }
+        $divisor += 2;
+    }
+
+    // If n is still > 1, it's prime
+    if ($n > 1)  $factors[$n] = 1;
+
     return $factors;
-  }
+}
 
 fscanf(STDIN, "%d", $N);
 error_log(var_export("N " . $N, true));
@@ -52,4 +60,3 @@ for($i = 0; $i <= intdiv($N, 2); ++$i) {
 } 
 
 echo $solutions;
-?>
