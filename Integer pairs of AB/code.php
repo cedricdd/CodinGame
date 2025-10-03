@@ -3,20 +3,28 @@
 //Get the prime factors of $n and their weight
 function primeFactors($n) {
     $factors = [];
-    $divisor = 2;
 
-    while ($n >= 2) {
-        if ($n % $divisor == 0) {
-            $factors[$divisor] = 0;
-            
-            while($n % $divisor == 0) {
-                $n = $n / $divisor;
-                $factors[$divisor]++;
-            }
-        } else {
-            $divisor++;
-        }
+    // Handle factor 2 separately
+    while ($n % 2 == 0) {
+        $factors[2] = ($factors[2] ?? 0) + 1;
+        $n = $n / 2;
     }
+
+    // Only check odd divisors up to sqrt(n)
+    $divisor = 3;
+    $sqrt = sqrt($n);
+
+    while ($divisor <= $sqrt) {
+        while ($n % $divisor == 0) {
+            $factors[$divisor] = ($factors[$divisor] ?? 0) + 1;
+            $n = $n / $divisor;
+        }
+        $divisor += 2;
+    }
+
+    // If n is still > 1, it's prime
+    if ($n > 1)  $factors[$n] = 1;
+
     return $factors;
 }
 
@@ -41,7 +49,5 @@ error_log(var_export($primes, 1));
 array_walk($primes, function(&$v) {
     $v = $v * 2 + 1;
 });
-
-error_log(var_export($primes, 1));
 
 echo (array_product($primes) * 2 - 1) . PHP_EOL;
