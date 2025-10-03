@@ -1,5 +1,5 @@
 # Puzzle
-**Integer pairs of AB/(A+B)** https://www.codingame.com/contribute/view/130398c2525a6fd19b0fa1fb5924c375cb1ff6
+**Integer pairs of AB/(A+B)** https://www.codingame.com/training/medium/integer-pairs-of-abab
 
 # Goal
 Given an integer N, find the number of pairs of integers (A, B) that satisfies (A*B)/(A+B)=N.
