@@ -130,6 +130,15 @@ function setDomino(array $info, array &$positionsToFind, array &$neighbors, arra
     //Update the values left
     $values[$a]--;
     $values[$b]--;
+
+    foreach($rules as $ruleID => [$rule, , $count]) {
+        if($rule == '==') {
+            foreach($values as $value => $occ) {
+                //We don't have enough occurence of that value, it can't satisfy the rule
+                if($occ < $count) unset($rules[$ruleID][1][$value]);
+            }
+        }
+    }
     
     return $a . " " . $b . " " . ($i1 % $width) . " " . intdiv($i1, $width) . " " . ((abs($i1 - $i2) == 1 && $width > 1) ? 0 : 1);
 }
