@@ -1,5 +1,5 @@
 # Puzzle
-**Pips** https://www.codingame.com/contribute/view/13396223d8a613f63164fae35b4379894c8bb7
+**Pips** https://www.codingame.com/training/medium/pips
 
 # Goal
 You are given a board with predefined cells where domino tiles must be placed. Some areas of the board come with special constraints (described in Rules section). Your task is to correctly place all given dominoes so that every condition is satisfied.
