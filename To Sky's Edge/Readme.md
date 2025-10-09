@@ -1,36 +1,37 @@
-https://www.codingame.com/ide/puzzle/to-skys-edge
+# Puzzle
+**To Sky's Edge** https://www.codingame.com/ide/puzzle/to-skys-edge
 
-Goal
+# Goal
 A generation starship is heading towards a new home for mankind : Sky's Edge. The exoplanet being several light years away, the journey will last centuries and see multiple generations of crew members being born, reproducing and dying in the service of human extrasolar expansion. Your goal is to determine which life expectancies are the best suited to reach Sky's Edge with at least 200 settlers, while avoiding overcrowding the ship.
 
 The journey will last Y years, with a variable starting group of people, on a starship having a maximum capacity of C. Every member of the expedition will have exactly the same life expectancy.
 
 Every year, these modifications will take place in the given order :
-1 - Every crew member will get older by one year.
-2 - Every crew member exceeding the life expectancy will die.
-3 - For each batch of 10 crew members between the age of 20 and half the life expectancy (rounded down), a baby is born, adding one 0-year-old individual to the crew. These limits are inclusive.
+1) Every crew member will get older by one year.
+2) Every crew member exceeding the life expectancy will die.
+3) For each batch of 10 crew members between the age of 20 and half the life expectancy (rounded down), a baby is born, adding one 0-year-old individual to the crew. These limits are inclusive.
 
 If the number of people exceeds the ship capacity C, overpopulation causes a civil war leading to the destruction of the ship. The expedition is considered successful if at least 200 people reach Sky's Edge after Y years of travel.
 
 Your goal is to give the minimum and maximum life expectancies in order to have a successful expedition. There is always at least one valid life expectancy.
 
-Example :
-The ship has 10 fifteen-year-olds, 15 twenty-year-olds, 5 forty-year-olds and 2 eighty-year-olds. The life expectancy is of 82 years.
+Example :  
+The ship has 10 fifteen-year-olds, 15 twenty-year-olds, 5 forty-year-olds and 2 eighty-year-olds. The life expectancy is of 82 years.  
 - At year 1, there will be 10 sixteen-year-olds, 15 twenty-one-year-olds, 5 forty-one-year-olds, 2 eighty-one-year-olds AND 2 zero-year-olds, since the 15 twenty-one-year-olds and 5 forty-one-year-olds are within the "fertility span" of [20, 41].
 - At year 2, there will be 2 one-year-olds, 10 seventeen-year-olds, 15 twenty-two-year-olds, 5 forty-two-year-olds, 2 eighty-two-year-olds and only one new zero-year-old.
 - At year 3, there will be 1 one-year-old, 2 two-year-olds, 10 eighteen-year-olds, 15 twenty-three-year-olds, 5 forty-three-year-olds and one zero-year-old. Sadly, the 2 old timers have passed away since they exceeded their life expectancy...
 - ... And so on, with a new peak of natality when the 10 teenagers will reach their twenties, but still heading to extinction...
 
-Input
-Line 1: An integer Y representing the number of years of travel.
-Line 2: An integer C representing the capacity of the ship.
-Line 3: An integer N representing the number of different ages of the starting group of people.
-Next N lines: Two integers AGE and NUMBER representing the number of people of that age.
+# Input
+* Line 1: An integer Y representing the number of years of travel.
+* Line 2: An integer C representing the capacity of the ship.
+* Line 3: An integer N representing the number of different ages of the starting group of people.
+* Next N lines: Two integers AGE and NUMBER representing the number of people of that age.
 
-Output
-Two space-separated integers representing the minimum and maximum life expectancies for the expedition to succeed.
+# Output
+* Two space-separated integers representing the minimum and maximum life expectancies for the expedition to succeed.
 
-Constraints
-1 ≤ Y ≤ 30000
-200 ≤ C ≤ 10000
-1 ≤ N ≤ 50
+# Constraints
+* 1 ≤ Y ≤ 30000
+* 200 ≤ C ≤ 10000
+* 1 ≤ N ≤ 50
