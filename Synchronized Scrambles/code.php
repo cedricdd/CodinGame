@@ -10,9 +10,11 @@ function getTime(int $offset): string {
 
 fscanf(STDIN, "%s %s", $offset1, $offset2);
 
+//Convert the offset to minutes difference
 $offset1 = getOffset($offset1);
 $offset2 = getOffset($offset2);
 
+//Make sure both values are positive
 while($offset1 < 0 || $offset2 < 0) {
     $min = abs(min($offset1, $offset2));
     $offset1 += $min;
@@ -21,6 +23,7 @@ while($offset1 < 0 || $offset2 < 0) {
 
 $match = [];
 
+//We just test the 1440 possible times during the day
 for($i = 0; $i < 1440; ++$i) {
     $t1 = getTime(($offset1 + $i) % 1440);
     $t2 = getTime(($offset2 + $i) % 1440);
