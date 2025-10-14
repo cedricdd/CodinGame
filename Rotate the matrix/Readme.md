@@ -1,6 +1,7 @@
-https://www.codingame.com/contribute/view/87861837da685ee48d533e1c28915e25b96f5
+# Puzzle
+**Rotate the matrix** https://www.codingame.com/contribute/view/87861837da685ee48d533e1c28915e25b96f5
 
-Goal
+# Goal
 Once upon a time, in a peaceful village, there was a child named Kevin. Kevin loved playing with matrices, those grids of numbers that intrigued him so much.
 
 One day, Kevin drew a square matrix on a piece of paper and added an exciting challenge: "Rotate the matrix by anti-clockwise by 45 degrees"
@@ -9,14 +10,14 @@ Kevin then embarked on a stimulating adventure, seeking to solve this mystery. G
 
 Elements in the output are separated by space and center-aligned.
 
-Input
-Line 1 An integer N for matrix size
-Line 2 Matrix matrix a matrix separated by -
+# Input
+* Line 1 An integer N for matrix size
+* Line 2 Matrix matrix a matrix separated by -
 
-Output
-matrix anti-clockwise by 45 degrees
+# Output
+* matrix anti-clockwise by 45 degrees
 Nb : Do not remove the space characters on the end in the each line of output
 
-Constraints
-2 ≤ N ≤ 20
-Every element in matrix is a single character
+# Constraints
+* 2 ≤ N ≤ 20
+* Every element in matrix is a single character
