@@ -1,0 +1,36 @@
+# Puzzle
+**Saving Snoopy** https://www.codingame.com/training/easy/saving-snoopy
+
+# Goal
+Snoopy has once again been shot down by the Red Baron and is trapped behind enemy lines.   
+Decode encrypted messages to help rescue Snoopy using the following rules:  
+
+The encoded message must be read from left to right.
+
+Character swap rules provided in program input must be honored. Character swaps are case sensitive. Only honor the exact cases specified in the program input.
+
+All plus signs (+) may be ignored in the encoded message.
+
+Stars (*) are never part of the decoded message. However, any time a star (*) is observed in the encoded message, the most recently observed (but not discarded) character should be added to the end of the decoded message. You may then discard the star (*) and the character you just added to the decoded message.
+
+For instance, an encoded message equal to t+c+*+a+*+* would be decoded to cat.   
+Moving from left to right, upon observing the first *, the c would be added to the decoded message (and then discarded) as it was most recently observed.   
+Upon observing the second *, the a would be added to the decoded message as it was the most recently observed character that has not yet been discarded.   
+When you get to the last *, you only have a single character left that has not yet been discarded and you add the t to the decoded message resulting in cat.  
+
+Your commanding officer is very particular about formatting. When printing the decoded message, make sure no line has beginning or trailing spaces and make sure each line is as close to 75 characters as possible without going over.
+
+These messages are extremely important. Make sure your commanding officer reads every word!
+
+# Input
+* Line 1: An integer n for the number of character swaps.
+* Next n lines: A string swap containing a character a, an arrow -> and a second character b, all three separated by spaces, indicating that any time a is seen in an encoded message, it should be replaced with b
+* Next line: An integer length indicating the length of the encoded message.
+* Next line: A string encoded_message containing the encoded message.
+
+# Output
+* The decoded message, broken into multiple strings separated by line breaks if necessary, where no string has leading or trailing spaces and each string is as close to 75 characters as possible without going over.
+
+# Constraints
+* 2 ≤ n ≤ 26
+* 10 ≤ length ≤ 2000
