@@ -1,12 +1,14 @@
-https://www.codingame.com/training/hard/simple-cpu-emulation-1
+# Puzzle
+**Simple CPU Emulation** https://www.codingame.com/training/hard/simple-cpu-emulation-1
 
-Goal
-You must create an emulator that takes a set of instructions and interprets them.
-An emulator is a software program that mimics hardware, in this case a CPU. 
-In this puzzle, you'll have to emulate an Arithmetic and Logic Unit (ALU) and registers. 
-This CPU uses three 8-bit registers numbered 0,1, and 2, initialized to zero.
+# Goal
+You must create an emulator that takes a set of instructions and interprets them.  
+An emulator is a software program that mimics hardware, in this case a CPU.   
+In this puzzle, you'll have to emulate an Arithmetic and Logic Unit (ALU) and registers.   
+This CPU uses three 8-bit registers numbered 0,1, and 2, initialized to zero.  
 
-Example:
+*Example:*  
+```
 Instruction - Opcode - description; comment
 1015 - 1knn - LD k, nn ; Load 0x15 into register 0x0
 
@@ -23,9 +25,10 @@ Only the lowest 8-bits are stored in register x.
 8knn – SNE k, nn – Skip next instruction if value of register k is not equal to nn
 90xy – SE x,y – Skip next instruction if value of register x equals value of register y
 A0xy – SNE x,y - Skip next instruction if value of register x is not equal to the value of register y
+```
 
 Example set of instructions:
-
+```
 1005110520010000
 
 opcode - instruction - comment
@@ -33,8 +36,10 @@ opcode - instruction - comment
 1105 - LD 1, 05 - Load 0x05 into register 0x1
 2001 - ADD 0,1 - Add register 0x0 to register 0x1, store in register 0x0
 0000 - EXIT - stop and print results
+```
 
 Example execution:
+```
 # register values = 0, 0, 0
 opcode 1005
 # register values = 5, 0, 0
@@ -45,15 +50,15 @@ opcode 2001
 opcode 0000
 # exit and print register values
 PRINT 10 5 0
+```
 
-Input
-You will receive a string of hexadecimal characters that represent the instructions to be interpreted. 
-Each character represents 4 bits and an opcode is made up of 4 characters, or 16 bits. An opcode is a single operation that must be performed.
+# Input
+* You will receive a string of hexadecimal characters that represent the instructions to be interpreted. 
+* Each character represents 4 bits and an opcode is made up of 4 characters, or 16 bits. An opcode is a single operation that must be performed.
+* Line 1: A string of hex characters, program, without spaces
 
-Line 1: A string of hex characters, program, without spaces
+# Output
+* Print the values of registers 0,1 and 2, in decimal notation and separated by spaces.
 
-Output
-Print the values of registers 0,1 and 2, in decimal notation and separated by spaces.
-
-Constraints
-program length <= 100 and is divisible by 4
+# Constraints
+* program length <= 100 and is divisible by 4
