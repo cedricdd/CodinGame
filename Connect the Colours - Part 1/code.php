@@ -459,7 +459,7 @@ function checkEmptyPositions(string $grid, array $colorsUsed): bool {
 
 // We are searching for a path to link all the colors, we don't care if all the positions are used or not
 function findPaths(array $colors, string $grid, array $paths = []): bool {
-    global $neighbors, $size;
+    global $neighbors;
 
     $color = array_key_last($colors);
 
@@ -527,7 +527,7 @@ fscanf(STDIN, "%d %d", $h, $w);
 $grid = [];
 $index = 0;
 $neighbors = [];
-$size = 0;
+$size = $w * $h;
 $start = microtime(1);
 
 for ($y = 0; $y < $h; ++$y) {
@@ -537,7 +537,6 @@ for ($y = 0; $y < $h; ++$y) {
         $index = $y * $w + $x;
 
         if($c != '.' && $c != 'H' && $c != 'V' && $c != 'X' && !isset($colors[$c])) $colors[$c] = [2, $index];
-        if($c != 'X') ++$size;
         if($c == 'V') {
             $V[$index] = 1;
             $grid[$y][$x] = '.';
