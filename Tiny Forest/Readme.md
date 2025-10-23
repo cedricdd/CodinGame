@@ -1,0 +1,73 @@
+# Puzzle
+**Tiny Forest** https://www.codingame.com/training/medium/tiny-forest
+
+# Goal
+You have just inherited of a small land of width W and height H with some trees in it and you had the idea to grow a forest.  
+But you have only 1 seed to plant.  
+Find the maximum number of trees after 33 years you can have by planting the seed at one of the best place.  
+
+*Rules:*  
+- Seeds need 10 years to grow as a Tree.
+- Trees produce 4 seeds around them after one year.
+- Trees may be already present on your land, they will produce seed after one year too.
+
+Year 0 : With X as your one and only seed and Y a tree already present
+```
+.  .  .  .  .
+.  X  .  .  .
+.  .  .  .  .
+.  .  .  .  .
+.  .  .  .  Y
+```
+Year 1 : Trees produce seeds after one year
+```
+.  .  .  .  .
+.  X  .  .  .
+.  .  .  .  .
+.  .  .  .  X
+.  .  .  X  Y
+```
+Year 10 : Your seed is now a tree, Congratulation !
+```
+.  .  .  .  .
+.  Y  .  .  .
+.  .  .  .  .
+.  .  .  .  X
+.  .  .  X  Y
+```
+Year 11 : Your new tree starts to produce seeds too after a year
+```
+.  X  .  .  .
+X  Y  X  .  .
+.  X  .  .  .
+.  .  .  .  Y
+.  .  .  Y  Y
+```
+Year 12 : The old trees in the corner also keep spreading
+```
+.  X  .  .  .
+X  Y  X  .  .
+.  X  .  .  X
+.  .  .  X  Y
+.  .  X  Y  Y
+```
+Year 33 : Finally you have a tiny forest of 21 trees !
+```
+Y  Y  Y  X  .
+Y  Y  Y  Y  Y
+Y  Y  Y  Y  Y
+X  Y  Y  Y  Y
+.  Y  Y  Y  Y
+```
+
+# Input
+* Line 1 : an integer W for the width of the parcel.
+* Line 2 : an integer H for the height of the grid.
+* Next H lines : each line of the land, with trees (Y) or grass (.).
+
+# Output
+* Line 1 : an integer N for the number of trees you can have on your land by 33 years by planting your seed at the best place.
+
+# Constraints
+* 1 <= W <= 40
+* 1 <= H <= 40
