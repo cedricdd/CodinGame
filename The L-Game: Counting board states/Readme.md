@@ -1,5 +1,5 @@
 # Puzzle
-**The L-Game: Counting board states** https://www.codingame.com/contribute/view/133467cb6a3f574dde5cd07050123309d657a4
+**The L-Game: Counting board states** https://www.codingame.com/training/easy/the-l-game-counting-board-states
 
 # Goal
 You must count the number of possible board states for a generalized version of the L-Game.
