@@ -1,0 +1,41 @@
+# Puzzle
+**There is no Spoon - Episode 2** https://www.codingame.com/training/hard/there-is-no-spoon-episode-2
+
+# Goal
+The game is played on a rectangular grid with a given size. Some cells contain nodes with a number on them from 1 to 8 inclusive. This number represents the amount of links the node should have with neighboring nodes. The rest of the cells are empty.
+
+The goal is to connect all of the nodes by printing a list of links.
+
+*Rules*  
+The links must follow certain criteria:
+* They must begin and end at distinct nodes.
+* They must either be horizontal or vertical (in a straight line).
+* They must not cross any other links or nodes.
+* At most two links connect a pair of nodes.
+* The number of links connected to each node must match the number on that node.
+* The links must connect all the nodes into a single connected group.
+
+You lose if:
+* You try to place three or more links between two nodes.
+* You try to place a link which crosses another link or a node to which it is not connected.
+* You try to place a link which causes a node to have a greater number of links than the amount of links it displays.
+* Your solution does not reach the amount of optimal links for each node.
+* Your solution creates two or more isolated groups of nodes.
+* Your program does not link nodes fast enough (timeout).
+
+# Input
+* Line 1: one integer width for the number of cells along the x axis.
+* Line 2: one integer height for the number of cells along the y axis.
+* Next height lines: A string line containing width characters. A dot . represents an empty cell. A number from 1 to 8 represents a cell containing a node. The number is the amount of links the node must have.
+
+# Output
+* One line per link or couple of links. Each line is comprised of five integers: x1 y1 x2 y2 amount to add amount links between two nodes at coordinates (x1,y1) and (x2,y2).
+
+# Constraints
+* 0 < width ≤ 30
+* 0 < height ≤ 30
+* 0 ≤ x1 , x2 < width
+* 0 ≤ y1 , y2 < height
+* 1 ≤ amount ≤ 2
+* Alloted response time to first output line ≤ 1s.
+* Response time between two output lines ≤ 100ms
