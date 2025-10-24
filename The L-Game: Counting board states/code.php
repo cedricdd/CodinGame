@@ -26,7 +26,7 @@ function nCk(int $n, int $k): int {
 
 fscanf(STDIN, "%d %d %d", $height, $width, $n);
 
-if($width * $height - ($n + 8) < 0) echo '0' . PHP_EOL;
+if($width * $height - ($n + 8) < 0) exit("0");
 else {
     $total = 0;
     $lID = 0;
@@ -77,9 +77,9 @@ for($index = ($width * $height) - 1; $index >= 0; --$index) {
             $listPieces += $pieces[$indexPosition];
         }
 
-        $result += $$total - count($listPieces);
+        $result += $total - count($listPieces);
     }   
 }
 
 //We need to multiply by the number of way to place the neutral blocks
-echo $total * nCk($width * $height - 8, $n) . PHP_EOL;
+echo $result * nCk($width * $height - 8, $n) . PHP_EOL;
