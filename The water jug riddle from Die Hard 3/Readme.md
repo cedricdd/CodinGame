@@ -1,6 +1,7 @@
-https://www.codingame.com/training/expert/the-water-jug-riddle-from-die-hard-3
+# Puzzle
+**The water jug riddle from Die Hard 3** https://www.codingame.com/training/expert/the-water-jug-riddle-from-die-hard-3
 
-Goal
+# Goal
 You've got to defuse a bomb by placing exactly 4 liters of water on a sensor. And you have to be quick!
 
 The problem is, you only have a 5L jug and a 3L jug on hand!
@@ -30,16 +31,16 @@ Possible moves:
 - "Empty" water from a container to empty it completely
 - "Pour" water from a container to another. No water is spilled with this move.
 
-Input
-Line 1: The amount of water W to be measured (4 in the example)
-Line 2: The number of containers N to be measured (2 in the example)
-Following N lines: An integer representing the capacity of the containers (3 and 5 in the example)
+# Input
+* Line 1: The amount of water W to be measured (4 in the example)
+* Line 2: The number of containers N to be measured (2 in the example)
+* Following N lines: An integer representing the capacity of the containers (3 and 5 in the example)
 
-Output
-Line 1: The minimal number of moves M needed to solve the problem (6 in the example)
+# Output
+* Line 1: The minimal number of moves M needed to solve the problem (6 in the example)
 
-Constraints
-0 < W < 100
-1 < N < 5
-Each container has a unique capacity Ci and:
-0 < C0 < C1 ... < CN < 100
+# Constraints
+* 0 < W < 100
+* 1 < N < 5
+* Each container has a unique capacity Ci
+* 0 < C0 < C1 ... < CN < 100
