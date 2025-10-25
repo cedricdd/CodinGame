@@ -1,0 +1,47 @@
+# Puzzle
+**The lost files** https://www.codingame.com/training/medium/the-lost-files
+
+# Goal
+You work in CG, where you wrote a bleeding-edge map generator for the next multi-player contest.  
+Your map generator takes 2 parameters: C the number of continents and T the total number of tiles to generate.  
+Generated tiles have polygonal shape and 2 tiles belong to the same continent if they share at least one vertex.  
+
+Your generator generates 2 files vertices.txt and edges.txt.  
+The first one contains coordinates of tile vertices sorted by their index, the second one describes edges between vertices.  
+You spent days to generate random maps and carefully saved the output files of the nicest ones for the contest... but you just accidentally erased all the vertices.txt files!
+
+With the right values of C and T, you could easily re-generate the erased files because you always hard-code random seeds to 42, but you cannot remember these damn parameters and the contest is in 24h.  
+No choice, you will have to cancel the contest... unless you can write a program to recover the C and T parameters from the leftover edges.txt files.
+
+Your task  
+Find the generator parameters C and T from the generated list of edges.  
+
+Example  
+Here is a possible planar representation of the edges in the first test:
+```
+                 1 --- 4 -- 10 -- 5
+                 |     |     \   /
+                 |     |      \ /
+                 2 --- 7       8
+                        \     /
+      3 --- 6            \   /
+       \   /              \ /
+        \ /                0
+         9
+```
+
+The edges form C=2 continents with 1 and 3 tiles for a total of T=4 tiles.  
+The output should be:
+```
+2 4
+```
+
+# Input
+* Line 1: one integer E the number of edges
+* Next E lines: two integers n1 and n2 representing an edge between vertex n1 and vertex n2
+
+# Output
+* 2 integers C and T for the number of continents and the total number of tiles
+
+# Constraints
+* E, C, T < 1000
