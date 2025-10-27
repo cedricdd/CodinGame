@@ -1,0 +1,26 @@
+# Puzzle
+**The leaking bathtub** https://www.codingame.com/training/easy/the-leaking-bathtub
+
+# Goal
+Bob has a bathtub.  
+He wants to fill it with water but there are some leaks that let the water flow.  
+Given the dimensions S and h of the bathtub, the tap water flow and the leakHeight and leakFlow of each leak, calculate the time, rounded to the second down, Bob needs to fill his bathtub.  
+A leak does not leak the water flow until the water has reached the leak height.  
+The bathtub is a rectangular parallelepiped of surface area S and height h.  
+
+# Input
+* Line 1 : An integer S for the surface area of the bathtub in cm².
+* Line 2 : An integer h for the height of the bathtub in cm.
+* Line 3 : An integer flow for the tap water flow in L/minute.
+* Line 4 : An integer N for the number of leaks.
+* N next lines : 2 space-separated integers leakHeight and leakFlow for the height of the leak in cm and the flow allowed by the leak (in L/minute).
+
+# Output
+* If the bathtub can be filled, output one line: The time, in HH:MM:SS format, that Bob needs to fill his bathtub.
+* If the bathtub cannot be filled entirely, output one line: Impossible, filling height cm.
+
+# Constraints
+* 0 ≤ N ≤ 1000
+* 0 ≤ leakHeight < h
+* 0 < time ≤ 99:59:59
+* 0 < Sxh < 2^32
