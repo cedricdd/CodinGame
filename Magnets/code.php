@@ -98,6 +98,7 @@ function solve(array $leftHint, array $topHint, array $rightHint, array $bottomH
                         [$leftHint, $topHint, $rightHint, $bottomHint, $toFind, $board, $actions] = setPosition('+', $xp, $yp, $leftHint, $topHint, $rightHint, $bottomHint, $toFind, $board, $actions);
 
                         $positionSet = true;
+                        break; //We might have conflicting magnets, one add one so the conflict is detected on next pass
                     }
                 }
             }
@@ -137,6 +138,7 @@ function solve(array $leftHint, array $topHint, array $rightHint, array $bottomH
                         [$leftHint, $topHint, $rightHint, $bottomHint, $toFind, $board, $actions] = setPosition('+', $xp, $yp, $leftHint, $topHint, $rightHint, $bottomHint, $toFind, $board, $actions);
 
                         $positionSet = true;
+                        break; //We might have conflicting magnets, one add one so the conflict is detected on next pass
                     }
                 }
             } 
@@ -176,6 +178,7 @@ function solve(array $leftHint, array $topHint, array $rightHint, array $bottomH
                         [$leftHint, $topHint, $rightHint, $bottomHint, $toFind, $board, $actions] = setPosition('-', $xp, $yp, $leftHint, $topHint, $rightHint, $bottomHint, $toFind, $board, $actions);
 
                         $positionSet = true;
+                        break; //We might have conflicting magnets, one add one so the conflict is detected on next pass
                     }
                 }
             }
@@ -215,6 +218,7 @@ function solve(array $leftHint, array $topHint, array $rightHint, array $bottomH
                         [$leftHint, $topHint, $rightHint, $bottomHint, $toFind, $board, $actions] = setPosition('-', $xp, $yp, $leftHint, $topHint, $rightHint, $bottomHint, $toFind, $board, $actions);
 
                         $positionSet = true;
+                        break; //We might have conflicting magnets, one add one so the conflict is detected on next pass
                     }
                 }
             }
