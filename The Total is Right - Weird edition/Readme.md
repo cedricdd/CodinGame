@@ -1,6 +1,7 @@
-https://www.codingame.com/ide/puzzle/the-total-is-right---weird-edition
+# Puzzle
+**The Total is Right - Weird edition** https://www.codingame.com/ide/puzzle/the-total-is-right---weird-edition
 
-Goal
+# Goal
 Your goal is to build an arithmetic expression which evaluates to N. This expression can only contain copies of a, the four arithmetic operations (+, -, * and /) and parentheses ( ).
 
 What is the minimum number of copies of a needed to reach the target number N?
@@ -8,38 +9,44 @@ What is the minimum number of copies of a needed to reach the target number N?
 Note: Divisions are valid only if the result is an integer. Thus, 8 / 4 is valid and 10 / 3 is not.
 
 Examples:
+```
 N = 69, a = 3
 ( 3 * 3 + 3 ) * ( 3 + 3 ) - 3 = 69
 Answer is 6
-
+```
+```
 N = 41, a = 6
 6 * 6 + 6 - 6 / 6 = 41
 Answer is 5
-
+```
+```
 N = 888, a = 8
 ( 8 + 8 ) * ( 8 * 8 - 8 ) - 8 = 888
 Answer is 6
-
+```
+```
 N = 1000, a = 11
 ( 11 * 11 - 11 - 11 + 11 / 11 ) * ( 11 - 11 / 11 ) = 1000
 Answer is 9
-
+```
+```
 N = 666, a = 7
 7 * 7 * ( 7 + 7 ) - 7 - 7 - 7 + 7 / 7 = 666
 Answer is 9
+```
 
-This problem could get tough. example:
-N = 3662, a = 71 needs 17 '71'...
-But none of the test cases proposed here are that bad!
+This problem could get tough. example:  
+N = 3662, a = 71 needs 17 '71'...  
+But none of the test cases proposed here are that bad!  
 
-Input
-Line 1: the target integer N
-Line 2: the integer a to use in your computation
+# Input
+* Line 1: the target integer N
+* Line 2: the integer a to use in your computation
 
-Output
-Line 1: the minimum number of a used to obtain N
+# Output
+* Line 1: the minimum number of a used to obtain N
 
-Constraints
-1 < N <= 10000
-1 <= a <= 100
-solution <= 12
+# Constraints
+* 1 < N <= 10000
+* 1 <= a <= 100
+* solution <= 12
