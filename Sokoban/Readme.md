@@ -1,0 +1,30 @@
+# Puzzle
+**Sokoban** https://www.codingame.com/training/hard/sokoban/solution
+
+# Goal
+Place all boxes on their target cells.
+
+You have one unit which you can move around on the map. You can push boxes by walking into them.   
+This will push the box in the same direction as you are moving in.   
+The field where you push the box to must be free, it is not possible to move two or more boxes at once.  
+You are given target cells where you have to place the boxes.  
+
+# Input
+* Line 1: width height boxCount, the width and height of the map and the number of boxes
+* Next height lines: a string of width characters, that can be:
+ * \. for an empty cell
+ * \# for a wall
+ * \* for a target cell
+
+# Input per turn
+* Line 1: pusherX pusherY, the position of your unit
+* Next boxCount lines: boxX boxY, the position of each box
+  
+# Output
+* A single character indicating your movement direction: U to move up, D to move down, R to move right, L to move left.
+
+# Constraints
+* 7 ≤ width ≤ 11
+* 7 ≤ height ≤ 11
+* 3 ≤ boxCount ≤ 5
+* Allotted response time to output is ≤ 10 seconds for the first turn, 50 ms for later turns.
