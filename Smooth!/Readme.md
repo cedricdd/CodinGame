@@ -1,0 +1,42 @@
+# Puzzle
+**Smooth!** https://www.codingame.com/training/easy/smooth
+
+# Goal
+Ming and Ham like smoothies. To make smoothies, you need a lot of fruit. Every now and then, they'll play a little game.   
+They'll buy a lot of fruit in bulk, and then take turns at “reducing” it.
+
+A turn of reducing works as follows:
+* Ming will neatly arrange the fruit in a first line, with the pieces evenly spread
+* Ham will pick a fruit type from stock, and arrange them in a second line, evenly spread, such that each one matches a bundle of exactly n pieces in the first line, with n depending on the fruit type (see table below)
+* If any fruit in the first line is left unmatched with fruit from the second line, Ming eats it and the game finishes in defeat
+* Else they scoop all fruit from the first line to the blender, swap roles and repeat
+
+They have the following fruit types in stock:
+* apples, that spread one for every bundle of n = two
+* oranges, that spread one for every bundle of n = three
+* bananas, that spread one for every bundle of n = five
+* watermelons, that spread one for every bundle of n = one
+
+The game ends in a victory if the second row ever gets reduced to a single watermelon at the end of a turn.
+
+*Examples*  
+
+A game that starts with 15 pieces of fruit can be won: Ming would spread them out; Ham would replace them with 3 bananas;   
+Ming would replace those with an orange; and Ham would perform the finishing move by replacing it with 1 watermelon.  
+
+A game that starts with 7 pieces of fruit can't be won: no matter what Ham attempts to replace them with, there'll always be leftovers for Ming to eat.  
+
+Thinking time!
+
+You have inside information about which quantity of fruit is going to be available in bulk for the following weeks. Assuming Ming and Ham play optimally (for victory, not bloatedness!), can you predict which games they'll win?
+
+# Input
+* Line 1: N number of weeks of information
+* Next N lines: F quantity of fruit available in bulk that week
+
+# Output
+* N lines: VICTORY or DEFEAT
+
+# Constraints
+* N ≤ 20
+* F < 2⁵³
