@@ -30,8 +30,8 @@ Note: Ignore leap seconds, daylight savings and other timezone shenanigans and t
 * Two UTC offset strings separated by a space (offset1 offset2)
 
 # Output
-* Line 1: N Count of distinct anagram time pairs found
-* Next N lines: time pairs in the format: (hhmm, hhmm) representing the time in the two timezones. The entries must be sorted in lexicographical order and separated by a comma and space.
+* Time pairs in the format: HHMM, HHMM representing the time in the two timezones printed one per line.
+* The entries must be sorted in lexicographical order and separated by a comma and space , 
   
 # Constraints
 * offset1 ≠ offset2
