@@ -1,5 +1,5 @@
 # Puzzle 
-**Agent X, Mission 3—The Bottle In The Sea** https://www.codingame.com/contribute/view/868058fdaa6cff707bbad53b205a2320dbdaf
+**Agent X, Mission 3—The Bottle In The Sea** https://www.codingame.com/training/medium/agent-x-mission-3the-bottle-in-the-sea
 
 # Goal
 [Agent Y to Base]  
