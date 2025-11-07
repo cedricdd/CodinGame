@@ -1,5 +1,5 @@
 # Puzzle
-**Synchronized Scrambles** https://www.codingame.com/contribute/view/135711354e3dac3eee928fbc0fdf1fe0aa75c2
+**Synchronized Scrambles** https://www.codingame.com/training/easy/synchronized-scrambles
 
 # Goal
 In our interconnected world, people across different time zones often coordinate meetings and events. Sometimes, purely by coincidence, the time displayed on clocks in two different time zones uses exactly the same digits arranged differently - creating what we call "synchronized scrambles."
