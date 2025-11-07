@@ -33,7 +33,6 @@ for($i = 0; $i < 1440; ++$i) {
 
 sort($match);
 
-echo count($match) . PHP_EOL;
 echo implode(PHP_EOL, array_map(function($m) {
     return implode(", ", $m);
 }, $match)) . PHP_EOL;
