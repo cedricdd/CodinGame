@@ -5,8 +5,9 @@ function sieveOfEratosthenes(int $limit): array {
 
     // Initialise the sieve array
     $sieve = array_fill(2, $limit - 1, 1);
+    $upper = sqrt($limit) + 1;
 
-    for($i = 2; $i < $limit; ++$i) {
+    for($i = 2; $i < $upper; ++$i) {
         //This number is still in the sieve, remove all it's multiples
         if(isset($sieve[$i])) {
             for($j = $i * 2; $j < $limit; $j += $i) unset($sieve[$j]);
