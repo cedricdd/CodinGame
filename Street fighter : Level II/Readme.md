@@ -1,10 +1,11 @@
-https://www.codingame.com/contribute/view/89841305c64ac8f04cad689a6cad9aaa0eaa3
+# Puzzle
+**Street fighter : Level II** https://www.codingame.com/contribute/view/89841305c64ac8f04cad689a6cad9aaa0eaa3
 
-Goal
-Given two teams of champions, my_team on the left and opponents on the right, with list of hits performed by each of them.
-Output the order of champions in my_team to win the fight with fewer number of hits.
+# Goal
+Given two teams of champions, my_team on the left and opponents on the right, with list of hits performed by each of them.  
+Output the order of champions in my_team to win the fight with fewer number of hits.  
 
-Rules:
+*Rules:*  
 - Each team has a predetermined sequence of attacks.
 - The order of champions in my_team is determined by you, while the order in opponents is given as input.
 - The champions in each team engage in a 1-to-1 fight until one of them is dead (life <= 0).
@@ -14,13 +15,14 @@ Rules:
 - When a champion uses special attack, his/her rage restarts at 0.
 - The fight stops when all fighters in a team are dead.
 
-In the input, each hit is preceded by the direction of the attack:
-- > means champion in my_team hits champion in opponents.
+In the input, each hit is preceded by the direction of the attack:  
+- \> means champion in my_team hits champion in opponents.
 - < means champion in opponents hits champion in my_team.
 
 The table below shows the starting life and the damage caused by PUNCH, KICK and SPECIAL (special attack) of the champions.
 
 Champ.|Life|Punch|Kick|Special Attack
+```
 KEN   |25  |6    |5   |3*rage
 RYU   |25  |4    |5   |4*rage
 TANK  |50  |2    |2   |2*rage
@@ -33,8 +35,10 @@ JINX  |22  |4    |4   |damage received*rage*opp.rage
 TIFA  |38  |5    |5   |0; 3*rage is added to TIFA's life
 ZED   |27  |4    |5   |5*rage; rage is removed from ZED's life
 SETT  |39  |8    |0   |2*rage; rage is added to SETT's life
+```
 
 Example
+```
 INPUT       COMMENT                                     
 KEN;VI JINX Ken and Vi are fighting against JINX 
             Ken fights first then Vi against Jinx alone
@@ -57,23 +61,22 @@ KEN;VI JINX Ken and Vi are fighting against JINX
             Vi and Ken beat Jinx in 2 hits
 
 OUTPUT: VI;KEN beat JINX in 2 hits
-
+```
 
 This challenge is the second of a series of 2 exercises proposed for the challenge « Street Fighter ». If you encounter difficulties with this challenge, you can start with the « Street Fighter Level I » on the same topic but easier to solve: https://www.codingame.com/training/easy/street-fighter-level-i
 
-Input
-Line 1: my_team opponents separated by a space where my_team and opponents is a list of champions separated by a semi-colon and each champion is one of: KEN, RYU, TANK, VLAD, JADE, ANNA, JUN, VI, JINX, TIFA, ZED or SETT
-Line 2:n is an integer: the total number of hits performed by the champions
-Next n Lines: d ATTACK separated by a space where d is > or < and gives the direction of the attack; ATTACK is one specific attack : PUNCH, KICK or SPECIAL
+# Input
+* Line 1: my_team opponents separated by a space where my_team and opponents is a list of champions separated by a semi-colon and each champion is one of: KEN, RYU, TANK, VLAD, JADE, ANNA, JUN, VI, JINX, TIFA, ZED or SETT
+* Line 2:n is an integer: the total number of hits performed by the champions
+* Next n Lines: d ATTACK separated by a space where d is > or < and gives the direction of the attack; ATTACK is one specific attack : PUNCH, KICK or SPECIAL
 
-Output
-order of champion from my_team beat opponents in m hits
-or
-We always lose in case my team can't beat opponents
-The champions' names in order of champion from my_team should be separated by a semi-colon.
+# Output
+* Order of champion from my_team beat opponents in m hits
+* We always lose in case my team can't beat opponents
+* The champions' names in order of champion from my_team should be separated by a semi-colon.
 
-Constraints
-champions from my_team is always different from champions from opponents.
-There is always a winner and a loser. No tie.
-There is always only one best solution.
-In my_team there are 2, 3, 4, 5 or 6 champions.
+# Constraints
+* Champions from my_team is always different from champions from opponents.
+* There is always a winner and a loser. No tie.
+* There is always only one best solution.
+* In my_team there are 2, 3, 4, 5 or 6 champions.
