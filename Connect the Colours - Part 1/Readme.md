@@ -1,5 +1,5 @@
 # Puzzle
-**Connect the Colours - Part 1** https://www.codingame.com/contribute/view/1299698fc897623022a45311186f34a333fc69
+**Connect the Colours - Part 1** https://www.codingame.com/training/medium/connect-the-colours---part-1
 
 # Goal
 Connect the Colours is a logical puzzle that involves connecting pairs of matching colours in a closed grid. The objective is to connect ALL pairs of identical colours with non-overlapping paths, using EVERY usable tile.
