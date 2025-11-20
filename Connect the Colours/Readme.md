@@ -1,11 +1,13 @@
 # Puzzle
-**Connect the Colours** https://www.codingame.com/contribute/view/129408a417d97f1bbc14444ce623ef6495dcba
+**Connect the Colours** https://www.codingame.com/training/hard/connect-the-colours---part-2
 
 # Goal
 Connect the Colours is a logical puzzle that involves connecting pairs of matching colours in a closed grid. The objective is to connect ALL pairs of identical colours with non-overlapping paths, using EVERY tile.
-  
+
+This is the second edition of the "Connect the Colours" series. This edition does NOT contain any of the special tiles that are in part 1. 
+
 Rules:  
-* Paths must consist of one or more horizontal and or vertical segments to connect adjacent tiles.
+* Paths must consist of one or more horizontal and/or vertical segments to connect adjacent tiles.
 * Each colour must be connected to the other instance of the same colour using a continuous path.
 * A single tile can only be used in ONE path and any two paths CANNOT overlap or cross each other.
 * Paths must remain entirely within the grid boundaries.
@@ -40,9 +42,9 @@ This will create a section of a path from the first tile, to the second tile and
 Tiles MUST be in the same plane either horizontally or vertically (x1 = x2 OR y1 = y2).   
 
 # Constraints
-* 1 ≤ h, w ≤ 10
+* 1 ≤ h, w ≤ 20
+* A colour identifier will appear exactly twice within a puzzle.
+* Maximum number of distinct colours in a puzzle is 9.
 * Allotted response time for first output is 2 seconds.
 * Allotted response time for subsequent outputs is 50 ms.
 * Turn limit is 60 turns.
-* A colour identifier will appear exactly twice within a puzzle.
-* Maximum number of distinct colours in a puzzle is 9.
