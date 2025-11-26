@@ -1,10 +1,11 @@
-https://www.codingame.com/training/easy/stunning-numbers
+# Puzzle
+**Stunning numbers** https://www.codingame.com/training/easy/stunning-numbers
 
-Goal
-When written with digits, some digits may still read when flipped (0, 1, 2, 5, 6, 8, and 9) while others mean nothing when flipped (3, 4, and 7).
-Once flipped, some integers remain identical like 69, they are called "stunning numbers"!
-Given an integer n, say whether it is "stunning" or not, then find the next "stunning number"...
-
+# Goal
+When written with digits, some digits may still read when flipped (0, 1, 2, 5, 6, 8, and 9) while others mean nothing when flipped (3, 4, and 7).  
+Once flipped, some integers remain identical like 69, they are called "stunning numbers"!  
+Given an integer n, say whether it is "stunning" or not, then find the next "stunning number"...  
+```
  --          --    --          --    --    --    --    --
 |  |     |     |     |  |  |  |     |        |  |  |  |  |
              --    --    --    --    --          --    --
@@ -17,16 +18,16 @@ Given an integer n, say whether it is "stunning" or not, then find the next "stu
  --    --          --    --    --    --    --        
 |  |  |  |  |        |     |  |  |  |     |     |     |  |
  --    --    --    --    --          --    --          --
-
+```
 
 Even if the number 1 is a little off once flipped, it is considered stunning.
 
-Input
-n an integer
+# Input
+* n an integer
 
-Output
-Line 1: true if n is a "stunning number", false otherwise
-Line 2: the next "stunning number".
+# Output
+* Line 1: true if n is a "stunning number", false otherwise
+* Line 2: the next "stunning number".
 
-Constraints
-0 <= n <= 10^20
+# Constraints
+* 0 <= n <= 10^20
