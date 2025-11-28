@@ -1,27 +1,30 @@
-https://www.codingame.com/training/easy/string-balls
+# Puzzle
+**String balls** https://www.codingame.com/training/easy/string-balls
 
-Goal 
+# Goal 
 Let's name the string abcdefghijklmnopqrstuvwxyz the alphabet, and let d be the distance between two elements in the alphabet defined by the absolute value of the difference of their indexes. For example:
-
-  d("b", "d") = d("d", "b") = 2
-  d("f", "f") = 0
-  d("a", "z") = 25
-
+```
+d("b", "d") = d("d", "b") = 2
+d("f", "f") = 0
+d("a", "z") = 25
+```
 
 We can extend d to strings of equal length as follows: given two strings sa, sb of equal length len, d(sa, sb) is the sum of the pairwise d(sa[i], sb[i]) for all index values (i) from 0 to len-1. For example:
-
-  d("fb", "fd") = d("f", "f") + d("b", "d") = 0 + 2 = 2
-  d("ab", "ac") = d("ac", "ab") = 1
-  d("ac", "bb") = 2
-
+```
+d("fb", "fd") = d("f", "f") + d("b", "d") = 0 + 2 = 2
+d("ab", "ac") = d("ac", "ab") = 1
+d("ac", "bb") = 2
+```
 
 We can now define a (closed) ball of center a given string and of (integer) radius. A point p (i.e. a string with letters in the alphabet and of same length as the center) is inside the ball if d(center, p) <= radius.
 
 Find the number of points contained in the ball of center center and radius radius.
 
 Example (Test 4):
+```
 2
 ab
+```
 
 The points at distance less or equal to 2 of ab are:
 - at distance 0: ab
@@ -32,15 +35,15 @@ For a total of 8 points contained in the (closed) ball of center ab and radius 2
 
 NB: Tests 1-7 cover simple cases and should help you debug your program. Tests 8-11 check the performance.
 
-Input
-Line 1: An integer radius, the radius of the ball.
-Line 2: A string center, the center of the ball.
+# Input
+* Line 1: An integer radius, the radius of the ball.
+* Line 2: A string center, the center of the ball.
 
-Output
-The number of points inside the ball of center center and radius radius.
+# Output
+* The number of points inside the ball of center center and radius radius.
 
-Constraints
-0 < radius <= 100
-0 < length(center) < 20
-0 <= answer <= 1e6
-The string center contains only lowercase English letters.
+# Constraints
+* 0 < radius <= 100
+* 0 < length(center) < 20
+* 0 <= answer <= 1e6
+* The string center contains only lowercase English letters.
