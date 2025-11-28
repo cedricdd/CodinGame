@@ -1,0 +1,23 @@
+# Puzzle
+**StringSorter** https://www.codingame.com/contribute/view/61065f23d5a03ba1a52c4f57a21048ccb8b72
+
+# Goal
+You're tasked with creating a string sorting algorithm for two arrays of strings. The second array's strings have unique characters. The sorting rules are:  
+1. Assign each letter a value (a=1, b=2, ..., z=26). The string's value is the concatenation of its letters' values. Calculate the absolute difference between the values of the strings at the same index in both arrays.
+2. If this difference is odd, sort the first array's string in ascending lexicographical order.
+3. If the difference is even, sort the first array's string based on the order of characters in the second array's string. Letters not in the second string are appended at the end.
+4. If multiple letters in the first string aren't in the second, group them as they appear in the first string and append at the end.
+
+Your function should take the two arrays as input and return the sorted first array.
+
+# Input
+* Line 1: A string First Array containing space-separated elements for the first array.
+* Line 2: A string Second Array containing space-separated elements for the second array.
+
+# Output
+* Line 1: The sorted version of the First Array after applying the sorting rules described in the question. The elements should be separated by spaces. The positions of the Array elements must be same as input.
+
+# Constraints
+* 1 ≤ First Array Length ≤ 9
+* 1 ≤ Second Array Length ≤ 9
+* First Array & Second Array Both consist of lowercase letters only
