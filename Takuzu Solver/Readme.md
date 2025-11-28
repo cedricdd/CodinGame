@@ -1,0 +1,24 @@
+# Puzzle
+**Takuzu Solver** https://www.codingame.com/training/hard/takuzu-solver
+
+# Goal
+Your program must output a solution to a Takuzu.  
+A Takuzu, also known as Binairo, is a logic puzzle involving placement of two symbols (0 and 1) on a square grid.  
+
+The objective is to fill the grid with 1s and 0s, constraints are :  
+- an equal number of 1s and 0s in each row and column
+- no more than two of either number adjacent to each other
+- no identical rows and no identical columns
+
+Similar to Sudoku, each puzzle begins with several squares in the grid already filled. Each test has only one possible solution.
+
+# Input
+* Line 1 : an integer n, dimension of the square grid.
+* n lines : a string line with n digits corresponding to that line. A "." is used for an empty space.
+
+# Output
+* n lines : A string line with n digits corresponding to that line. The original numbers should not have changed, and there should be no "." left.
+
+# Constraints
+* 0 < n <= 20
+* n is an even number
