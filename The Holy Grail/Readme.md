@@ -1,0 +1,28 @@
+# Puzzle
+**The Holy Grail** https://www.codingame.com/training/hard/the-holy-grail
+
+# Goal
+After years of searching, you have finally found the Holy Grail in a room of size W x H with W being the width and H the height.
+
+You can see the grail in the far corner of the room, but there is a large chasm between your position and the Grail's position.   
+Every several seconds a tile appears, hovering over the chasm.
+
+At first, there are only 2 hovering tiles: one in position (0,0) where your bot is located, and one in position (W-1, H-1) where the Grail is resting.   
+Your bot can only move horizontally or vertically between visible tiles.
+
+Your task is to detect when a complete path has been created for your bot to get to the Holy Grail.   
+Once the complete path is revealed, your bot must immediately sprint the entire distance from his current location to the tile containing the Holy Grail.   
+If you send him too early, he will fall into the pit. Too late, and the Holy Grail will have disappeared.  
+
+# Input
+* Line 1: Two space separated integers W and H for the width and height of the room.
+* Next ? lines: Two space separated integers tileX and tileY for the coordinates of a new tile.
+
+# Output
+* Line 1: The number of new tiles that were needed to create a path.
+
+# Constraints
+* 2 ≤ W ≤ 40
+* 2 ≤ H ≤ 40
+* 0 ≤ tileX < W
+* 0 ≤ tileY < H
