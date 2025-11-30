@@ -1,11 +1,11 @@
 # Puzzle
-**Gauss and the Stolen Numbers** https://www.codingame.com/contribute/view/1370971b6722302de24b0ce39367b2e1a13800
+**Gauss and the Stolen Numbers** https://www.codingame.com/training/easy/gauss-and-the-stolen-numbers
 
 # Goal
 You are young Gauss, and your teacher wrote the natural numbers from 1 to N on the board.  
-When the class went out for lunch, two numbers mysteriously disappeared!
+When the class went out for lunch, two numbers mysteriously disappeared!  
 
-All that remains are: 
+All that remains are:
 * the sum of the remaining natural numbers
 * the sum of their squares
 
