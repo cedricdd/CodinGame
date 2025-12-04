@@ -1,20 +1,22 @@
-https://www.codingame.com/ide/puzzle/street-fighter-level-i
+# Puzzle
+**Street Fighter : Level I** https://www.codingame.com/ide/puzzle/street-fighter-level-i
 
-Goal
+# Goal
 Given two champions with list of hits performed by each of them, output who is the winner and number of hits he strikes on his opponent.
 
-Rules:
+Rules:  
 - All champions start with rage = 0
 - When a champion is hit, his/her rage increases by one.
 - When a champion uses special attack, his/her rage restarts at 0.
 - The fight stops when we reach the last line read or when one fighter is dead (life <= 0)
 
-In the input, each hit is preceded by the direction of the attack:
-- > means champion1 hits champion2.
+In the input, each hit is preceded by the direction of the attack:  
+- \> means champion1 hits champion2.
 - < means champion2 hits champion1.
 
 The table below shows the starting life and the damage caused by punch, kick and special attack of the champions.
 
+```
 Champ.|Life|Punch|Kick|Special Attack
 KEN   |25  |6    |5   |3*rage
 RYU   |25  |4    |5   |4*rage
@@ -23,8 +25,10 @@ VLAD  |30  |3    |3   |2*(rage+opp.rage);opp.rage=0
 JADE  |20  |2    |7   |number of hits made*rage
 ANNA  |18  |9    |1   |damage received*rage
 JUN   |60  |2    |1   |rage; and rage is added to JUN's life
+```
 
 Example
+```
 INPUT    COMMENT                                     
 KEN RYU  KEN and RYU are fighting 
 4        total number of hits performed
@@ -35,15 +39,16 @@ KEN RYU  KEN and RYU are fighting
          Ryu's life is: 20, Ken's life is: 12        
 
 OUTPUT: Ryu beats Ken in 3 hits
+```
 
-Input
-Line 1: champion1 champion2 separated by a space where each champion is one of: KEN, RYU, TANK, VLAD, JADE, ANNA, or JUN
-Line 2:n is an integer: the total number of hits performed by the champions
-Next n Lines: d ATTACK separated by a space where d is > or < and gives the direction of the attack; ATTACK is one specific attack : PUNCH, KICK or SPECIAL
+# Input
+* Line 1: champion1 champion2 separated by a space where each champion is one of: KEN, RYU, TANK, VLAD, JADE, ANNA, or JUN
+* Line 2:n is an integer: the total number of hits performed by the champions
+* Next n Lines: d ATTACK separated by a space where d is > or < and gives the direction of the attack; ATTACK is one specific attack : PUNCH, KICK or SPECIAL
 
-Output
-winner beats opponent in m hits
+# Output
+* winner beats opponent in m hits
 
-Constraints
-champion1 is always different from champion2.
-There is always a winner and a loser. No tie
+# Constraints
+* champion1 is always different from champion2.
+* There is always a winner and a loser. No tie
