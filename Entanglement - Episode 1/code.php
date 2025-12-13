@@ -10,8 +10,6 @@ $x = 0;
 $y = -1;
 
 function updateCoordinate(int &$x, int &$y, int $index) {
-    error_log("index is $index");
-
     switch($index) {
         case 0:
         case 1: --$y; break;
@@ -56,5 +54,5 @@ while (TRUE) {
     } while(isset($entrances[$x][$y]));
 
     echo $score . PHP_EOL;
-    echo implode(" ", $quadruples) . PHP_EOL;
+    echo implode(";", $quadruples) . PHP_EOL;
 }
