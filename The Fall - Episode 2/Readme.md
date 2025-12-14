@@ -1,0 +1,69 @@
+# Puzzle
+**The Fall - Episode 2** https://www.codingame.com/training/hard/the-fall-episode-2
+
+# Goal
+Your objective is to write a program capable of predicting the route Indy will take on his way down a tunnel.
+
+The structure of the tunnel hasn't changed.  
+However, at the beginning there is no longer an unbroken safe route from start to finish.  
+
+Fortunately,  certain rooms can now be rotated each turn by a quarter turn clockwise or counterclockwise.   
+Some rooms are locked in place and cannot be rotated (these rooms have a negative type in the provided grid).   
+Furthermore, you cannot rotate the rooms containing Indy or leading to the exit.  
+
+This turn around, your mission consists of writing a program capable of rotating tunnel rooms in order to lead Indy to safety.  
+
+Lastly, for the last two tests only, giant rocks can appear within the tunnel system. If Indy comes into contact with a rock, he dies.
+
+The rocks have the following behavior:
+* They can arrive on any game turn.
+* They only arrive from an edge of the grid.
+* They follow the same rules of movement as Indy (and dissapear if they leave the grid).
+* If a rock hits a wall or gets stuck, it will be destroyed and dissapear from the grid on the next turn.
+* You cannot rotate a room containing a rock.
+* You do not need to anticipate the arrival of rocks in your algorithm: whatever choices you made before a rock appears, if you had a chance to win before the arrival, you will still have a chance after the arrival of the rock.
+
+On each game turn:
+* You are given Indy's current position.
+* Then you can spin a room clockwise or counterclockwise with the commands LEFT and RIGHT, or do nothing with the command WAIT.
+* Indy will then advance to the next room according to the shape of the current room.
+    
+*Victory Conditions*  
+Indy reaches the exit
+ 
+*Lose Conditions*  
+* Indy slams into a wall while exiting a room (interrupted route): you have failed
+* Indy finds himself in the same room as a rock on the same turn: you have failed
+* Indy stops moving: you have failed
+
+# Game Input
+The program must first read the initialization data from standard input. Then, within an infinite loop, read the data from the standard input related to the current position of Indy and provide to the standard output the expected data.
+
+# Initialization input
+* Line 1 : 2 space separated integers W H specifying the width and height of the grid.
+* Next H lines: Each line represents a line in the grid and contains W space separated integers T. T specifies the type of the room. 
+* If T is negative, the room cannot be rotated.
+* Last line: 1 integer EX specifying the coordinate along the X axis of the exit (always at the very bottom of the grid).
+
+# Input for one game turn
+* Line 1 : XI YI POSI
+* (XI, YI) two integers to indicate Indy's current position on the grid.
+* POSI a single word indicating Indy's entrance point into the current room: TOP if Indy enters from above, LEFT if Indy enters from the left and RIGHT if Indy enters from the right.
+* Next line: R an integer representing the number of rocks currently in the grid.
+* Next R lines: each line represents the position of a rock on the grid: XR YR POSR (same rules as Indy's XI YI POSI).
+
+# Output for one game turn
+One line containing on of three commands:  
+* X Y LEFT : rotate the room at (X Y) by a quarter turn counterclockwise
+* X Y RIGHT : rotate the room at (X Y) by a quarter turn clockwise
+* WAIT : don't rotate a room and wait for next turn
+
+# Constraints
+* 0 < W ≤ 20
+* 0 < H ≤ 20
+* 0 ≤ T ≤ 13
+* 0 ≤ R ≤ 10
+* 0 ≤ EX < W
+* 0 ≤ XI, XR, X < W
+* 0 ≤ YI, YR, Y < H
+* Response time for one game ≤ 150ms
