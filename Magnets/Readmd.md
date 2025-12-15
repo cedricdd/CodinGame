@@ -1,5 +1,5 @@
 # Puzzle
-**Magnets** https://www.codingame.com/contribute/view/1350185cf2c9298ddb3cd45462d5a3ddd6395c
+**Magnets** https://www.codingame.com/training/hard/magnets
 
 # Goal
 You are given a board where you must place magnets and wooden blocks so that all rules are satisfied and the final configuration is stable.
@@ -41,8 +41,6 @@ Note: You will receive -1 if there is no hint specified for given row or column.
 Note: The board's top-left position is [0, 0].
 
 # Constraints
-* 6 ≤ width ≤ 10
-* 5 ≤ height ≤ 9
-
-Allotted response time to output in first turn is ≤ 7.5s
-Allotted response time to output in other turns is ≤ 50ms
+* 5 ≤ width, height ≤ 10
+* Allotted response time to output in first turn is ≤ 3s
+* Allotted response time to output in other turns is ≤ 50ms
