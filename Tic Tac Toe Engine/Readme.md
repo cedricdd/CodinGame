@@ -1,5 +1,5 @@
 # Puzzle
-**Tic Tac Toe Engine** https://www.codingame.com/contribute/view/137427e4682c78b49d5119f1869626038392ee
+**Tic Tac Toe Engine** https://www.codingame.com/training/medium/tic-tac-toe-engine
 
 # Goal
 Tic Tac Toe (also known as noughts and crosses or Xs and Os) is a paper-and-pencil game for two players who take turns marking the spaces in a 3x3 grid, one with Xs and the other with Os. The player X always goes first.
