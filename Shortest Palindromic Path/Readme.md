@@ -1,5 +1,5 @@
 # Puzzle
-**Shortest Palindromic Path** https://www.codingame.com/contribute/view/13802194d2618857feb67c68026c54700843be
+**Shortest Palindromic Path** https://www.codingame.com/training/medium/shortest-palindromic-path
 
 # Goal
 You are given an NxN grid where each cell contains a single character. You are also given a start cell (startR, startC) and a goal cell (goalR, goalC). All coordinates use the format (row, column) and are 1-indexed.
