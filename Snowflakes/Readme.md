@@ -1,5 +1,5 @@
 # Puzzle
-**Snowflakes** https://www.codingame.com/contribute/view/13676715255ff2a4dc23f9feea4d726aa686ea
+**Snowflakes** https://www.codingame.com/training/medium/snowflakes
 
 # Goal
 There is a saying that no two snowflakes are alike, but you are skeptical of this claim. On a snowy day, you take a photo of the sky to test this claim. The goal is to find out how many total snowflakes are in the photo and how many of them are unique shapes.
@@ -28,4 +28,4 @@ Example of the same snowflake shape in different orientations:
 * Line 2: Integer of the number of distinct snowflakes shapes.
 
 # Constraints
-* 1 ≤ h, w ≤ ?
+* 1 ≤ h, w ≤ 50
