@@ -100,8 +100,6 @@ for($y2 = 0; $y2 < $h; ++$y2) {
                 generateHashes($snowflake, $w2, $h2);
                 
                 ++$unique;
-            } else {
-                error_log("Already exist: " . $snowflakes[$snowflake]);
             }
         }
     }
