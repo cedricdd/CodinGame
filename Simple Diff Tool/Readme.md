@@ -6,15 +6,19 @@ A product owner was asked to develop a text diff tool. Unfortunately he was a bi
 So after a short time he discovered only two ways to identify lines: by their number or by their content.  
 As he did not know which one is better, he asked his developer team to add the identifier method as a configuration parameter of the tool.  
 
-The behavior of the tool is defined as follows :  
-It tries to match lines from the revised file to the ones in the original file based on the configuration parameter value.  
-* If set to BY_NUMBER, two lines are considered the same if they have the same line number and contents.
-* If set to BY_CONTENT, two lines are considered the same if their contents are identical, regardless of their line numbers.
-  
-After identifying all matched lines, all unmatched lines are classified under one of the three categories:
-* If a line only exists in the original file, the tool shall output a DELETE.
-* If a line only exists in the revised file, the tool shall output an ADD.
-* If a line exists at the same line number in both files but their contents are not equal, the tool shall output a CHANGE. CHANGE is applicable to BY_NUMBER only.
+The behavior of the tool is defined as follows:
+
+Step 1: The tool matches lines from the revised file to the ones in the original file, based on the configuration parameter value.  
+* If set to BY_NUMBER, lines are considered matched if they have the same line number, regardless of their contents.
+* If set to BY_CONTENT, lines are considered matched if their contents are identical, regardless of their line numbers.
+
+Step 2: The tool processes differences between matched lines, based on the configuration parameter value.  
+* If set to BY_NUMBER, the tool shall output CHANGE for each pair of matched lines with unequal content.
+* If set to BY_CONTENT, the tool shall output MOVE for each pair of matched lines with unequal line numbers.
+
+Step 3: The tool processes differences between unmatched lines, regardless of the configuration parameter value.  
+* The tool shall output DELETE for every unmatched line that exists only in the original file.
+* The tool shall output ADD for every unmatched line that exists only in the revised file.
 
 # Input
 * Line 1 : The configuration parameter value (BY_NUMBER or BY_CONTENT)
@@ -30,9 +34,11 @@ After identifying all matched lines, all unmatched lines are classified under on
   * for a deleted line: DELETE: deleted line
   * for an added line: ADD: added line
   * for a changed line: CHANGE: original line ---> revised line
+  * for a moved line: MOVE: original line @:original line number >>> @:revised line number
 * The alphabetical comparison process shall compare the entire line (including the difference kind).
+* The line numbers displayed shall be 1-indexed (i.e., the line numbers start at 1, not 0)
 
 # Constraints
 * 0 ≤ nbLinesV1, nbLinesV2 ≤ 20
 * Within a given version of a file, every line will be unique.
-* The diff tool has to support ADD, DELETE and CHANGE differences only.
+* The diff tool has to support ADD, DELETE, CHANGE and MOVE differences only.
