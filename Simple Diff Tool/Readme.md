@@ -1,5 +1,5 @@
 # Puzzle
-**Simple Diff Tool** https://www.codingame.com/contribute/view/1383516b2a6c5fc12a627986a476af84f06e0d
+**Simple Diff Tool** https://www.codingame.com/training/easy/simple-diff-tool
 
 # Goal
 A product owner was asked to develop a text diff tool. Unfortunately he was a bit confused because there is no id on text lines.  
