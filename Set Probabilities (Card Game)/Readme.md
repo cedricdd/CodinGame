@@ -1,5 +1,5 @@
 # Puzzle
-**Set Probabilities (Card Game)** https://www.codingame.com/contribute/view/136668d136c61132f37124a7e40173b44bf737
+**Set Probabilities (Card Game)** https://www.codingame.com/training/easy/set-probabilities-card-game
 
 # Goal
 You have a deck of the card game set and n current cards drawn on the table. Determine the probability that after drawing 1 more card, you can form a set from the current cards.
