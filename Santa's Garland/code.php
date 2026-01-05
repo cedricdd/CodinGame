@@ -12,28 +12,23 @@ for ($i = 0; $i < $M; $i++) {
     $links[$B][$A] = $T;
 }
 
-$step = 1;
 $history = [];
-$queue = [[$S, INF]];
+$queue = [[$E, 1]];
 
 while($queue) {
-    $newQueue = [];
+    [$pos, $time] = array_shift($queue);
 
-    foreach($queue as [$pos, $blow]) {
-        if($blow == $step) continue; //The path burns
+    foreach($links[$pos] as $newPos => $T) {
+        if($T <= $time - 1) continue;
 
-        if($pos == $E) exit("" . ($step - 1)); //We have reached the start before the path burns
+        if($newPos == $S) exit("$time");
 
-        if(isset($history[$pos]) && $history[$pos] <= $blow) continue; //We have already reached this position with a best blown up time
-        else $history[$pos] = $blow;
+        if(!isset($history[$newPos])) {
+            $queue[] = [$newPos, $time + 1];
 
-        foreach($links[$pos] as $newPos => $T) {
-            $newQueue[] = [$newPos, min($T + $step, $blow)];
+            $history[$newPos] = 1;
         }
     }
-
-    $queue = $newQueue;
-    ++$step;
 }
 
 echo "IMPOSSIBLE" . PHP_EOL;
