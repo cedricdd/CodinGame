@@ -1,5 +1,5 @@
 # Puzzle
-**Santa's Garland** https://www.codingame.com/contribute/view/139308125cba9f67bda7b65a5d47b5f67028cd
+**Santa's Garland** https://www.codingame.com/training/medium/santas-garland
 
 # Goal
 It's Christmas Eve, and Santa is preparing to light up the grand Christmas tree! The garland consists of N nodes: a power source, a star, and N-2 bulbs in between, all connected by wires.
@@ -26,10 +26,11 @@ Help Santa find the shortest valid path from the power source to the star!
 * Line 1: The minimum number of steps to reach the star, or IMPOSSIBLE if no valid path exists
 
 # Constraints
-* 1 <= N <= 100
-* 0 <= M <= 100
+* 1 < N <= 100
+* 0 < M <= 100
 * 0 <= S, E < N
 * 0 <= A, B < N
 * 1 <= T <= 100
-* Wires are bidirectional
+* S ≠ E
 * No duplicate wires or self-loops
+* Every node is connected to at least one other node
