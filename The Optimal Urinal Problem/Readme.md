@@ -1,6 +1,7 @@
-https://www.codingame.com/training/medium/the-optimal-urinal-problem
+# Puzzle
+**The Optimal Urinal Problem** https://www.codingame.com/training/medium/the-optimal-urinal-problem
 
-Goal
+# Goal
 You and your schoolmates from an all-boys school are going for a very exciting trip by bus. After some time, your bus stops so that the students can relieve themselves in a nearby public toilet.
 
 It happens that there are n urinals in a row in the public toilet.
@@ -13,7 +14,7 @@ You are the first guy among your schoolmates to enter the public toilet, initial
 
 Now, the question is: which urinal should you choose to maximize the number of guys that will use the toilet at one time, assuming all your schoolmates line up behind you and they will enter the toilet one by one, following these rules?
 
-Rules
+*Rules*  
 1. Other than you, each guy will pick the free urinal furthest away from any occupied urinals. If there are multiple such urinals, he will just pick any.
 2. No guy will use a urinal if any of the urinals next to it is occupied.
 
@@ -21,9 +22,9 @@ Note that the urinals are 1-indexed, so the first urinal has index 1, the second
 
 If there are multiple urinal indices that you can choose to achieve the objective, output the smallest one.
 
-Example
+*Example*  
 If there are 7 urinals and you choose urinal with index 1, you can fit 3 guys, as they enter in the following manner:
-
+```
 Time 1:
 1000000
 
@@ -32,11 +33,11 @@ Time 2:
 
 Time 3:
 1001001
+```
 
-
-Note that no more guys will use the urinals at this point, since it will violate rule 2.
+Note that no more guys will use the urinals at this point, since it will violate rule 2.  
 However, if you choose urinal with index 3, you can fit 4 guys:
-
+```
 Time 1:
 0010000
 
@@ -48,16 +49,16 @@ Time 3:
 
 Time 4:
 1010101
-
+```
 This is the maximum, so you should output 4 3.
 
-Input
-An integer n representing the number of urinals in the public toilet.
+# Input
+* An integer n representing the number of urinals in the public toilet.
 
-Output
-Two integers k and i separated by a space.
-k represents the maximum number of guys that can use the toilet at one time.
-i represents the smallest index of the urinal that you should choose.
+# Output
+* Two integers k and i separated by a space.
+* k represents the maximum number of guys that can use the toilet at one time.
+* i represents the smallest index of the urinal that you should choose.
 
-Constraints
-2 <= n <= 1500000
+# Constraints
+* 2 <= n <= 1500000
