@@ -1,0 +1,30 @@
+# Puzzle
+**The Balanced Centrifuge Problem** https://www.codingame.com/training/hard/the-balanced-centrifuge-problem
+
+# Goal
+(Inspired by https://www.youtube.com/watch?v=7DHE8RnsCQ8)
+
+Centrifuge is a piece of equipment that puts multiple test tubes in rotation at very high speeds.   
+It consists of a cylindrical rotor with holes situated evenly along the circumference of the rotor.  
+Because the device is operating at high speeds, the center of mass of all tubes must coincide with the center of the rotor.   
+We assume all tubes have the same mass.  
+
+For the sake of simplicity, we also assume that tubes are point masses, fixed firmly to the rotor.   
+All at the same distance from the center. You may safely assume the (x,y) coordinates of tube k are (R*sin (a), R*cos (a)), where a = 2*Pi*k/n;
+
+The problem is: Given a centrifuge with N holes and K tubes, is it possible to balance it?
+
+example 1: given N = 6 possible values for K are 2,3,4,6.  
+example 2: given N = 12, it is possible to balance 5 tubes: put 3 evenly dispersed (every 4th hole), then find a pair of opposite unoccupied holes and insert remaining 2 tubes there.  
+example 3: given N = 10, it is impossible to balance 7 tubes: put 5 evenly dispersed, and there's no opposite unoccupied holes left!
+
+# Input
+* Line 1: An integer N for the capacity of the centrifuge.
+
+# Output
+* Line 1: An integer M for the number of different possible values of K.
+
+# Constraints
+* 2 <= N <= 200000
+* 1 <= K <= N
+* 1 <= M <= N
