@@ -1,0 +1,38 @@
+# Puzzle
+**Square Spiral for Alien "Contact"** https://www.codingame.com/training/easy/square-spiral-for-alien-contact
+
+Goal
+In the 1997 movie "Contact", Jodie Foster portrays a SETI scientist who finds evidence of extraterrestrial life and is chosen to make first contact.
+
+Her group is given cryptic instructions** for how aliens want them to build a machine to facilitate this contact. (Maybe that worked, maybe not; no spoilers here.)
+
+This scenario:  
+In a sequel to that story, the aliens once again attempt to communicate how they want us Earthlings to build something.  
+This time it's a Square Spiral (squareSpiral), as a potential-vehicle for some wild space-time multiverse travel adventures.  
+
+Your task:  
+Figure out what they mean, and build it.
+
+What to output:  
+The output is generally the entire squareSpiral.  
+However if the sideSize is greater than 31, just output the top-left section (of size 31x31) of squareSpiral.
+
+Caution: Letters don't wrap-around. If you get to either end of the alphabet, there is no more "material" available after that.  
+(This variation is shown in Test/Validator #21 and #22)
+
+**NOT needed to solve this puzzle but see this clip for context: https://youtu.be/Q399v-pMG30?t=88
+
+# Input
+* Line 1: A String, the cryptic instructions in the format of:
+  * an Integer sideSize, which is the length of a side of the desired squareSpiral, followed by
+  * a word which is either topLeft or topRight or bottomRight or bottomLeft, followed by
+  * a word, which is either clockwise or counter-clockwise, followed by
+  * two short Strings (separated by a space) ...hmmm.... what is this?? . . . it looks like maybe some sort of pattern
+
+# Output
+* sideSize Lines: squareSpiral (or a 31x31 section of it, if it's larger than that)
+
+# Constraints
+* 5 ≤ sideSize ≤ 201
+* sideSize is an odd integer
+* squareSpiral includes only spaces and uppercase letters
