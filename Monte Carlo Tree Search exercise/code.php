@@ -40,28 +40,27 @@ class Node {
         return isset($this->children[$name]) ? $this->children[$name] : null;
     }
 
-    public function addChild(Node $node, string $name): void {
-        $this->children[$name] = $node;
+    public function addChild(string $name, float $score): void {
+        $this->children[$name] = new Node($name, $score);
     }
 
     public function UCB(float $C): ?Node {
         $bestScore = 0.0;
-        $bestNode = null;
+        $bestName = "";
 
         if(count($this->children) == 0) return null;
 
         foreach($this->children as $name => $node) {
-            $score = $node->getScore() / $node->getVisited() + $C * sqrt(log($this->visited) / $node->getVisited());
+            $score = $node->getScore() / $node->getVisited() + ($C * sqrt(log($this->visited) / $node->getVisited()));
 
-            error_log("$name $score");
-
-            if($score > $bestScore) {
+            //Best score or same score & 'smaller letter'
+            if($score > $bestScore || ($score == $bestScore && ord($name) < ord($bestName))) {
                 $bestScore = $score;
-                $bestNode = &$node;
+                $bestName = $name;
             }
         }
 
-        return $bestNode;
+        return $this->children[$bestName];
     }
 }
 
@@ -70,8 +69,6 @@ $root = new Node("root", 0.0);
 fscanf(STDIN, "%d %f", $N, $C);
 for ($i = 0; $i < $N; $i++) {
     fscanf(STDIN, "%s %f", $playout, $score);
-
-    error_log("$playout $score");
 
     $node = $root;
     $index = 0;
@@ -88,12 +85,8 @@ for ($i = 0; $i < $N; $i++) {
         }
     }
 
-    error_log("we are at $index");
-
-    $node->addChild(new Node($playout[$index], $score), $playout[$index]);
+    $node->addChild($playout[$index], $score);
 }
-
-error_log(var_export($root, 1));
 
 $sequence = "";
 $node = $root;
@@ -101,13 +94,7 @@ $node = $root;
 while(true) {
     $next = $node->UCB($C);
 
-    error_log(var_export($node->getName(), 1));
-    error_log(var_export($next, 1));
-
-    if($next === null) {
-        error_log("here");
-        break;
-    }
+    if($next === null) break;
     else {
         $sequence .= $next->getName();
         $node = $next;
