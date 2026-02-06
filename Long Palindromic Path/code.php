@@ -37,37 +37,57 @@ function setLetters(array $path, int $N): array {
     return $grid;
 }
 
+function findPath(array $path, array $visited, int $count): ?array {
+    global $neighbors, $N, $half;
+
+    if($count == $N * $N) return $path;
+
+    foreach($neighbors[array_key_last($visited)] as $neighbor => $_) {
+        if(isset($visited[$neighbor])) continue;
+        if($count > $half && isset($neighbors[$path[$N * $N - $count - 1]][$neighbor])) continue;
+
+        $path[$count] = $neighbor;
+        $visited[$neighbor] = 1;
+
+        $result = findPath($path, $visited, $count + 1);
+        
+        if($result !== null) return $result;
+
+        unset($visited[$neighbor]);
+    }
+
+    return null;
+}
+
 fscanf(STDIN, "%d", $N);
 fscanf(STDIN, "%d %d", $startR, $startC);
 
-// Write an action using echo(). DON'T FORGET THE TRAILING \n
-// To debug: error_log(var_export($var, true)); (equivalent to var_dump)
+$startTime = microtime(1);
+$start = ($startR - 1) * $N + $startC - 1;
+$neighbors = [];
+$half = ($N * $N) / 2;
 
-$path = [
-    [0, 0],
-    [1, 0],
-    [2, 0],
-    [3, 0],
-    [3, 1],
-    [2, 1],
-    [1, 1],
-    [0, 1],
-    [0, 2],
-    [0, 3],
-    [1, 3],
-    [1, 2],
-    [2, 2],
-    [3, 2],
-    [3, 3],
-    [2, 3],
-];
+for($y = 0, $index = 0; $y < $N; ++$y) {
+    for($x = 0; $x < $N; ++$x, ++$index) {
+        if($x > 0) $neighbors[$index][$index - 1] = 1;
+        if($x < $N - 1) $neighbors[$index][$index + 1] = 1;
+        if($y > 0) $neighbors[$index][$index - $N] = 1;
+        if($y < $N - 1) $neighbors[$index][$index + $N] = 1;
+    }
+}
 
-echo("4 3\n");
-// echo("abcd\n");
-// echo("hgfe\n");
-// echo("hedc\n");
-// echo("gfab\n");
+error_log(var_export("Start is $start", true));
+// error_log(var_export($neighbors, true));
 
-$grid = setLetters($path, $N);
+$path = findPath([$start], [$start => 1], 1);
 
-echo implode(PHP_EOL, $grid) . PHP_EOL;
+error_log(microtime(1) - $startTime);
+
+// error_log(var_export($path, 1));
+
+$line = str_repeat("*", $N);
+$grid = array_fill(0, $N, $line);
+
+foreach($path as $i => $index) $grid[intdiv($index, $N)][$index % $N] = chr(65 + $i);
+
+ error_log(var_export(implode(PHP_EOL, $grid), 1));
