@@ -7,96 +7,137 @@ $blank = str_repeat("o", $n);
 
 error_log($path[0] . "\n" . $path[1] . "\n");
 
+if($path[0] == $blank && $path[1] == $blank) exit("0");
+
 $turn = 0;
 
 while(true) {
-    if($path[0] == $blank && $path[1] == $blank) break;
+    //People on the top that can move directly right
+    preg_match_all("/R+(?=$|o)/", $path[0], $matches, PREG_OFFSET_CAPTURE);
 
-    $moves = [1 => [], 2 => [], 3 => []];
+    // error_log(var_export($matches[0], 1));
 
-    for($i = 0; $i < $n; ++$i) {
-        if($path[0][$i] == 'R') {
-            //The first move is going right
-            $moves[1][] = [0, $i, 0, $i + 1];
-        } elseif($path[0][$i] == 'L') {
-            //The first move is going down
-            $moves[2][] = [0, $i, 1, $i];
-
-            //The fallback is going left
-            $moves[3][] = [0, $i, 0, $i - 1];
-        }
-
-        if($path[1][$i] == 'L') {
-            //The first move is going left
-            $moves[1][] = [1, $i, 1, $i - 1];
-        } elseif($path[1][$i] == 'R') {
-            //The first move is going up
-            $moves[2][] = [1, $i, 0, $i];
-
-            //The fallback is going right
-            $moves[3][] = [1, $i, 1, $i + 1];
-        }
+    foreach($matches[0] as [$string, $offset]) {
+        $path[0] = substr(substr_replace($path[0], 'o' . strtolower($string), $offset, 1 + strlen($string)), 0, $n); 
     }
 
-    // error_log(var_export($moves, 1));
+    // //People on the top that can move right after someone moves down
+    // preg_match_all("/R+(?=L.{" . ($n - 1) . "}o)/", $path[0] . $path[1], $matches, PREG_OFFSET_CAPTURE);
 
-    while(true) {
+    // // error_log(var_export($matches[0], 1));
 
-        for($i = 1; $i <= 3; ++$i) {
-            $moved = false;
+    // foreach($matches[0] as [$string, $offset]) {
+    //     $path[0] = substr(substr_replace($path[0], 'o' . strtolower($string), $offset, 1 + strlen($string)), 0, $n); 
+    //     $path[1][$offset + strlen($string)] = 'l';
+    // }
 
-            foreach($moves[$i] as $index => [$l1, $i1, $l2, $i2]) {
-                //We are moving out of the path
-                if($i2 < 0 || $i2 >= $n) {
-                    $path[$l1][$i1] = 'o';
-                    unset($moves[$i][$index]);
-                    $moved = true;
-                }
-                //Nobody can move there anymore this turn
-                elseif($path[$l2][$i2] == 'l' || $path[$l2][$i2] == 'r') {
-                    unset($moves[$i][$index]);
-                }
-                //The person there has already moved
-                elseif($path[$l1][$i1] != 'L' && $path[$l1][$i1] != 'R') {
-                    unset($moves[$i][$index]);
-                }
-                //The move is possible, the spot is open
-                elseif($path[$l2][$i2] == 'o') {
-                    $path[$l2][$i2] = strtolower($path[$l1][$i1]);
-                    $path[$l1][$i1] = 'o';
-                    unset($moves[$i][$index]);
-                    $moved = true;
-                }
-                //Swapping up and down
-                elseif($i == 2) {
-                    if($path[$l1][$i1] == 'L' && $path[$l2][$i2] == 'R') {
-                        $path[$l1][$i1] = 'r';
-                        $path[$l2][$i2] = 'l';
+    //People on the bottom that can move directly left
+    preg_match_all("/(?<=^|o)L+/", $path[1], $matches, PREG_OFFSET_CAPTURE);
 
-                        unset($moves[$i][$index]);
-                        $moved = true;
-                    } elseif($path[$l1][$i1] == 'R' && $path[$l2][$i2] == 'L') {
-                        $path[$l1][$i1] = 'l';
-                        $path[$l2][$i2] = 'r';
-                        
-                        unset($moves[$i][$index]);
-                        $moved = true;
-                    }
-                }
-            }
+    // error_log(var_export($matches[0], 1));
 
-            if($moved) continue 2;
+    foreach($matches[0] as [$string, $offset]) {
+        if($offset == 0) $path[1] = substr(strtolower($string), 1) . 'o' . substr($path[1], strlen($string));
+        else $path[1] = substr(substr_replace($path[1], strtolower($string) . 'o', $offset - 1, 1 + strlen($string)), 0, $n); 
+    }
+
+    // //People on the bottom that can move left after someone moves up
+    // preg_match_all("/(?<=o.{" . ($n - 1) . "}R)L+/", $path[0] . $path[1], $matches, PREG_OFFSET_CAPTURE);
+
+    // // error_log(var_export($matches[0], 1));
+
+    // foreach($matches[0] as [$string, $offset]) {
+    //     $offset -= $n;
+
+    //     $path[0][$offset - 1] = 'r';
+    //     $path[1] = substr(substr_replace($path[1], strtolower($string) . 'o', $offset - 1, 1 + strlen($string)), 0, $n); 
+    // }
+
+    //Ring around the rosse
+    preg_match_all("/(?:^|(?<=[oL]))R+L/", $path[0], $matches, PREG_OFFSET_CAPTURE);
+
+    // error_log(var_export($matches[0], 1));
+
+    foreach($matches[0] as [$string, $offset]) {
+        $len = strlen($string);
+
+        if(preg_match("/^.{" . $offset . "}RL{" . ($len - 1) . "}(?:$|(?=[oR]))/", $path[1])) {
+            // error_log(var_export("here", 1));
+            $path[0] = substr_replace($path[0], str_repeat('r', $len), $offset, $len);
+            $path[1] = substr_replace($path[1], str_repeat('l', $len), $offset, $len);
+        } 
+    }
+
+    // error_log($path[0] . "\n" . $path[1] . "\n");
+    // die();
+
+    //Person on top that wants to go left moves down if possible
+    preg_match_all("/L(?=.{" . ($n - 1) . "}o)/", $path[0] . $path[1], $matches, PREG_OFFSET_CAPTURE);
+
+    // error_log(var_export($matches[0], 1));
+
+    if(count($matches[0]) > 0) {
+        foreach($matches[0] as [$string, $offset]) {
+            [$path[0][$offset], $path[1][$offset]] = [strtolower($path[1][$offset]), strtolower($path[0][$offset])];
         }
 
-        break;
+        continue;
+    }
+
+    //Person on bottom that wants to go right moves up if possible
+    preg_match_all("/o(?=.{" . ($n - 1) . "}R)/", $path[0] . $path[1], $matches, PREG_OFFSET_CAPTURE);
+
+    // error_log(var_export($matches[0], 1));
+    if(count($matches[0]) > 0) {
+        foreach($matches[0] as [$string, $offset]) {
+            [$path[0][$offset], $path[1][$offset]] = [strtolower($path[1][$offset]), strtolower($path[0][$offset])];
+        }
+
+        continue;
+    }
+
+    //Person on top that wants to go left and person on bottom that wants to go right swap
+    preg_match_all("/L(?=.{" . ($n - 1) . "}R)/", $path[0] . $path[1], $matches, PREG_OFFSET_CAPTURE);
+
+    // error_log(var_export($matches[0], 1));
+
+    if(count($matches[0]) > 0) {
+        foreach($matches[0] as [$string, $offset]) {
+            [$path[0][$offset], $path[1][$offset]] = [strtolower($path[1][$offset]), strtolower($path[0][$offset])];
+        }
+
+        continue;
+    }
+    
+    //People stuck on the bottom that move right as fallback
+    preg_match_all("/[R]+(?=$|o)/", $path[1], $matches, PREG_OFFSET_CAPTURE);
+
+    // error_log(var_export($matches[0], 1));
+
+    foreach($matches[0] as [$string, $offset]) {
+        $path[1] = substr(substr_replace($path[1], 'o' . strtolower($string), $offset, 1 + strlen($string)), 0, $n); 
+    }
+
+    //People stuck on the top that move left as fallback
+    preg_match_all("/(?<=^|o)[L]+/", $path[0], $matches, PREG_OFFSET_CAPTURE);
+
+    // error_log(var_export($matches[0], 1));
+
+    foreach($matches[0] as [$string, $offset]) {
+        if($offset == 0) $path[0] = substr(strtolower($string), 1) . 'o' . substr($path[0], strlen($string));
+        else $path[0] = substr(substr_replace($path[0], strtolower($string) . 'o', $offset - 1, 1 + strlen($string)), 0, $n);
     }
 
     error_log($path[0] . "\n" . $path[1] . "\n");
 
+    ++$turn; 
+
+    if($path[0] == $blank && $path[1] == $blank) break;
+
+    if(strpos($path[0], 'l') === false && strpos($path[1], 'l') === false && strpos($path[0], 'r') === false && strpos($path[1], 'r') === false) exit("Congestion");
+
     $path[0] = strtr($path[0], "lr", "LR");
     $path[1] = strtr($path[1], "lr", "LR");
-
-    if(++$turn > 1001) exit("Congestion");
 }
 
 echo $turn . PHP_EOL;
