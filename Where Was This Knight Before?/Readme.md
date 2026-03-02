@@ -1,0 +1,26 @@
+# Puzzle
+**Where Was This Knight Before?** https://www.codingame.com/contribute/view/1435322fb04dc1db3690203107bc406b8d594c
+
+# Goal
+You get two consecutive pictures of a game board. The board is made of 64 squares arranged in 8 rows and 8 columns. A single piece was moved:
+* either to an empty square (simple move),
+* or to a square occupied by another piece of the opposite player, in which case the target is removed from the board (move with capture).
+
+Some AI already converted the pictures to ASCII art. Pieces may appear on the board in uppercase (white) or lowercase (black). Any character not in the set of valid piece letters (in either uppercase or lowercase) represents an empty square. The character used for an empty square may differ between the two board states.
+
+Your task is to output the move with its coordinates.
+
+# Input
+* Line 1 : A string pieces containing the uppercase letters (A-Z) that represent the white pieces. (The corresponding lowercase letters represent the black pieces.)
+* Next 8 lines: The board before the move.
+* Next 8 lines: The board after the move.
+* Each line of the board is a string of 8 printable ASCII characters. Each character is either a piece or an empty square.
+
+# Output
+* Line 1: Coordinates of the initial and final squares of the piece that was moved.
+* Each coordinate is made of one lowercase letter (from a to h for the horizontal position on the board, from left to right) and one digit (from 1 to 8 for the vertical position, from bottom to top), the top left square being a8.
+* The coordinates shall be separated by - for a simple move, or x for a move with capture.
+
+# Constraints
+* Only one piece is moved and at most one piece can be captured.
+* The string pieces contains at least one letter.
