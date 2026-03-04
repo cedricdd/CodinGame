@@ -1,5 +1,5 @@
 # Puzzle
-**Solar Shadow Hunter** https://www.codingame.com/contribute/view/142575488b2ef02949980aa78f1ee989a3dd7a
+**Solar Shadow Hunter** https://www.codingame.com/training/easy/solar-shadow-hunter
 
 # Goal
 Calculate the total power output of a solar roof by simulating vertical shadows.
@@ -17,7 +17,7 @@ Power Rules:
 * Each unshaded Solar Panel P produces 100 Watts.
 * Any panel covered by a shadow produces 0 Watts.
 * Obstacles themselves do not produce power.
-
+  
 # Input
 * Line 1: Two integers W and H for the width and height of the map.
 * Line 2: An integer K (shadow coefficient).
