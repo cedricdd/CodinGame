@@ -1,5 +1,5 @@
 # Puzzle
-**0xC0FFEE Request Validator** https://www.codingame.com/contribute/view/1424762fbefe49c880720181ce675d20734cd6
+**0xC0FFEE Request Validator** https://www.codingame.com/training/easy/0xc0ffee-request-validator
 
 # Goal
 Crystal runs a specialty coffee station in a tech company where employees can send their order to the station via an internal API endpoint. Recently, she has been seeing more suspicious requests to the machines that do not seem to originate from the internal API endpoint. She suspects non-employees have hacked into the internal request system, and has tasked you to investigate.
