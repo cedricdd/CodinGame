@@ -1,5 +1,5 @@
 # Puzzle
-**The Descent - Part 2** https://www.codingame.com/contribute/view/143433c7b7e8188840bd55bfa77d154b28c045
+**The Descent - Part 2** https://www.codingame.com/training/easy/the-descent---part-2
 
 # Goal
 Uh oh, there seem to be more mountains than you thought. Help the starship find a place to land!
