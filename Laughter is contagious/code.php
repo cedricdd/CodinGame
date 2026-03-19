@@ -21,8 +21,6 @@ $result = $laughts;
 
 //Step 2
 foreach($laughts as $i => $laught) {
-    error_log("working on $i $laught");
-
     if(preg_match("/[A-Z][a-z]/", $laught)) {
         //Both neighbors are sullen
         if($i > 0 && $i < $count - 1 && preg_match("/[a-z]{2}/", $laughts[$i - 1]) && preg_match("/[a-z]{2}/", $laughts[$i + 1])) continue;
