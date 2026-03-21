@@ -26,5 +26,10 @@ foreach($places[$moved[2]] as [$x, $y]) {
     //Found the starting position
     if($board2[$y][$x] == '.') {
         echo chr($x + 97) . (8 - $y) . ($board1[$moved[1]][$moved[0]] == '.' ? "-" : "x") . chr($moved[0] + 97) . (8 - $moved[1]) . PHP_EOL;
+
+        $xm = abs($x - $moved[0]);
+        $ym = abs($y - $moved[1]);
+
+        echo ((($xm == 2 && $ym == 1) || ($xm == 1 && $ym == 2)) ? "Knight" : "Other") . PHP_EOL;
     }
 }
