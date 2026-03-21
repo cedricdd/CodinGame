@@ -1,5 +1,5 @@
 # Puzzle
-**Where Was This Knight Before?** https://www.codingame.com/contribute/view/1435322fb04dc1db3690203107bc406b8d594c
+**Where Was This Knight Before?** https://www.codingame.com/training/easy/where-was-this-knight-before
 
 # Goal
 You get two consecutive pictures of a game board. The board is made of 64 squares arranged in 8 rows and 8 columns. A single piece was moved:
