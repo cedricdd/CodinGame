@@ -1,5 +1,5 @@
 # Puzzle
-**Mana Quest: Hunt for the Perfect Seven** https://www.codingame.com/contribute/view/1260094aef9b4c2531f4a456b97853de11b6d4
+**Mana Quest: Hunt for the Perfect Seven** https://www.codingame.com/training/medium/mana-quest-hunt-for-the-perfect-seven
 
 # Goal
 You have a 60-card Magic: The Gathering deck. Each card is represented by a 3-character string of the form TCP, where:
