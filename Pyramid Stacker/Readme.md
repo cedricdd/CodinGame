@@ -1,5 +1,5 @@
 # Puzzle
-**Pyramid Stacker** https://www.codingame.com/contribute/view/14452219fecd4e6e7e3d1ad3069c930c6385e4
+**Pyramid Stacker** https://www.codingame.com/training/easy/pyramid-stacker
 
 # Goal
 You are tasked with building a 3D pyramid using N toy cubes. The pyramid should have H layers, numbered from 1 (top) to H (bottom). Starting from the bottom layer, build layer i as follows:
