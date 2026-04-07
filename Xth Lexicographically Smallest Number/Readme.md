@@ -1,5 +1,5 @@
 # Puzzle
-**Xth Lexicographically Smallest Number** https://www.codingame.com/contribute/view/107925de0c08195433c6f6bc0c759ff32a9f7b
+**Xth Lexicographically Smallest Number** https://www.codingame.com/training/hard/xth-lexicographically-smallest-number
 
 # Goal
 Given four integers m, n, b, and x:
