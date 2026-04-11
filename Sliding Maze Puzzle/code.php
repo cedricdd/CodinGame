@@ -1,28 +1,6 @@
 <?php
 
-function solve(string $hash, string $moves) {
-    global $waterMoves, $playerMoves, $playerMovesToCheck, $waterCanSlide;
-
-    $playerIndex = $hash[9];
-    $waterIndex = $hash[10];
-    $tileIndex = $hash[$playerIndex];
-
-    //Moving the player
-    foreach(($playerMovesToCheck[$playerIndex][$tileIndex] ?? []) as $indexToCheck => $_) {
-        if(isset($playerMoves[$playerIndex][$tileIndex][$indexToCheck][$hash[$indexToCheck]])) {
-            error_log("Player can move to $indexToCheck");
-        }
-    }
-
-    //Moving the water
-    if($waterCanSlide[$tileIndex]) {
-        foreach($waterMoves[$waterIndex] as $waterIndexMoved => $_) {
-            if($waterIndexMoved == $playerIndex) continue;
-
-            error_log("water from $waterIndex can be switched with $waterIndexMoved");
-        }
-    }
-}
+const DIRECTIONS = ["", "v", "<", ">", "^"];
 
 fscanf(STDIN, "%d %d", $R, $C);
 
@@ -41,6 +19,7 @@ for ($y = 0; $y < 9; ++$y) {
 
 $waterMoves = [];
 $waterCanSlide = array_fill(0, 9, false);
+$playerCanLeave = array_fill(0, 9, false);
 $playerMoves = [];
 
 //Get the position of the water
@@ -51,7 +30,8 @@ foreach($tiles as $tileIndex => $tile) {
         unset($tiles[$waterPosition]);
     }
 
-    if($tile[1][1] == '.') $waterCanSlide[$tileIndex] = true;
+    if($tile[1][1] == '.') $waterCanSlide[$tileIndex] = true; //Water can only move if player is on first floor
+    if($tile[1][0] == '=' || $tile[1][0] == '+') $playerCanLeave[$tileIndex] = true; //Player can only exit if he's on the second floor or by using a stair
 }
 
 $hash = implode("", range(0, 8)) . $playerPosition . $waterPosition;
@@ -69,15 +49,15 @@ for($index = 0, $y = 0; $y < 3; ++$y) {
                     if($tileIndex == $tileIndex2) continue;
 
                     //We are on the second floor, need to stay there or use a stair
-                    if($tile[1][0] == '=' && ($tile2[1][2] == '=' || $tile2[1][2] == '+')) $playerMoves[$index][$tileIndex][$index - 1][$tileIndex2] = '1';
+                    if($tile[1][0] == '=' && ($tile2[1][2] == '=' || $tile2[1][2] == '+')) $playerMoves[$index][$tileIndex][$index - 1][$tileIndex2] = '2';
                     //We are on the first floor, need to stay there
-                    if($tile[1][0] == '.' && $tile2[1][2] == '.') $playerMoves[$index][$tileIndex][$index - 1][$tileIndex2] = '1';
+                    if($tile[1][0] == '.' && $tile2[1][2] == '.') $playerMoves[$index][$tileIndex][$index - 1][$tileIndex2] = '2';
                     //We are on the first floor and using a stair, need to end up the second floor or another stair need to cancel the change of floor
-                    if($tile[1][0] == '+' && ($tile2[1][2] == '='  || $tile2[1][2] == '+')) $playerMoves[$index][$tileIndex][$index - 1][$tileIndex2] = '1';
+                    if($tile[1][0] == '+' && ($tile2[1][2] == '='  || $tile2[1][2] == '+')) $playerMoves[$index][$tileIndex][$index - 1][$tileIndex2] = '2';
                 }
             }
 
-            $waterMoves[$index][$index - 1] = true;
+            $waterMoves[$index][$index - 1] = '3'; //It's the tile moving not the water so we need '>'
         }
 
         //Player could move right
@@ -87,15 +67,15 @@ for($index = 0, $y = 0; $y < 3; ++$y) {
                     if($tileIndex == $tileIndex2) continue;
 
                     //We are on the second floor, need to stay there or use a stair
-                    if($tile[1][2] == '=' && ($tile2[1][0] == '=' || $tile2[1][0] == '+')) $playerMoves[$index][$tileIndex][$index + 1][$tileIndex2] = '2';
+                    if($tile[1][2] == '=' && ($tile2[1][0] == '=' || $tile2[1][0] == '+')) $playerMoves[$index][$tileIndex][$index + 1][$tileIndex2] = '3';
                     //We are on the first floor, need to stay there
-                    if($tile[1][2] == '.' && $tile2[1][0] == '.') $playerMoves[$index][$tileIndex][$index + 1][$tileIndex2] = '2';
+                    if($tile[1][2] == '.' && $tile2[1][0] == '.') $playerMoves[$index][$tileIndex][$index + 1][$tileIndex2] = '3';
                     //We are on the first floor and using a stair, need to end up the second floor or another stair need to cancel the change of floor
-                    if($tile[1][2] == '+' && ($tile2[1][0] == '='  || $tile2[1][0] == '+')) $playerMoves[$index][$tileIndex][$index + 1][$tileIndex2] = '2';
+                    if($tile[1][2] == '+' && ($tile2[1][0] == '='  || $tile2[1][0] == '+')) $playerMoves[$index][$tileIndex][$index + 1][$tileIndex2] = '3';
                 }
             }
 
-            $waterMoves[$index][$index + 1] = true;
+            $waterMoves[$index][$index + 1] = '2'; //It's the tile moving not the water so we need '<'
         }
 
         //Player could move up
@@ -105,15 +85,15 @@ for($index = 0, $y = 0; $y < 3; ++$y) {
                     if($tileIndex == $tileIndex2) continue;
 
                     //We are on the second floor, need to stay there or use a stair
-                    if($tile[0][1] == '=' && ($tile2[2][1] == '=' || $tile2[2][1] == '+')) $playerMoves[$index][$tileIndex][$index - 3][$tileIndex2] = '3';
+                    if($tile[0][1] == '=' && ($tile2[2][1] == '=' || $tile2[2][1] == '+')) $playerMoves[$index][$tileIndex][$index - 3][$tileIndex2] = '4';
                     //We are on the first floor, need to stay there
-                    if($tile[0][1] == '.' && $tile2[2][1] == '.') $playerMoves[$index][$tileIndex][$index - 3][$tileIndex2] = '3';
+                    if($tile[0][1] == '.' && $tile2[2][1] == '.') $playerMoves[$index][$tileIndex][$index - 3][$tileIndex2] = '4';
                     //We are on the first floor and using a stair, need to end up the second floor or another stair need to cancel the change of floor
-                    if($tile[0][1] == '+' && ($tile2[2][1] == '='  || $tile2[2][1] == '+')) $playerMoves[$index][$tileIndex][$index - 3][$tileIndex2] = '3';     
+                    if($tile[0][1] == '+' && ($tile2[2][1] == '='  || $tile2[2][1] == '+')) $playerMoves[$index][$tileIndex][$index - 3][$tileIndex2] = '4';     
                 }
             }
 
-            $waterMoves[$index][$index - 3] = true;
+            $waterMoves[$index][$index - 3] = '1'; //It's the tile moving not the water so we need 'v'
         }
 
         //Player could move down
@@ -123,15 +103,15 @@ for($index = 0, $y = 0; $y < 3; ++$y) {
                     if($tileIndex == $tileIndex2) continue;
 
                     //We are on the second floor, need to stay there or use a stair
-                    if($tile[2][1] == '=' && ($tile2[0][1] == '=' || $tile2[0][1] == '+')) $playerMoves[$index][$tileIndex][$index + 3][$tileIndex2] = '0';
+                    if($tile[2][1] == '=' && ($tile2[0][1] == '=' || $tile2[0][1] == '+')) $playerMoves[$index][$tileIndex][$index + 3][$tileIndex2] = '1';
                     //We are on the first floor, need to stay there
-                    if($tile[2][1] == '.' && $tile2[0][1] == '.') $playerMoves[$index][$tileIndex][$index + 3][$tileIndex2] = '0';
+                    if($tile[2][1] == '.' && $tile2[0][1] == '.') $playerMoves[$index][$tileIndex][$index + 3][$tileIndex2] = '1';
                     //We are on the first floor and using a stair, need to end up the second floor or another stair need to cancel the change of floor
-                    if($tile[2][1] == '+' && ($tile2[0][1] == '='  || $tile2[0][1] == '+')) $playerMoves[$index][$tileIndex][$index + 3][$tileIndex2] = '0';     
+                    if($tile[2][1] == '+' && ($tile2[0][1] == '='  || $tile2[0][1] == '+')) $playerMoves[$index][$tileIndex][$index + 3][$tileIndex2] = '1';     
                 }
             }
 
-            $waterMoves[$index][$index + 3] = true;
+            $waterMoves[$index][$index + 3] = '4'; //It's the tile moving not the water so we need '^'
         }
     }
 }
@@ -143,17 +123,72 @@ foreach($playerMoves as $index1 => $list1) {
     }
 }
 
-// for($i = 0; $i < 9; ++$i) {
-//     error_log("if player is at pos $i"); 
+$history = [];
+$queue = [[$hash, ""]];
+$solution = false;
 
-//     foreach(($playerMovesToCheck[$i][$hash[$i]] ?? []) as $index => $_) {
-//         error_log("we need to check $index");
+while($solution == false) {
+    $newQueue = [];
 
-//         if(isset($playerMoves[$i][$hash[$i]][$index][$hash[$index]])) error_log("we can move there");
-//         else error_log("we CAN'T move there");
-//     }
-// }
+    foreach($queue as [$hash, $moves]) {
+        //If we have already found this configuration, we skip the duplicate
+        if(isset($history[$hash])) continue;
+        else $history[$hash] = true;
 
-solve($hash, "");
+        $playerIndex = $hash[9];
+        $waterIndex = $hash[10];
+        $tileIndex = $hash[$playerIndex];
+
+        //Player is on the top left tile and he can exit on this tile
+        if($playerIndex == 0 && $playerCanLeave[$tileIndex]) {
+            $moves .= "P2";
+
+            //Get the 'best' solution based on lexicography
+            if($solution == false) $solution = $moves;
+            elseif(strcmp($solution, $moves) > 0) $solution = $moves;
+
+            continue;
+        }
+
+        //Moving the player
+        foreach(($playerMovesToCheck[$playerIndex][$tileIndex] ?? []) as $indexToCheck => $_) {
+            $direction = $playerMoves[$playerIndex][$tileIndex][$indexToCheck][$hash[$indexToCheck]] ?? 0;
+
+            //The player can move
+            if($direction) {
+                $newHash = $hash;
+                $newHash[9] = $indexToCheck;
+
+                $newQueue[] = [$newHash, $moves . 'P' . $direction];
+            }
+        }
+
+        //Moving a tile
+        if($waterCanSlide[$tileIndex]) {
+            foreach($waterMoves[$waterIndex] as $waterIndexMoved => $direction) {
+                if($waterIndexMoved == $playerIndex) continue;
+
+                //A tile & water can switch
+                $newHash = $hash;
+                $newHash[$waterIndex] = $hash[$waterIndexMoved];
+                $newHash[$waterIndexMoved] = $hash[$waterIndex];
+                $newHash[10] = $waterIndexMoved;
+
+                $newQueue[] = [$newHash, $moves . 'T' . $direction];
+            }
+        }
+    }
+
+    $queue = $newQueue;
+    unset($newQueue);
+}
+
+$len = strlen($solution);
+
+echo ($len / 2) . PHP_EOL;
+
+for($i = 0; $i < $len; $i += 2) {
+    echo $solution[$i] . " " . DIRECTIONS[$solution[$i + 1]] . PHP_EOL;
+}
 
 error_log(microtime(1) - $start);
