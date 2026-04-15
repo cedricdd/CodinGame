@@ -1,5 +1,5 @@
 # Puzzle
-**The Hole Truth** https://www.codingame.com/contribute/view/144557d8a43881eae4432cf86672c92f73e769
+**The Hole Truth** https://www.codingame.com/training/medium/the-hole-truth
 
 # Goal
 You are given a 2D grid where # represents solid material and . represents empty space.
