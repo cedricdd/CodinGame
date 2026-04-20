@@ -1,24 +1,27 @@
 <?php
 
-function chessPositionToIndex(string $position): int {
-    return (8 - intval($position[1])) * 8 + (ord($position[0]) - 97);
+function chessToGrid(string $position): array {
+    return [ord($position[0]) - 97, 8 - intval($position[1])];
 }
 
-function indexToChessPosition(int $index): string {
-    return chr($index % 8 + 97) . (8 - intdiv($index, 8));
+function gridToChess(int $x, int $y): string {
+    return chr($x + 97) . (8 - $y);
 }
 
 $kingMoves = [];
 $rookMoves = [];
+$distances = [];
 
 for($y = 0, $index = 0; $y < 8; ++$y) {
     for($x = 0; $x < 8; ++$x, ++$index) {
         //King Moves
-        for($y2 = max(0, $y - 1); $y2 <= min(7, $y + 1); ++$y2) {
-            for($x2 = max(0, $x - 1); $x2 <= min(7, $x + 1); ++$x2) {
-                if($x2 == $x && $y2 == $y) continue;
+        for($y2 = 0; $y2 < 8; ++$y2) {
+            for($x2 = 0; $x2 < 8; ++$x2) {
+                $distance = max(abs($x - $x2), abs($y - $y2));
 
-                $kingMoves[$index][$y2 * 8 + $x2] = true;
+                $distances[$y][$x][$y2][$x2] = $distance;
+
+                if($distance == 1) $kingMoves[$y][$x][] = [$x2, $y2];
             }
         }
 
@@ -43,33 +46,48 @@ for($y = 0, $index = 0; $y < 8; ++$y) {
 // $blackKing: Position of the black king
 fscanf(STDIN, "%s %s %s", $whiteKing, $whiteRook, $blackKing);
 
-$whiteKing = chessPositionToIndex($whiteKing);
-$whiteRook = chessPositionToIndex($whiteRook);
-$blackKing = chessPositionToIndex($blackKing);
+[$whiteKingX, $whiteKingY] = chessToGrid($whiteKing);
+[$whiteRookX, $whiteRookY] = chessToGrid($whiteRook);
+[$blackKingX, $blackKingY] = chessToGrid($blackKing);
 
-error_log("WK: $whiteKing (" . ($whiteKing % 8) . " - " . intdiv($whiteKing, 8) . ")");
-error_log("WK: $whiteRook (" . ($whiteRook % 8) . " - " . intdiv($whiteRook, 8) . ")");
-error_log("WK: $blackKing (" . ($blackKing % 8) . " - " . intdiv($blackKing, 8) . ")");
+error_log("WK: $whiteKing ($whiteKingX  - $whiteKingY)");
+error_log("WR: $whiteRook ($whiteRookX  - $whiteRookY)");
+error_log("BK: $blackKing ($blackKingX  - $blackKingY)");
 
-$queue[1] = [[$whiteKing, $whiteRook, $blackKing, []]];
+$queue[1] = [[$whiteKingX, $whiteKingY, $whiteRookX, $whiteRookY, $blackKingX, $blackKingY, []]];
 $turn = 1;
 $solutions = [];
 
+
 while(!$solutions) {
-    foreach($queue[$turn] as [$whiteKing, $whiteRook, $blackKing, $moves]) {
+    foreach($queue[$turn] as [$whiteKingX, $whiteKingY, $whiteRookX, $whiteRookY, $blackKingX, $blackKingY, $moves]) {
+
+        error_log("WK " . gridToChess($whiteKingX, $whiteKingY) . " WK " . gridToChess($whiteRookX, $whiteRookY) . " BK " . gridToChess($blackKingX, $blackKingY));
+
         //It's black turn
         if($turn % 2 == 0) {
             $checkmate = true;
 
             //We try every possible moves
-            foreach($kingMoves[$blackKing] as $newPosition => $_) {
-                if(isset($kingMoves[$whiteKing][$newPosition]) || isset($rookMoves[$whiteRook][$newPosition])) continue;
+            foreach($kingMoves[$blackKingY][$blackKingX] as [$moveX, $moveY]) {
+                if($distances[$moveY][$moveX][$whiteKingY][$whiteKingX] == 1) continue; //We don't want to be checkmated by the other king
 
-                error_log("black king at $blackKing can move to $newPosition");
+                //On the same col as the rook
+                if($moveX == $whiteRookX) {
+                    //Checking if white king is preventing the rook from taking black king
+                    if($whiteKingX != $moveX || ($moveY - $whiteKingY) * ($whiteRookY - $whiteKingY) > 0) continue;
+                } 
+                //On the same row as the rook
+                if($moveY == $whiteRookY) {
+                    //Checking if white king is preventing the rook from taking black king
+                    if($whiteKingY != $moveY || ($moveX - $whiteKingX) * ($whiteRookX - $whiteKingX) > 0) continue;
+                }
 
-                $moves[$turn] = indexToChessPosition($blackKing) . indexToChessPosition($newPosition);
+                error_log("black king at $blackKing can move to $moveX $moveY - " . gridToChess($moveX, $moveY));
 
-                $queue[$turn + 1][] = [$whiteKing, $whiteRook, $newPosition, $moves];
+                $moves[$turn] = gridToChess($blackKingX, $blackKingY) . gridToChess($moveX, $moveY);
+
+                $queue[$turn + 1][] = [$whiteKingX, $whiteKingY, $whiteRookX, $whiteRookY, $moveX, $moveY, $moves];
 
                 $checkmate = false;
             }
@@ -80,16 +98,54 @@ while(!$solutions) {
         }
         //It's white turn
         else {
-            [$blackKingX, $blackKingY] = $coordinates[$blackKing];
-            [$whiteKingX, $whiteKingY] = $coordinates[$whiteKing];
-            [$whiteRookX, $whiteRookY] = $coordinates[$whiteRook];
+            $distance = $distances[$whiteKingY][$whiteKingX][$blackKingY][$blackKingX];
+            error_log("WK is at $distance from BK");
 
-            //Black king can't go any lower, it's checkmate
-            if($blackKingY == 7 && $whiteKingY == 5 && $whiteKingX == $blackKingX) {
-                $newPosition = 7 * 8 + $whiteRookX;
-                $moves[$turn] = indexToChessPosition($whiteRook) . indexToChessPosition($newPosition);
+            foreach($kingMoves[$whiteKingY][$whiteKingX] as [$moveX, $moveY]) {
+                $distanceAfterMove = $distances[$moveY][$moveX][$blackKingY][$blackKingX];
 
-                $queue[$turn + 1][] = [$whiteKing, $newPosition, $blackKing, $moves];
+                if($distanceAfterMove == 1) continue; //We are not suicidal
+                if($distanceAfterMove > $distance) continue; //We never move away from the other king
+                if($distanceAfterMove == $distance && ($whiteKingX == $blackKingX || $whiteKingY == $blackKingY)) continue; //We arealdy are on the same row or col, best place for blocking the most positions
+
+                error_log("WK can move to $moveX $moveY - New Distance $distanceAfterMove");
+            }
+
+            //Can we move the rook closer
+            $goal = "";
+            $distanceGoal = 10;
+
+            foreach(['TOP' => $blackKingY, 'LEFT' => $blackKingX, 'RIGHT' => 7 - $blackKingX, 'BOTTOM' => 7 - $blackKingY] as $border => $dist) {
+                if($dist < $distanceGoal) {
+                    $distanceGoal = $dist;
+                    $goal = $border;
+                }
+            }
+
+            if($goal == 'TOP') {
+                //
+            } elseif($goal == 'LEFT') {
+                //
+            } elseif($goal == 'RIGHT') {
+
+            } elseif($goal == 'BOTTOM') {
+                error_log("trying to pin to bottom border");
+
+                for($i = 0; $i < 2; ++$i) {
+                    if($whiteRookY < $blackKingY - $i) {
+                        [$moveX, $moveY] = [$whiteRookX, $blackKingY - $i];
+
+                        $distanceAfterMove = $distances[$moveY][$moveX][$blackKingY][$blackKingX];
+
+                        if($distanceAfterMove != 1) {
+                            $moves[$turn] = gridToChess($whiteRookX, $whiteRookY) . gridToChess($moveX, $moveY);
+
+                            $queue[$turn + 1][] = [$whiteKingX, $whiteKingY, $moveX, $moveY, $blackKingX, $blackKingY, $moves];
+
+                            error_log("moving rook to $moveX $moveY - " . gridToChess($moveX, $moveY));
+                        }
+                    }
+                }
             }
         }
     }
@@ -98,7 +154,7 @@ while(!$solutions) {
 
     ++$turn;
 
-    if($turn == 10) break;
+    if($turn == 3) break;
 }
 
 error_log(var_export($solutions, 1));
