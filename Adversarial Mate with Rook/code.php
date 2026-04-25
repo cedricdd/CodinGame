@@ -47,31 +47,27 @@ error_log("WK: $whiteKing ($whiteKingX  - $whiteKingY)");
 error_log("WR: $whiteRook ($whiteRookX  - $whiteRookY)");
 error_log("BK: $blackKing ($blackKingX  - $blackKingY)");
 
-$solutionsMaxLen = MAX_SIZE_SOLUTION;
-$solutions = [];
-
 function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRookY, int $blackKingX, int $blackKingY, int $turn, array $moves) :?array {
-    global $solutions, $solutionsMaxLen, $distances, $kingMoves, $start;
-    static $history = [];
+    global $distances, $kingMoves, $start;
+    static $maxLen = MAX_SIZE_SOLUTION;
 
-    $key = $whiteKingX | ($whiteKingY << 3) | ($whiteRookX << 6) | ($whiteRookY << 9) | ($blackKingX << 12) | ($blackKingY << 15);
-
-    if(isset($history[$key]) && $history[$key] <= $turn) return null;
-    else $history[$key] = $turn;
+    $key = $whiteKingX | ($whiteKingY << 3) | ($whiteRookX << 6) | ($whiteRookY << 9) | ($blackKingX << 12) | ($blackKingY << 15) | ($turn << 18);
 
     $wk = gridToChess($whiteKingX, $whiteKingY);
     $wr = gridToChess($whiteRookX, $whiteRookY);
     $bk = gridToChess($blackKingX, $blackKingY);
 
-    if($wk == "f1" && $wr == "e3" && $bk == "h21") $debug = true;
+    if($wk == "e6" && $wr == "g5" && $bk == "f88") $debug = true;
     else $debug = false;
 
-    if($turn >= $solutionsMaxLen) return null;
+    if($turn >= $maxLen) return null;
 
     if($debug) error_log("Turn $turn -- WK: $wk WR: $wr BK: $bk");
 
     //It's black turn
     if($turn % 2 == 0) {
+        if($debug) error_log("it's black turn");
+
         $results = [0, []];
         $canMove = false;
 
@@ -98,6 +94,11 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
 
             $result = solve($whiteKingX, $whiteKingY, $whiteRookX, $whiteRookY, $moveX, $moveY, $turn + 1, $moves);
 
+            if($debug) {
+                error_log("result for moving black king to " . gridToChess($moveX, $moveY));
+                error_log(var_export($result, 1));
+            }
+
             if($result === null) return null;
             else {
                 $results[0] = max($results[0], $result[0]);
@@ -107,12 +108,26 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
 
         if($canMove === false) {
             //The black king needs to be in a check, he can only be checked by the rook
-            if(($whiteRookX == $blackKingX && isBetween($whiteRookX, $blackKingX, $whiteKingX) === false) || ($whiteRookY == $blackKingY && isBetween($whiteRookY, $blackKingY, $whiteKingY) === false)) return [$turn - 1, [$moves]];
+            if(($whiteRookX == $blackKingX && ($whiteRookX != $whiteKingX || isBetween($whiteRookY, $blackKingY, $whiteKingY) === false)) || ($whiteRookY == $blackKingY && ($whiteRookY != $whiteKingY || isBetween($whiteRookX, $blackKingX, $whiteKingX) === false))) {
+                if($debug) {
+                    error_log("black king can't move!");
+                    error_log(var_export($moves, 1));
+                }
+
+                return [$turn - 1, [$moves]];
+            }
 
             //It's a stalemate 
             else return null;
         }
-        else return $results;
+        else {
+            if($debug) {
+                error_log("final result for black - $whiteKingX, $whiteKingY, $whiteRookX, $whiteRookY, $blackKingX, $blackKingY, $turn");
+                error_log(var_export($results, 1));
+            }
+
+            return $results;
+        }
     }
     //It's white turn
     else {
@@ -121,25 +136,26 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
         $bestSolution = [MAX_SIZE_SOLUTION, []];
 
         //The black king can take the rook, we can't win without the rook, we have to save it
-        if($distanceRook == 1 && $distances[$whiteKingY][$whiteKingX][$whiteRookY][$whiteRookX] != 1) {
+        if($distanceRook == 1) {
             //We try to 'guard' the rook with our king
             foreach($kingMoves[$whiteKingY][$whiteKingX] as [$moveX, $moveY]) {
-                if($distances[$moveY][$moveX][$whiteRookY][$whiteRookX] == 1) {
+                if($distances[$moveY][$moveX][$whiteRookY][$whiteRookX] == 1 && $distances[$moveY][$moveX][$blackKingY][$blackKingX] > 1) {
                     if($debug) error_log("we can move our king at " . gridToChess($moveX, $moveY) . " to save the rook"); 
 
                     $moves[$turn] = gridToChess($whiteKingX, $whiteKingY) . gridToChess($moveX, $moveY);
 
                     $result = solve($moveX, $moveY, $whiteRookX, $whiteRookY, $blackKingX, $blackKingY, $turn + 1, $moves);
 
-                    if($result !== null) {
-                        if($turn == 1) {
-                            [$solutionsMaxLen, $solutions] = $result;
+                    if($result !== null && $result[0] < $bestSolution[0]) {
+                        $bestSolution = $result;
 
-                            error_log("1 new best $solutionsMaxLen");
+                        if($turn == 1) {
+                            $maxLen = $result[0];
+
+                            error_log("1 new best $maxLen");
                             // error_log(var_export($moves, 1));
                             error_log(microtime(1) - $start);
                         }
-                        elseif($result[0] < $bestSolution[0]) $bestSolution = $result;
                     }
                 }
             }
@@ -160,15 +176,16 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
 
                     $result = solve($whiteKingX, $whiteKingY, $moveX, $moveY, $blackKingX, $blackKingY, $turn + 1, $moves);
 
-                    if($result !== null) {
-                        if($turn == 1) {
-                            [$solutionsMaxLen, $solutions] = $result;
+                    if($result !== null && $result[0] < $bestSolution[0]) {
+                        $bestSolution = $result;
 
-                            error_log("2 new best $solutionsMaxLen");
+                        if($turn == 1) {
+                            $maxLen = $result[0];
+
+                            error_log("2 new best $maxLen");
                             // error_log(var_export($moves, 1));
                             error_log(microtime(1) - $start);
                         }
-                        elseif($result[0] < $bestSolution[0]) $bestSolution = $result;
                     }
 
                     break;
@@ -192,25 +209,31 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
 
                 $result = solve($moveX, $moveY, $whiteRookX, $whiteRookY, $blackKingX, $blackKingY, $turn + 1, $moves);
 
-                if($result !== null) {
-                    if($turn == 1) {
-                        [$solutionsMaxLen, $solutions] = $result;
+                if($debug) {
+                    error_log("result for moving white king to " . gridToChess($moveX, $moveY) . " -- $moveX, $moveY, $whiteRookX, $whiteRookY, $blackKingX, $blackKingY, " . ($turn + 1));
+                    error_log(var_export($result, 1));
+                }
 
-                        error_log("3 new best $solutionsMaxLen");
+                if($result !== null && $result[0] < $bestSolution[0]) {
+                    $bestSolution = $result;
+
+                    if($turn == 1) {
+                        $maxLen = $result[0];
+
+                        error_log("3 new best $maxLen");
                         // error_log(var_export($moves, 1));
                         error_log(microtime(1) - $start);
                     }
-                    elseif($result[0] < $bestSolution[0]) $bestSolution = $result;
                 }
             }
 
-            for($i = -2; $i <= 2; ++$i) {
+            for($i = -1; $i <= 1; ++$i) {
                 /*Move rook vertically*/
                 $moveX = $whiteRookX;
                 $moveY = $blackKingY + $i;
   
                 //The move is valid (still on the grid & actually moving)
-                if($whiteRookX != $blackKingX && $moveY >= 0 && $moveY < 8) {
+                if($whiteRookX != $blackKingX && $moveY != $whiteRookY && $moveY >= 0 && $moveY < 8) {
 
                     //Make sure our king isn't in the way
                     if($whiteKingX != $whiteRookX || isBetween($whiteRookY, $moveY, $whiteKingY) === false) {
@@ -226,15 +249,16 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
 
                                 $result = solve($whiteKingX, $whiteKingY, $moveX, $moveY, $blackKingX, $blackKingY, $turn + 1, $moves);
 
-                                if($result !== null) {
-                                    if($turn == 1) {
-                                        [$solutionsMaxLen, $solutions] = $result;
+                                if($result !== null && $result[0] < $bestSolution[0]) {
+                                    $bestSolution = $result;
 
-                                        error_log("4 new best $solutionsMaxLen");
+                                    if($turn == 1) {
+                                        $maxLen = $result[0];
+
+                                        error_log("4 new best $maxLen");
                                         // error_log(var_export($moves, 1));
                                         error_log(microtime(1) - $start);
                                     }
-                                    elseif($result[0] < $bestSolution[0]) $bestSolution = $result;
                                 }
                             }
                         }
@@ -248,7 +272,7 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
                 // if($debug) error_log("testing moving rook at $moveX $moveY " . gridToChess($moveX, $moveY));
 
                 //The move is valid (still on the grid & actually moving)
-                if($whiteRookY != $blackKingY && $moveX >= 0 && $moveX < 8) {
+                if($whiteRookY != $blackKingY && $moveX != $whiteRookX && $moveX >= 0 && $moveX < 8) {
 
                     //Make sure our king isn't in the way
                      if($whiteKingY != $whiteRookY || isBetween($whiteRookX, $moveX, $whiteKingX) === false) {
@@ -264,15 +288,21 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
 
                                 $result = solve($whiteKingX, $whiteKingY, $moveX, $moveY, $blackKingX, $blackKingY, $turn + 1, $moves);
 
-                                if($result !== null) {
-                                    if($turn == 1) {
-                                        [$solutionsMaxLen, $solutions] = $result;
+                                // if($debug) {
+                                //     error_log("result for moving to " . gridToChess($moveX, $moveY));
+                                //     error_log(var_export($result, 1));
+                                // }
 
-                                        error_log("5 new best $solutionsMaxLen");
-                                        error_log(var_export($result, 1));
+                                if($result !== null && $result[0] < $bestSolution[0]) {
+                                    $bestSolution = $result;
+
+                                    if($turn == 1) {
+                                        $maxLen = $result[0];
+
+                                        error_log("5 new best $maxLen");
+                                        // error_log(var_export($moves, 1));
                                         error_log(microtime(1) - $start);
                                     }
-                                    elseif($result[0] < $bestSolution[0]) $bestSolution = $result;
                                 }
                             }
                         }
@@ -281,14 +311,19 @@ function solve(int $whiteKingX, int $whiteKingY, int $whiteRookX, int $whiteRook
             }
         }
 
+        if($debug) {
+            error_log("Best Solution:");
+            error_log(var_export($bestSolution, 1));
+        }
+
         if($bestSolution[0] < MAX_SIZE_SOLUTION) return $bestSolution;
         else return null;
     }
 }
 
-solve($whiteKingX, $whiteKingY, $whiteRookX, $whiteRookY, $blackKingX, $blackKingY, 1, []);
+[$size, $solutions] = solve($whiteKingX, $whiteKingY, $whiteRookX, $whiteRookY, $blackKingX, $blackKingY, 1, []);
 
-error_log(var_export($solutions, 1));
+// error_log(var_export($solutions, 1));
 error_log(microtime(1) - $start);
 
 $turn = 1;
