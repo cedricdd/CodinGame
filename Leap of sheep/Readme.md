@@ -1,5 +1,5 @@
 # Puzzle
-**Leap of sheep** https://www.codingame.com/contribute/view/146700c60c02a58fbcf8bc5cf176089475a2c9
+**Leap of sheep** https://www.codingame.com/training/easy/leap-of-sheep
 
 # Goal
 Bob is training his sheep for the annual competition Leap of Sheep.
