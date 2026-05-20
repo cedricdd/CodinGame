@@ -1,5 +1,5 @@
 # Puzzle
-**Orbital Logistics: Exact Load** https://www.codingame.com/contribute/view/1460737ecdfdbf3e1faa74bc9d340d6ec822c4
+**Orbital Logistics: Exact Load** https://www.codingame.com/training/medium/orbital-logistics-exact-load
 
 # Goal
 A cargo captain is preparing a shipment for a space journey.
