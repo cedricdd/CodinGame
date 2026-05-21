@@ -1,8 +1,8 @@
 # Puzzle
-**Cistercian addition** https://www.codingame.com/contribute/view/144852b400619739005aed6c805568c1060848
+**Cistercian addition** https://www.codingame.com/training/easy/cistercian-addition
 
 # Goal
-You simply need to provide the result of an addition between two numbers.
+You simply need to provide the result of an *addition* between two numbers.
 
 However, these numbers are given in the form of the Cistercian numeral system! (https://en.wikipedia.org/wiki/Cistercian_numerals)  
 This system allows you to encode numbers from 1 to 9999 using a single symbol.  
