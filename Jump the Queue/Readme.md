@@ -1,5 +1,5 @@
 # Puzzle
-**Jump the Queue** https://www.codingame.com/contribute/view/1480538610c42be57278e5840099e794c0a406
+**Jump the Queue** https://www.codingame.com/training/easy/jump-the-queue
 
 # Goal
 A school of students is queueing in line in the school canteen to buy lunchboxes.  
