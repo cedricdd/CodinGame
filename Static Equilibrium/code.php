@@ -17,12 +17,4 @@ $x = ($forces['RIGHT'] - $forces['LEFT']) * -1;
 $y = ($forces['UP'] - $forces['DOWN']) * -1;
 
 echo format(sqrt($x ** 2 + $y ** 2));
-
-if($x > 0 && $y < 0) echo format(360 - rad2deg(atan(abs($y) / $x)));
-elseif($x < 0 && $y < 0) echo format(180 + rad2deg(atan(abs($y) / abs($x))));
-elseif($x < 0 && $y > 0) echo format(180 - rad2deg(atan($y / abs($x))));
-elseif($x > 0 && $y > 0) echo format(rad2deg(atan($y / $x)));
-elseif($x == 0 && $y < 0) echo "270.00" . PHP_EOL;
-elseif($x < 0 && $y == 0) echo "180.00" . PHP_EOL;
-elseif($x == 0 && $y > 0) echo "90.00" . PHP_EOL;
-else echo "0.00" . PHP_EOL;
+echo format(fmod(rad2deg(atan2($y, $x)) + 360, 360));
