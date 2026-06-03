@@ -67,20 +67,10 @@ for($i = 0, $n = intval(fgets(STDIN)); $i < $n; ++$i) {
 $output = [];
 
 foreach(str_split($grid, 8) as $y => $line) {
-    $count = 0;
-    $output[$y] = "";
-
-    for($i = 0; $i < 8; ++$i) {
-        if($line[$i] != '.') {
-            if($count) {
-                $output[$y] .=  $count;
-                $count = 0;
-            }
-            $output[$y] .=  $line[$i];
-        }
-        else ++$count;
-    }
-    if($count) $output[$y] .= $count;
+    $output[] = preg_replace_callback('/\.+/',
+        function ($matches) {
+            return strlen($matches[0]);
+        }, $line);
 }
 
 echo implode('/', $output);
