@@ -2,15 +2,15 @@
 **Simple Makefiles** https://www.codingame.com/contribute/view/149373d871f27bdcdc97a723791d28b1fdfe5e
 
 # Goal
-A makefile is a build script read by the make utility. It describes how to produce files (called targets) from other files (called prerequisites), by running shell commands called actions. make figures out the correct order to run those actions so that every prerequisite exists before it is needed.  
+A makefile is a build script read by the make utility. It describes how to produce files (called targets) from other files (called prerequisites), by running shell commands called actions. make figures out the correct order to run those actions so that every prerequisite exists before it is needed.
+
 Your task is to implement a simplified makefile processor: read a makefile and a list of targets to build, then print the actions that would be executed, in order.
 
 *Makefile syntax*  
 A makefile is a sequence of rules, action lines, comments, and blank lines.
 
 *Rule lines*  
-A rule line declares one or more targets and their prerequisites:
-```target1 [target2 ...]: [prereq1 prereq2 ...]```
+A rule line declares one or more targets and their prerequisites: ```target1 [target2 ...]: [prereq1 prereq2 ...]```
 
 Everything before the : is a whitespace-separated list of target names. Everything after is a whitespace-separated list of prerequisite names. Either list may be empty.
 
@@ -35,21 +35,26 @@ Inside an action line, the following macros may appear as **complete, standalone
 | $^    | All prerequisites of the rule, space-separated, in definition order
 ```
 
-*Build semantics* Determining what to build. If no targets are requested, the default target — the first target named on the first rule line of the makefile — is built.
+**Build semantics**
 
-*Prerequisite-first ordering* Before a target is built, all of its prerequisites must be fully built. A target that has no rule at all is assumed to already exist (like a source file checked into version control); it requires no actions and has no prerequisites of its own.
+*Determining what to build.* If no targets are requested, the default target — the first target named on the first rule line of the makefile — is built.
 
-*Lexicographic tie-breaking* When the dependency graph leaves the order between two targets unconstrained, the one whose name is lexicographically smaller is built first. This applies both to prerequisites listed in a rule and to multiple targets requested on the command line.
+*Prerequisite-first ordering.* Before a target is built, all of its prerequisites must be fully built. A target that has no rule at all is assumed to already exist (like a source file checked into version control); it requires no actions and has no prerequisites of its own.
 
-*Built once* Each target is built at most once, even if multiple targets depend on it.
+*Lexicographic tie-breaking.* When the dependency graph leaves the order between two targets unconstrained, the one whose name is lexicographically smaller is built first. This applies both to prerequisites listed in a rule and to multiple targets requested on the command line.
 
-*Actions only when defined* A target that has no action lines produces no output, but its prerequisites are still built.
+*Built once.* Each target is built at most once, even if multiple targets depend on it.
 
-*Timestamps ignored* Unlike real make, this processor does not check whether files are up to date. Every target that has action lines is unconditionally rebuilt.
+*Actions only when defined.* A target that has no action lines produces no output, but its prerequisites are still built.
 
-*Cycle detection* Before any build begins, the entire dependency graph is checked for circular dependencies. If a cycle exists anywhere in the graph — even among targets not being built — the build is aborted.
+*Timestamps ignored.* Unlike real make, this processor does not check whether files are up to date. Every target that has action lines is unconditionally rebuilt.
 
-*Example*  
+*Cycle detection.* Before any build begins, the entire dependency graph is checked for circular dependencies. If a cycle exists anywhere in the graph — even among targets not being built — the build is aborted.
+
+---
+
+Example
+
 The following makefile compiles two source files into object files, then links them into a program. No targets are explicitly requested, so the default target all is built.
 ```
 all: main.o util.o
@@ -79,12 +84,10 @@ Note that $^ in the all rule expands to main.o util.o — the prerequisites in t
 * Next L lines: The makefile, one line at a time. Syntax rules are described above.
 
 # Output
-*If a circular dependency is detected:*  
-* A single line: [Circular dependencies detected]
-
-*Otherwise*  
-* One line per action executed: The tokens of the action, separated by single spaces, with all built-in macros already expanded. Actions are emitted in build order: a target's prerequisites are fully built before the target itself, and lexicographically smaller names are built first when the dependency graph imposes no further constraint. Targets with no action lines produce no output.
-* Final line: [Build complete]
+* If a circular dependency is detected: ```[Circular dependencies detected]```
+* Otherwise:
+	* One line per action executed:> The tokens of the action, separated by single spaces, with all built-in macros already expanded. Actions are emitted in build order: a target's prerequisites are fully built before the target itself, and lexicographically smaller names are built first when the dependency graph imposes no further constraint. Targets with no action lines produce no output.
+	* [Build complete]
 
 # Constraints
 * L <= 1000
