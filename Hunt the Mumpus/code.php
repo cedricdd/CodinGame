@@ -1,5 +1,6 @@
 <?php
 
+//Find a path to the next room we want to explore
 function findNextRoomToExplore(int $position, bool $allowBats = false): ?array {
     global $visited, $links, $rooms;
 
@@ -26,6 +27,7 @@ function findNextRoomToExplore(int $position, bool $allowBats = false): ?array {
     }
 }
 
+//We found the location of the mumpus, go into position to shot it
 function goToShootingPosition(int $position, array $path = []): ?array {
     global $mumpusPosition, $links, $rooms;
 
@@ -52,135 +54,92 @@ function goToShootingPosition(int $position, array $path = []): ?array {
     }
 }
 
-function updateRooms($infoIndex) {
-    global $rooms, $infos, $infosRemoved, $mumpusPosition, $batTargetPosition;
+function checkRoomsInfo($infoIndex) {
+    global $rooms, $infos, $infosRemoved, $mumpusPosition;
 
-    [$neighbors, [$bats, $shaft, $mumpus]] = $infos[$infoIndex];
+    [&$neighbors, [$bats, $shaft, $mumpus]] = $infos[$infoIndex];
 
-    // error_log("working on info $infoIndex (" . implode('-', array_keys($neighbors)) . " $bats, $shaft, $mumpus) -- $batTargetPosition");
-
-    $candidates = $neighbors;
-
-    foreach($neighbors as $roomID => $_)
-        //It's a power of two, we are sure what's in the room
-        if(($rooms[$roomID] & ($rooms[$roomID] - 1)) == 0) {
-            unset($candidates[$roomID]);
-
-            if($batTargetPosition === $roomID) --$bats;
-            else {
-                switch ($rooms[$roomID]) {
-                    case 2: --$bats; break;
-                    case 4: --$shaft; break;
-                    case 8: --$mumpus; break;
-                }
-            }
-        }
-
+    //We have nothing left to find
     if($bats + $shaft + $mumpus == 0) {
-        foreach($candidates as $roomID => $_) {
-            $rooms[$roomID] = 1;
-            unset($candidates[$roomID]);
-        }
-    }
-
-    if(count($candidates) == 0) {
         unset($infos[$infoIndex]);
+
         $infosRemoved[$infoIndex] = true;
-        // error_log("we remove info index $infoIndex");
+
         return;
     }
 
+    //We can remove the rooms we know are empty
+    foreach($neighbors as $roomID => $_) if($rooms[$roomID] == 1) unset($neighbors[$roomID]);
+
     $hashDanger = ($bats ? 2 : 0) | ($shaft ? 4 : 0) | ($mumpus ? 8 : 0);
 
-    if(count($candidates) > $bats + $shaft + $mumpus) $hashDanger |= 1;
+    if($bats + $shaft + $mumpus < count($neighbors)) $hashDanger |= 1;
 
-    foreach($candidates as $roomID => $_) $rooms[$roomID] &= $hashDanger;
+    foreach($neighbors as $roomID => $_) $rooms[$roomID] &= $hashDanger;
 
+    //There's at least one bat
     if($bats) {
-        $potential = 0;
-        $missing = $bats;
+        $potential = [];
 
-        foreach($candidates as $roomID => $_) {
-            if($rooms[$roomID] == 2) --$missing;
-            elseif($rooms[$roomID] & 2) ++$potential;
-        }
+        foreach($neighbors as $roomID => $_) if($rooms[$roomID] & 2) $potential[] = $roomID;
 
-        // error_log("$bats bats -- missing $missing & potential $potential");
+        if(count($potential) == 1) {
+            $roomID = reset($potential);
+            $rooms[$roomID] = 2;
+            unset($infos[$infoIndex][0][$roomID]);
 
-        if($missing == 0 || $potential == $missing) {
-            if($missing == 0) {
-                // error_log("We have found all the bats");
-
-                foreach($candidates as $roomID => $_) {
-                    if($rooms[$roomID] != 2) $rooms[$roomID] &= 13;
-                }
-            } else {
-                // error_log("We have found all the possible bats");
-
-                foreach($candidates as $roomID => $_) {
-                    if($rooms[$roomID] & 2) $rooms[$roomID] = 2;
-                    else $rooms[$roomID] &= 13;
-                }
-            }
-
-            $infos[$infoIndex][1][0] = 0;
+            $infos[$infoIndex][1][0] = 0; //We are done with bats
         }
     }
+    //There's at least one shaft
     if($shaft) {
-        $potential = 0;
-        $missing = $shaft;
+        $potential = [];
 
-        foreach($candidates as $roomID => $_) {
-            if($rooms[$roomID] == 4) --$missing;
-            elseif($rooms[$roomID] & 4) ++$potential;
-        }
+        foreach($neighbors as $roomID => $_) if($rooms[$roomID] & 4) $potential[] = $roomID;
 
-        // error_log("$shaft shaft -- missing $missing & potential $potential");
+        if(count($potential) == 1) {
+            $roomID = reset($potential);
+            $rooms[$roomID] = 4;
+            unset($infos[$infoIndex][0][$roomID]);
 
-        //We have found them all
-        if($missing == 0 || $potential == $missing) {
-            if($missing == 0) {
-                // error_log("We have found all the shafts");
 
-                foreach($candidates as $roomID => $_) {
-                    if($rooms[$roomID] != 4) $rooms[$roomID] &= 11;
-                }
-            } else {
-                // error_log("We have found all the possible shafts");
-
-                foreach($candidates as $roomID => $_) {
-                    if($rooms[$roomID] & 4) $rooms[$roomID] = 4;
-                    else $rooms[$roomID] &= 11;
-                }
-            }
-
-            $infos[$infoIndex][1][1] = 0;
+            $infos[$infoIndex][1][1] = 0; //We are done with shafts
         }
 
     }
+    //There's one mumpus
     if($mumpus) {
-        $count = 0;
+        $potential = [];
 
-        foreach($candidates as $roomID => $_)
-            if($rooms[$roomID] & 8) ++$count;
+        foreach($neighbors as $roomID => $_) if($rooms[$roomID] & 8) $potential[] = $roomID;
 
-        if($count == $mumpus) {
-            foreach($candidates as $roomID => $_) {
-                if($rooms[$roomID] & 8) {
-                    $rooms[$roomID] = 8;
-                    $mumpusPosition = $roomID;
-                }
-                else $rooms[$roomID] &= 7;
-            }
+        if(count($potential) == 1) {
+            $roomID = reset($potential);
+            $rooms[$roomID] = 8;
+            $mumpusPosition = $roomID;
+            unset($infos[$infoIndex][0][$roomID]);
 
-            $infos[$infoIndex][1][2] = 0;
+
+            $infos[$infoIndex][1][2] = 0; //We are done with mumpus
         }
     }
 }
 
 fscanf(STDIN, "%d %d %d", $roomCount, $batCount, $shaftCount);
 
-$rooms = array_fill(0, $roomCount, 15);
+$hash = 8 | 1; //Everything can be empty or a mumpus
+
+if($batCount) {
+    $hash |= 2; //There are some bats
+    $foundBatGroups = false;
+} else $foundBatGroups = true;
+
+if($shaftCount) {
+    $hash |= 4; //There are some shafts
+    $foundShaftGroups = false;
+} else $foundShaftGroups = true;
+
+$rooms = array_fill(0, $roomCount, $hash);
 $infos = [];
 $infosRemoved = [];
 $visited = [];
@@ -189,7 +148,6 @@ $actions = [];
 $shaftsInfo = [];
 $batsInfo = [];
 $mumpusPosition = null;
-$batTargetPosition = null;
 
 // game loop
 while (TRUE) {
@@ -200,154 +158,145 @@ while (TRUE) {
     $rooms[$currentRoom] = 1;
     $visited[$currentRoom] = true;
 
-    error_log(var_export($currentRoom, true));
-    error_log(var_export("$roomA, $roomB, $roomC", true));
-    error_log(var_export("$bats, $shaft, $mumpus", true));
-
     //There's only one mumpus, any rooms not a direct neighbor of our current location can't contain the mumpus
-    if($mumpus != 0) {
+    if($mumpus != 0) 
         foreach($rooms as $roomID => $_)
             if($roomID != $roomA && $roomID != $roomB && $roomID != $roomC) $rooms[$roomID] &= 7;
-    }
-
+    
     $links[$currentRoom][$roomA] =  $links[$roomA][$currentRoom] = true;
     $links[$currentRoom][$roomB] =  $links[$roomB][$currentRoom] = true;
     $links[$currentRoom][$roomC] =  $links[$roomC][$currentRoom] = true;
 
-    if($shaftCount && $shaft && !isset($shaftsInfo[$currentRoom])) $shaftsInfo[$currentRoom] = [$shaft, [$roomA, $roomB, $roomC]];
-    if($batCount && $bats && !isset($batsInfo[$currentRoom])) $batsInfo[$currentRoom] = [$bats, [$roomA, $roomB, $roomC]];
+    if($shaft && !isset($shaftsInfo[$currentRoom])) $shaftsInfo[$currentRoom] = [$shaft, [$roomA, $roomB, $roomC]];
+    if($bats && !isset($batsInfo[$currentRoom])) $batsInfo[$currentRoom] = [$bats, [$roomA, $roomB, $roomC]];
 
+    //Nothing in any of the three rooms
     if($bats + $shaft + $mumpus == 0) {
         foreach(['A','B','C'] as $letter) {
             if($rooms[${"room" . $letter}] != 1) $rooms[${"room" . $letter}] = 1;
         }
-    } elseif(!isset($infosRemoved[$currentRoom]) && !isset($infos[$currentRoom])) 
+    } elseif(!isset($infosRemoved[$currentRoom]) && !isset($infos[$currentRoom])) {
         $infos[$currentRoom] = [[$roomA => true, $roomB => true, $roomC => true], [$bats, $shaft, $mumpus]];
+    }
 
+    //Check if with the new info we can deduce what's in some rooms
     do {
         $before = $infos;
 
-        foreach($infos as $index => $_) {
-            updateRooms($index);
-        }
+        foreach($infos as $index => $_) checkRoomsInfo($index);
     } while($before != $infos);
 
-    foreach($shaftsInfo as $index1 => [, $list]) {
-        foreach($list as $index2 => $roomID) {
-            if(($rooms[$roomID] & 4) == 0) unset($shaftsInfo[$index1][1][$index2]);
-        }
-    }
-
-    $shaftsInfoTemp = array_values($shaftsInfo);
-    $shaftIDs = [];
-    $groups = [];
-
-    for($i = count($shaftsInfoTemp) - 1; $i >= 0; --$i) {
-        foreach($shaftsInfoTemp[$i][1] as $roomID) $shaftIDs[$roomID] = true;
-
-        foreach($groups as $groupID => $possibleRooms) {
-            $intersect = array_intersect($shaftsInfoTemp[$i][1], $possibleRooms);
-
-            if($intersect == false) continue;
-
-            $groups[$groupID] = $intersect;
-
-            continue 2;
-        }
-
-        $groups[] = $shaftsInfoTemp[$i][1];
-    }
-
-    // error_log(var_export($shaftsInfo, 1));
-    // error_log(var_export($groups, 1));
-
-    if(count($groups) == $shaftCount) {
-        // error_log(var_export($shaftIDs, 1));
-
-        foreach($rooms as $roomID => $hash) {
-            if(!isset($shaftIDs[$roomID]) && $rooms[$roomID] & 4) {
-                $rooms[$roomID] &= 11;
-                error_log("$roomID can't be a shaft");
+    //We are not sure where all the shafts are yet
+    if($foundShaftGroups === false) {
+        foreach($shaftsInfo as $index1 => [, $list]) {
+            //Check if it's still possible for a shaft to be there
+            foreach($list as $index2 => $roomID) {
+                if(($rooms[$roomID] & 4) == 0) unset($shaftsInfo[$index1][1][$index2]);
             }
         }
 
-        $shaftCount = 0;
-    }
+        $shaftsInfoTemp = array_values($shaftsInfo);
+        $shaftIDs = [];
+        $groups = [];
 
-    foreach($batsInfo as $index1 => [, $list]) {
-        foreach($list as $index2 => $roomID) {
-            if(($rooms[$roomID] & 2) == 0) unset($batsInfo[$index1][1][$index2]);
+        //We group the possible locations of shafts
+        for($i = count($shaftsInfoTemp) - 1; $i >= 0; --$i) {
+            foreach($shaftsInfoTemp[$i][1] as $roomID) $shaftIDs[$roomID] = true;
+
+            foreach($groups as $groupID => $possibleRooms) {
+                $intersect = array_intersect($shaftsInfoTemp[$i][1], $possibleRooms);
+
+                if($intersect == false) continue;
+
+                $groups[$groupID] = $intersect;
+
+                continue 2;
+            }
+
+            $groups[] = $shaftsInfoTemp[$i][1];
+        }
+
+        //We know all the possible locations of shafts
+        if(count($groups) == $shaftCount) {
+            foreach($rooms as $roomID => $hash) {
+                //A shaft can't be there
+                if(!isset($shaftIDs[$roomID]) && $rooms[$roomID] & 4) $rooms[$roomID] &= 11;
+            }
+
+            $foundShaftGroups = true;
         }
     }
 
-    $batsInfoTemp = array_values($batsInfo);
-    $batIDs = [];
-    $groups = [];
-
-    for($i = count($batsInfoTemp) - 1; $i >= 0; --$i) {
-        foreach($batsInfoTemp[$i][1] as $roomID) $batIDs[$roomID] = true;
-
-        foreach($groups as $groupID => $possibleRooms) {
-            $intersect = array_intersect($batsInfoTemp[$i][1], $possibleRooms);
-
-            if($intersect == false) continue;
-
-            $groups[$groupID] = $intersect;
-
-            continue 2;
-        }
-
-        $groups[] = $batsInfoTemp[$i][1];
-    }
-
-    if(count($groups) == $batCount) {
-        error_log(var_export($batIDs, 1));
-
-        foreach($rooms as $roomID => $hash) {
-            if(!isset($batIDs[$roomID]) && $rooms[$roomID] & 2) {
-                $rooms[$roomID] &= 13;
-                error_log("$roomID can't be a bat");
+    //We are not sure where all the bats are yet
+    if($foundBatGroups === false) {
+        foreach($batsInfo as $index1 => [, $list]) {
+            foreach($list as $index2 => $roomID) {
+                if(($rooms[$roomID] & 2) == 0) unset($batsInfo[$index1][1][$index2]);
             }
         }
 
-        $batCount = 0;
+        $batsInfoTemp = array_values($batsInfo);
+        $batIDs = [];
+        $groups = [];
+
+        //We group the possible locations of cats
+        for($i = count($batsInfoTemp) - 1; $i >= 0; --$i) {
+            foreach($batsInfoTemp[$i][1] as $roomID) $batIDs[$roomID] = true;
+
+            foreach($groups as $groupID => $possibleRooms) {
+                $intersect = array_intersect($batsInfoTemp[$i][1], $possibleRooms);
+
+                if($intersect == false) continue;
+
+                $groups[$groupID] = $intersect;
+
+                continue 2;
+            }
+
+            $groups[] = $batsInfoTemp[$i][1];
+        }
+
+        //We know all the possible locations of bats
+        if(count($groups) == $batCount) {
+            foreach($rooms as $roomID => $hash) {
+                //A bat can't be there
+                if(!isset($batIDs[$roomID]) && $rooms[$roomID] & 2) $rooms[$roomID] &= 13;
+            }
+
+            $foundBatGroups = true;
+        }
     }
 
-    // error_log(var_export($batsInfo, 1));
+    $shaftFound = 0;
 
-    error_log(var_export($rooms, true));
+    foreach($rooms as $roomID => $hash) if($hash == 4) ++$shaftFound; //We are sure this room contains a shaft
+
+    if($shaftFound == $shaftCount)
+        foreach($rooms as $roomID => $hash)
+            if($hash != 4 && ($hash & 4)) $rooms[$roomID] &= 11; //We are sure there's no shaft there
+
 
     if(!$actions) {
+        //Go kill the mumpus
         if($mumpusPosition !== null) {
-            $path = array_values(goToShootingPosition($currentRoom));
-
-            error_log(var_export($path, 1));
+            $path = goToShootingPosition($currentRoom);
 
             $actions[] = "SHOOT $mumpusPosition";
-
-            for($i = count($path) - 1; $i > 0; --$i) $actions[] = "MOVE " . $path[$i];
         } else {
-            $path = findNextRoomToExplore($currentRoom);
+            $path = findNextRoomToExplore($currentRoom); //Find the next safe room to explore
 
-            if($path === null) {
+            if($path === null) { //We have no safe room to explore, go to a bat
                 $path = findNextRoomToExplore($currentRoom, true);
 
-                $batTargetPosition = array_key_last($path);
+                $rooms[array_key_last($path)] = 1;
+                $batCount--;
             }
-
-            $path = array_values($path);
-
-            error_log(var_export($path, 1));
-
-            for($i = count($path) - 1; $i > 0; --$i) $actions[] = "MOVE " . $path[$i];
         }
+
+        $path = array_values($path);
+
+        for($i = count($path) - 1; $i > 0; --$i) $actions[] = "MOVE " . $path[$i];
     }
 
-    $action = array_pop($actions);
-
-    if($action == "MOVE $batTargetPosition") {
-        $rooms[$batTargetPosition] = 1;
-    }
-
-    echo $action . PHP_EOL;
+    echo array_pop($actions) . PHP_EOL;
 }
