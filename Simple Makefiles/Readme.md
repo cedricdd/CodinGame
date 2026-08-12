@@ -2,92 +2,123 @@
 **Simple Makefiles** https://www.codingame.com/training/medium/simple-makefiles
 
 # Goal
-A makefile is a build script read by the make utility. It describes how to produce files (called targets) from other files (called prerequisites), by running shell commands called actions. make figures out the correct order to run those actions so that every prerequisite exists before it is needed.
+A Makefile is a build script that describes dependencies between dated files, and the actions required to build a target file from its prerequisite files; actions are executed in an order such that every prerequisite is up to date before it is needed.
 
-Your task is to implement a simplified makefile processor: read a makefile and a list of targets to build, then print the actions that would be executed, in order.
+Your task is to implement a simplified make utility: read a list of preexistingFiles with associated fileTimes, a list of goalTargets to build, and a Makefile, then print the actions that would be executed.
 
 *Makefile syntax*  
-A makefile is a sequence of rules, action lines, comments, and blank lines.
+A Makefile is a sequence of rules and actions, with optional comments.
 
-*Rule lines*  
-A rule line declares one or more targets and their prerequisites: ```target1 [target2 ...]: [prereq1 prereq2 ...]```
+*Comments*  
+A # character begins a comment that extends to the end of the line. Comments are removed before applying other parsing rules.
 
-Everything before the : is a whitespace-separated list of target names. Everything after is a whitespace-separated list of prerequisite names. Either list may be empty.
+*Whitespace*  
+After using TAB to identify actions (see below), TAB and other leading and trailing whitespace are ignored, as are blank lines and extra spaces not needed to separate tokens.
 
-If multiple targets appear before the :, it is exactly equivalent to writing a separate identical rule for each target.
+*Rules*  
+A rule associates a target with zero or more prerequisites. Each of these is generally a file, but can be any valid token string: ```target : [prereq1 ...]```
 
-A target name may appear in more than one rule line. Its prerequisites are the **union** of all definitions, and its actions are the **concatenation** of all definition action lines, in order of appearance.
+To the left of the : is a target. To the right is a whitespace-separated list of zero or more prerequisites. Whitespace adjacent to the : is optional.
 
-*Action lines*  
-An action line immediately follows a rule line (or another action line) and begins with a single TAB character**. It contains the command to execute when building the rule's target(s). TAB appears **only** at the start of action lines.
+A target may appear in more than one rule. Its prerequisites are the union of prerequisites in all its rules, and its actions are the concatenation of all associated rule actions, in order of appearance.
 
-*Comments and blank lines*  
-A # character begins a comment that extends to the end of the line, on any line type. Blank lines are ignored.
+*Actions*  
+An action is any line that begins with a TAB. It is associated with the preceding rule. Applying the whitespace rules above yields a sequence of tokens. Any token that matches a built-in macro (see below) is replaced by its expansion. When the action is executed, the resulting tokens are printed as a single line of output with single-space delimiters.
 
 *Built-in macros*  
-Inside an action line, the following macros may appear as **complete, standalone tokens** (never embedded inside a longer word):
+Within an action, built-in macros may appear as whole tokens. They are replaced by their expansions before the line is printed:
 
 ```
 | Macro | Expands to
 |-------|-----------
-| $@    | The name of the target being built
-| $<    | The first prerequisite of the rule
-| $^    | All prerequisites of the rule, space-separated, in definition order
+| $@    | The target being built
+| $<    |The first prerequisite of the associated rule
+| $^    | All distinct prerequisites of the rule, space-separated, preserving their order in the rule
 ```
 
-**Build semantics**
+*File times*  
+A fileTime is an integer timestamp associated with a file. The higher the fileTime, the more recently the file was last updated. A file that does not exist has no fileTime.
 
-*Determining what to build.* If no targets are requested, the default target — the first target named on the first rule line of the makefile — is built.
+*Circular dependencies*  
+A circular dependency exists if any target is a prerequisite of itself, either directly or indirectly (even if the cycle involves targets not being built). The build is aborted prior
+to executing any action, and the output is a single line: ```[Circular dependencies detected].```
 
-*Prerequisite-first ordering.* Before a target is built, all of its prerequisites must be fully built. A target that has no rule at all is assumed to already exist (like a source file checked into version control); it requires no actions and has no prerequisites of its own.
+*Minimal Build*  
+- Only requested goalTargets and their direct or indirect prerequisites are built.
+- A target is only built if it does not exist or it has a fileTime <= the fileTime of any of its prerequisites.
+- When a target is built, its fileTime is updated to a value greater than any preexisting file's fileTime.
 
-*Lexicographic tie-breaking.* When the dependency graph leaves the order between two targets unconstrained, the one whose name is lexicographically smaller is built first. This applies both to prerequisites listed in a rule and to multiple targets requested on the command line.
+*Build Order*  
+- goalTargets are built in the order they are given in the input.
+- A target is built only after all of its prerequisites are built.
+- A target is built at most once, even if it is a prerequisite of multiple other targets.
+- Each target is built to completion, starting with its prerequisites, before proceeding to other targets.
+- A target's prerequisites are built in lexicographic order.
 
-*Built once.* Each target is built at most once, even if multiple targets depend on it.
-
-*Actions only when defined.* A target that has no action lines produces no output, but its prerequisites are still built.
-
-*Timestamps ignored.* Unlike real make, this processor does not check whether files are up to date. Every target that has action lines is unconditionally rebuilt.
-
-*Cycle detection.* Before any build begins, the entire dependency graph is checked for circular dependencies. If a cycle exists anywhere in the graph — even among targets not being built — the build is aborted.
+*Build Output*  
+- When a target is built, each of its actions from all rules is printed, in the order they appear in the Makefile.
+- An action is printed as a single line of single-space-separated tokens, with all built-in macros expanded.
+- A target that has no actions produces no output, but its prerequisites are still built, and its fileTime is still updated.
+- After all goalTargets are built, print [Build complete] on a single line.
 
 ---
 
 Example
 
-The following makefile compiles two source files into object files, then links them into a program. No targets are explicitly requested, so the default target all is built.
+The following Makefile compiles two source files into object files, then links them into a program.
 ```
-all: main.o util.o
+all: util.o main.o
 	gcc -o $@ $^
-main.o: main.c
-	gcc -c $< -o $@
 util.o: util.c
+	gcc -c $< -o $@
+main.o: main.c
 	gcc -c $< -o $@
 ```
 
-main.o and util.o are prerequisites of all and must be built first. main.c and util.c have no rules, so they are assumed to exist. Between main.o and util.o, neither depends on the other, so the lexicographically smaller name main.o is built first.
+Assume the sole goalTarget is all. Assuming main.c and util.c are the only preexisting files, the build proceeds as follows: util.o and main.o are prerequisites of all and must be built first. Between util.o and main.o, neither depends on the other, so the lexicographically smaller name main.o is built first.
 
 The actions output are:
 ```
 gcc -c main.c -o main.o
 gcc -c util.c -o util.o
-gcc -o all main.o util.o
+gcc -o all util.o main.o
 [Build complete]
 ```
 
-Note that $^ in the all rule expands to main.o util.o — the prerequisites in their definition order, not the order they were built.
+Note that $^ in the all rule expands to util.o main.o—-the prerequisites in their given rule order, not the order they were built.
 
 # Input
-* Line 1: An integer N, the number of targets to build. If N is 0, the first target defined in the makefile (the default target) will be built.
-* Line 2: N space-separated strings, each a target name to build. This line is blank when N is 0.
-* Line 3: An integer L, the number of lines in the makefile.
-* Next L lines: The makefile, one line at a time. Syntax rules are described above.
+* Line 1: An integer nFiles, the number of preexisting files.
+* Next nFiles lines: A preexistingFile and its integer timestamp fileTime, one file per line.
+* Next Line: An integer nGoalTargets, the number of goal targets to build.
+* Next Line: Space-delimited goalTargets, the nGoalTargets goal targets to build.
+* Next Line: An integer nLines, the number of lines in the Makefile.
+* Next nLines lines: The contents of the Makefile, one makefileLine at a time.
 
 # Output
 * If a circular dependency is detected: ```[Circular dependencies detected]```
 * Otherwise:
-	* One line per action executed:> The tokens of the action, separated by single spaces, with all built-in macros already expanded. Actions are emitted in build order: a target's prerequisites are fully built before the target itself, and lexicographically smaller names are built first when the dependency graph imposes no further constraint. Targets with no action lines produce no output.
+	* One line per action executed: The tokens of the action, separated by single spaces, with all built-in macros already expanded. Actions are printed in the order they are executed.
 	* [Build complete]
 
 # Constraints
-* L <= 1000
+* 0 <= nFiles <= 20
+* 1 <= length(preexistingFile) <= 100
+* 1 <= length(goalTarget) <= 100
+* 0 <= fileTime <= 1000
+* 1 <= nGoalTargets <= 20
+* 1 <= nLines <= 100
+* 0 <= length(makefileLine) <= 100
+
+preexistingFile consists of printable ASCII characters and does not contain whitespace, $, :, or #.
+All fileTime values may be assumed to be in the past.
+
+Within the Makefile:
+- All Makefiles are syntactically valid.
+- At least one rule is defined.
+- Every file consists of 1-100 printable ASCII characters and does not contain whitespace, $, :, or #.
+- Every prerequisite and every goalTarget is either a preexistingFile or is the target of at least one rule.
+- $< is only used in actions with a rule having at least one prerequisite.
+- Every action is preceded by at least one rule.
+- Every action has at least one token.
+- TAB characters appear only as the first character of an action.
