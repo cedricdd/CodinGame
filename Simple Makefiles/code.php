@@ -1,43 +1,68 @@
 <?php
 
-function build(string $name) {
-    global $targets, $actions, $prereqs, $output, $built;
-    static $building = [];
+function build(string $name): array {
+    global $targets, $actions, $prereqs, $files;
+    static $building = [], $builded = [];
+    $result = [];
 
-    if(!isset($targets[$name])) return; //Nothing to do
+    if(isset($builded[$name])) return []; //Already builded
+
+    if(!isset($targets[$name])) return []; //There's nothing to do for this file
+    
     if(isset($building[$name])) die("[Circular dependencies detected]");
 
     $building[$name] = true; 
     $dependencies = [];
 
-    foreach($targets[$name] as $dependency => $_) {
-        if(!isset($built[$dependency])) $dependencies[] = $dependency;
+    //Find all the dependencies to build
+    foreach(($targets[$name] ?? []) as $dependency => $_) {
+        if(!isset($builded[$dependency])) $dependencies[] = $dependency;
     }
 
-    sort($dependencies);
+    sort($dependencies); //We build them in alpha order
 
-    foreach($dependencies as $dependency) build($dependency);
+    foreach($dependencies as $dependency) $result = array_merge($result, build($dependency));
 
-    foreach($actions[$name] ?? [] as $action) {
-        $action = str_replace("$@", $name, $action);
-        $action = str_replace("$<", array_key_first($targets[$name]), $action);
-        $output[] = $action;
-    }
-
-    $built[$name] = true;
+    $builded[$name] = true;
     unset($building[$name]);
+
+    if(isset($files[$name])) {
+        $upToDate = true;
+
+        foreach(($prereqs[$name] ?? []) as $prereq) {
+            //File isn't up to date, we need to build it
+            if(isset($files[$prereq]) && $files[$prereq] >= $files[$name]) {
+                $upToDate = false;
+                break;
+            }
+        }
+
+        if($upToDate) return [];
+    }
+
+    foreach($actions[$name] ?? [] as $action) $result[] = trim(str_replace("$@", $name, $action));
+
+    $files[$name] = PHP_INT_MAX;
+
+    return $result;
 }
 
-fscanf(STDIN, "%d", $nTargets);
+fscanf(STDIN, "%d", $nFiles);
+for ($i = 0; $i < $nFiles; $i++) {
+    fscanf(STDIN, "%s %d", $preexistingFile, $fileTime);
 
-$targetsLine = explode(" ", trim(fgets(STDIN)));
+    $files[$preexistingFile] = $fileTime;
+}
+
+fscanf(STDIN, "%d", $nGoalTargets);
+
+$goalTarget = explode(" ", trim(fgets(STDIN)));
 
 fscanf(STDIN, "%d", $nLines);
 $targets = [];
 $actions = [];
 $prereqs = [];
 $output = [];
-$build = [];
 
 for ($i = 0; $i < $nLines; $i++) {
     $line = stream_get_line(STDIN, 1024 + 1, "\n");
@@ -51,7 +76,10 @@ for ($i = 0; $i < $nLines; $i++) {
       
         foreach(explode(" ", $T) as $target) {
             if(!isset($targets[$target])) $targets[$target] = [];
-            $prereqs[$T] = $P;
+
+            $prerequisites = explode(" ", $P);
+
+            $prereqs[$T] = array_merge($prerequisites, ($prereqs[$T] ?? []));
 
             if(strlen($P) == 0) continue;
 
@@ -62,16 +90,20 @@ for ($i = 0; $i < $nLines; $i++) {
     } //Actions
     else {
         foreach(explode(" ", $T) as $target) {
-            $actions[$target][] = str_replace("$^", $P, $line);
+            $line = str_replace("$^", $P, $line);
+            $line = str_replace("$<", reset($prerequisites), $line);
+
+            $actions[$target][] = $line;
         }
     }
 }
 
-if($nTargets == 0) $targetsLine = [array_key_first($targets)];
+foreach($goalTarget as $target) {
+    $output = array_merge($output, build($target));
+}
 
-sort($targetsLine);
+//Check targets that are not being built for unreachable cycle detection
+foreach($targets as $target => $_) build($target);
 
-foreach($targetsLine as $target) build($target);
-
-echo implode(PHP_EOL, $output) . PHP_EOL;
+if($output) echo implode(PHP_EOL, $output) . PHP_EOL;
 echo "[Build complete]" . PHP_EOL;
