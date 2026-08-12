@@ -1,5 +1,5 @@
 # Puzzle
-**Simple Makefiles** https://www.codingame.com/contribute/view/149373d871f27bdcdc97a723791d28b1fdfe5e
+**Simple Makefiles** https://www.codingame.com/training/medium/simple-makefiles
 
 # Goal
 A makefile is a build script read by the make utility. It describes how to produce files (called targets) from other files (called prerequisites), by running shell commands called actions. make figures out the correct order to run those actions so that every prerequisite exists before it is needed.
