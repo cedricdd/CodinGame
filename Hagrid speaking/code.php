@@ -13,9 +13,7 @@ function replace(string $word1, string $word2): string {
     $len = strlen($word2);
 
     for ($i = 0; $i < $len; ++$i) {
-        $result .= ctype_upper($word1[$i] ?? '')
-            ? strtoupper($word2[$i])
-            : $word2[$i];
+        $result .= ctype_upper($word1[$i] ?? $word1[$i - 1]) ? strtoupper($word2[$i]) : $word2[$i];
     }
 
     return $result;
@@ -30,37 +28,33 @@ for ($lines = 0; $lines < $N; $lines++) {
     [, $quote, $speaker] = $match;
 
     if(preg_match("/.*hagrid.*/i", $speaker)) {
-        preg_match_all('/\w+|[[:punct:]]/', $quote, $words);
-
-        $quote = "";
+        preg_match_all('/[a-zA-Z\'\-]+/', $quote, $words);
 
         foreach($words[0] as $i => $word) {
-            if(!ctype_alpha($word)) {
-                $quote .= $word;
-                continue;
-            }
+            if(preg_match("/[\-\']/", $word)) continue; //We should not modified words that contains an apostrophe (') or a hyphen (-)
 
-            $lower = strtolower($word);
+            $updated = $word;
+            $len = strlen($word);
 
             //Check the 4 words
-            if (isset(DICT[$lower])) {
-                $word = replace($word, DICT[$lower]);
+            if (($replacement = DICT[strtolower($updated)] ?? null) !== null) {
+                $updated = replace($updated, $replacement);
             }
 
-            //Check first & last letter
-            $len = strlen($word);
-            $startingLetters = ['h' => true];
-            $endingLetters = ['f' => true, 't' => true, 'd' => true, 'g' => true];
+            if($len > 2) {
+                //Check first & last letter
+                $startingLetters = ['h' => true];
+                $endingLetters = ['f' => true, 't' => true, 'd' => true, 'g' => true];
 
-            //First letter
-            if(isset($startingLetters[strtolower($word[0])])) $word[0] = "'";
-            //Last letter
-            if(isset($endingLetters[strtolower($word[-1])])) $word[-1] = "'";
+                //First letter
+                if(isset($startingLetters[strtolower($updated[0])])) $updated[0] = "'";
+                //Last letter
+                if(isset($endingLetters[strtolower($updated[-1])])) $updated[-1] = "'";
+            }
 
-            $quote .= ($quote[-1] == "\"" ? "" : " ") . $word;
+            $quote = preg_replace("/(?<=[^a-zA-Z\'\-])$word(?=[^a-zA-Z\'\-])/", $updated, $quote);
         }
     }
 
     echo $quote . $speaker . PHP_EOL;
 }
-
