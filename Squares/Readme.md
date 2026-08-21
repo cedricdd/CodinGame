@@ -1,5 +1,5 @@
-#Puzzle Squares
-**https://www.codingame.com/contribute/view/152145cf56458321bc6046832f83d518185d86** 
+# Puzzle
+**Puzzle Squares** https://www.codingame.com/training/medium/squares
 
 # Goal
 Several potentially overlapping squares are drawn along the grid lines of a bounded square grid, partitioning it into distinct regions.
