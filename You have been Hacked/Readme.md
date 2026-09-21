@@ -1,5 +1,5 @@
 # Puzzle
-**You have been Hacked** https://www.codingame.com/contribute/view/78658089fc5f6fedf11c055682408582f2eb
+**You have been Hacked** https://www.codingame.com/training/easy/you-have-been-hacked
 
 # Goal
 Hackers carry out Advanced Persistent Threat cyber attacks against a number of companies. Each company has a firewall with a protection level p.
