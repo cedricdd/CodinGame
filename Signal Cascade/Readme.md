@@ -1,5 +1,5 @@
 # Puzzle 
-**Signal Cascade** https://www.codingame.com/contribute/view/1508586bd621271401005e38900483f7bb966c
+**Signal Cascade** https://www.codingame.com/training/easy/signal-cascade
 
 # Goal
 This puzzle is about chain reactions and propagation.  
