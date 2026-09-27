@@ -18,7 +18,6 @@ for($i = 0; $i < 13; ++$i) {
     elseif($row[8][$index] == "|") $count += 3;
     elseif($row[9][$index] == "|") $count += 4;
 
-    error_log($count);
     $value .= $count; 
 }
 
@@ -26,6 +25,10 @@ $pos = strpos($row[4], '.') - 5;
 $pos /= 4;
 $pos += 1;
 
-error_log($pos);
+$left = round(substr($value, 0, $pos));
+$right = rtrim(substr($value, $pos), '0');
 
-echo trim(substr($value, 0, $pos) . "." . substr($value, $pos), '0') . PHP_EOL;
+$output = $left;
+if($right != 0) $output .= "." . $right;
+
+echo $output . PHP_EOL;
