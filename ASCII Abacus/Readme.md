@@ -1,5 +1,5 @@
 # Puzzle
-**ASCII Abacus** https://www.codingame.com/contribute/view/1534984cd7621db34eaa0831ee22a72188ac66
+**ASCII Abacus** https://www.codingame.com/training/easy/ascii-abacus
 
 # Goal
 The Japanese abacus (soroban) is a calculation tool that uses vertical columns (|) of beads to represent a floating-point number. Each column has 1 bead on the top and 4 beads at the bottom; the position of the beads denotes a corresponding place (digit) value of the resultant number.
