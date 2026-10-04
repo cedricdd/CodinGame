@@ -1,5 +1,5 @@
 # Puzzle
-**Assignments Overdue** https://www.codingame.com/ide/demo/1579685bc3264ff110d147e653946951eda2457
+**Assignments Overdue** https://www.codingame.com/training/easy/assignments-overdue
 
 # Goal
 On the first day of school after summer vacation, a student realizes he has N unfinished assignments that are all due today. The student promises to start working on them immediately.
