@@ -1,30 +1,51 @@
 <?php
 
-//Find a path to the next room we want to explore
-function findNextRoomToExplore(int $position, bool $allowBats = false): ?array {
-    global $visited, $links, $rooms;
+//Does this room match what we're looking for at this tier?
+function isTarget(int $room, int $tier): bool {
+    global $visited, $rooms;
 
-    $history = [];
-    $queue[0] = [$position, []];
+    if(isset($visited[$room])) return false;
 
-    for($i = 0; ;++$i) {
-        if(!isset($queue[$i])) return null;
+    $v = $rooms[$room];
 
-        [$position, $path] = $queue[$i];
+    switch($tier) {
+        case 0: return $v == 1;                     //Safe
+        case 1: return $v == 3;                     //Bats or empty
+        case 2: return $v == 2;                     //Certain bats
+        case 3: return $v != 0 && ($v & 8) == 0;    //Forced guess, not the Mumpus
+    }
 
-        if(isset($path[$position]) || $rooms[$position] > ($allowBats ? 3 : 1) || isset($history[$position])) continue;
-        
-        $history[$position] = true;
-        $path[$position] = $position;
+    return false;
+}
 
-        if(!isset($visited[$position])) return $path;
+//BFS through safe rooms only, returns [start, ..., target] or null
+function findPathTo(int $start, int $tier): ?array {
+    global $links, $rooms;
 
-        foreach($links[$position] as $neighbor => $_) {
-            $queue[] = [$neighbor, $path];
+    $prev = [$start => null];
+    $queue = [$start];
+
+    while($queue) {
+        $pos = array_shift($queue);
+
+        if($pos !== $start && isTarget($pos, $tier)) {
+            $path = [];
+            for($p = $pos; $p !== null; $p = $prev[$p]) $path[] = $p;
+            return array_reverse($path);
         }
 
-        unset($queue[$i]);
+        //Only walk through rooms we know are safe
+        if($pos !== $start && $rooms[$pos] != 1) continue;
+
+        foreach($links[$pos] ?? [] as $neighbor => $_) {
+            if(!array_key_exists($neighbor, $prev)) {
+                $prev[$neighbor] = $pos;
+                $queue[] = $neighbor;
+            }
+        }
     }
+
+    return null;
 }
 
 //We found the location of the mumpus, go into position to shot it
@@ -148,6 +169,7 @@ $actions = [];
 $shaftsInfo = [];
 $batsInfo = [];
 $mumpusPosition = null;
+$expectedRoom = null;
 
 // game loop
 while (TRUE) {
@@ -155,8 +177,19 @@ while (TRUE) {
     fscanf(STDIN, "%d %d %d", $roomA, $roomB, $roomC);
     fscanf(STDIN, "%d %d %d", $bats, $shaft, $mumpus);
 
+    error_log("Current Room: $currentRoom");
+    error_log("Rooms: $roomA $roomB $roomC");
+    error_log("Danger: $bats, $shaft, $mumpus");
+
     $rooms[$currentRoom] = 1;
     $visited[$currentRoom] = true;
+
+    //We didn't end up where we moved: bats carried us
+    if($expectedRoom !== null && $currentRoom != $expectedRoom) {
+        $rooms[$expectedRoom] = 1; //Bats are gone
+        $batCount--;
+        $actions = [];             //Remaining moves are no longer valid
+    }
 
     //There's only one mumpus, any rooms not a direct neighbor of our current location can't contain the mumpus
     if($mumpus != 0) 
@@ -277,20 +310,21 @@ while (TRUE) {
 
 
     if(!$actions) {
-        //Go kill the mumpus
+        $path = null;
+
         if($mumpusPosition !== null) {
             $path = goToShootingPosition($currentRoom);
+            if($path !== null) $actions[] = "SHOOT $mumpusPosition";
+        }
 
-            $actions[] = "SHOOT $mumpusPosition";
-        } else {
-            $path = findNextRoomToExplore($currentRoom); //Find the next safe room to explore
+        //Try each tier in order: safe, maybe bats, certain bats, forced guess
+        for($tier = 0; $path === null && $tier <= 3; ++$tier) {
+            $path = findPathTo($currentRoom, $tier);
+        }
 
-            if($path === null) { //We have no safe room to explore, go to a bat
-                $path = findNextRoomToExplore($currentRoom, true);
-
-                $rooms[array_key_last($path)] = 1;
-                $batCount--;
-            }
+        if($path === null) {
+            error_log("Stuck! " . var_export($rooms, true));
+            $path = [$currentRoom, array_key_first($links[$currentRoom])];
         }
 
         $path = array_values($path);
@@ -298,5 +332,7 @@ while (TRUE) {
         for($i = count($path) - 1; $i > 0; --$i) $actions[] = "MOVE " . $path[$i];
     }
 
-    echo array_pop($actions) . PHP_EOL;
+    $action = array_pop($actions);
+    $expectedRoom = (substr($action, 0, 4) === "MOVE") ? (int)substr($action, 5) : null;
+    echo $action . PHP_EOL;
 }
