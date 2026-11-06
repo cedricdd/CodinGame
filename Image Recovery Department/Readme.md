@@ -1,5 +1,5 @@
 # Puzzle
-**Image Recovery Department** https://www.codingame.com/contribute/view/1508259d38553ca4273153ae30ab92e5b04982
+**Image Recovery Department** https://www.codingame.com/training/easy/image-recovery-department
 
 # Goal
 Your company maintains an image transfer library used by clients to transmit digital images between systems.
